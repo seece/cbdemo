@@ -1,0 +1,32 @@
+SCREEN 640, 480
+FrameLimit 60
+
+buffer=MakeImage(640, 360) // kuvasuhde 16:9
+
+Gosub main
+
+
+main:
+	start_time = Timer()
+	Repeat
+		t# = (Float(Timer())-Float(start_time)) / 1000.0
+
+		SetWindow "t: " + t
+		
+		DrawToImage buffer
+		Gosub drawDemo
+		
+		DrawToScreen
+		Gosub drawBuffer
+	Forever
+Return
+
+drawBuffer:
+	DrawImage buffer, 0, (ScreenHeight()-360)/2
+	
+Return
+
+drawDemo:
+	Color 255, 0, 0
+	Box 0,0,640,480,1
+Return
