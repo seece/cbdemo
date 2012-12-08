@@ -1,4 +1,4 @@
-SCREEN 640, 480
+SCREEN 640, 480, 0, 1
 FrameLimit 60
 
 buffer=MakeImage(640, 360) // kuvasuhde 16:9
@@ -23,7 +23,7 @@ Return
 
 drawBuffer:
 	DrawImage buffer, 0, (ScreenHeight()-360)/2
-	
+	DrawScreen
 Return
 
 drawDemo:
