@@ -1,3 +1,5 @@
+#define assert(statement) If Not (statement) Then MakeError __LINE__ + ": assertion failed"
+
 SCREEN 640, 480, 0, 1
 FrameLimit 60
 
