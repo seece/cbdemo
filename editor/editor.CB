@@ -1,0 +1,470 @@
+#define malloc(size) makeMEMBlock(size)
+#define free deleteMEMBlock
+#define realloc resizeMEMBlock
+#define toType(integer) convertToType(integer)
+#define toInt(typevar) convertToInteger(typevar)
+#define assert(statement) If Not (statement) Then makeError __LINE__ + ": assertion failed"
+
+#define frac(_var) (_var-roundDown(_var))
+
+#define POINT_STRIDE 8
+#define UNDEFINED -1
+
+#define UI_POINT_SIZE 8
+#define UI_COLOR_BG 64,64,64
+#define UI_COLOR_DIM 80,80,80
+#define UI_COLOR_BG_FOCUS 72,64,64
+#define UI_COLOR_RIM 128,128,128
+#define UI_COLOR_LIGHT 255, 255, 255
+#define UI_COLOR_MID 128, 128, 140
+
+#define mouseOverlap(_x,_y,_w,_h) (mouseX() >= (_x) and mouseX() <= ((_x) + (_w)) and mouseY() >= (_y) and mouseY() <= ((_y) + (_h)))
+
+type Synctrack
+	// memblock data format
+	// each entry is a datapoint as two float vars
+	// offset	length	desc
+	// 0		4		the point time as bars, 32-bit float
+	// 4		4		the points value, a float between 0-1 (inclusive)
+	field mem	// memblock
+	field count
+	field name as string
+endType
+
+type Envpoint
+	field bars as float
+	field value as float
+	field index
+endType
+
+type EnvEditor
+	field selectedPoint // just an id
+	field x
+	field y
+	field width
+	field height
+	field startpos#
+	field endpos#
+	field track
+	field hover
+endType
+
+//#pragma dumb_debug
+
+const TRACK_AMOUNT = 3
+
+dim tracks(TRACK_AMOUNT)
+
+SCREEN 800, 600
+frameLimit 60
+
+for i=0 to TRACK_AMOUNT
+	tracks(i) = createSyncTrack("track #" + i )
+	
+	point.Envpoint = new (Envpoint)	// only a temporary var
+	
+	for u=0 to 9
+		point\bars = float(u)
+		point\value = rnd(0, 1)
+		track.Synctrack = toType(tracks(i))
+		addEnvelopePoint(tracks(i), toInt(point), track\count)
+	next u
+	
+	delete point
+next i
+
+for i=0 to TRACK_AMOUNT
+	it.Synctrack = tracks(i)
+	
+	addText "" + it\name + " count: " + it\count
+	point.Envpoint = getEnvpoint(toInt(it), 0)
+	addText "" + point\bars + ", " + point\value
+	delete point
+	
+	addText "" + memDumpFloat(it\mem)
+next i
+
+editorp = createEnvEditor(0, 300, 800, 200, 0.0, 10.0)
+editor.EnvEditor = toType(editorp)
+editor\track = tracks(0)
+
+
+tempo# = 130.0
+tstart=timer()
+repeat
+	t# = float(timer() - tstart)/1000.0
+	beats# = (t/60.0)*(tempo)
+	bars# = beats/4.0
+
+	bars = updateEditor(toInt(editor), bars)
+	drawEditor(toInt(editor), bars)
+	//drawTrack(tracks(0), 0, 300, 800, 200, 0.0, 10.0) 
+	
+	drawScreen
+forever
+
+function createEnvEditor(x,y,w,h,startspan,endspan)
+	editor.EnvEditor = new(EnvEditor)
+	editor\x = x
+	editor\y = y
+	editor\width = w
+	editor\height = h
+	editor\startpos = startspan
+	editor\endpos = endspan
+	editor\track = UNDEFINED
+	editor\selectedPoint = UNDEFINED 
+	editor\hover = false
+	return toInt(editor)
+endFunction
+
+// returns the new time variable because we can skip in time with the timeline
+function updateEditor(editorp, bars#)
+	editor.EnvEditor = toType(editorp)
+	mousedz# = mouseMoveZ()
+	scrollspeed#  = 0.7
+	
+	origpos# = editor\startpos
+	
+
+	if keyDown(cbKeyA) then	
+		editor\startpos = max(editor\startpos - scrollspeed, 0.0)
+		editor\endpos = editor\endpos - (origpos - editor\startpos)
+	elseIf keyDown(cbKeyD) then
+		editor\startpos = editor\startpos + scrollspeed
+		editor\endpos = editor\endpos + scrollspeed
+	endif
+	
+	span# = editor\endpos - editor\startpos
+	middle# = editor\startpos + span*0.5
+	zoom# = mousedz * 1.0
+
+	if keyDown(cbKeyW) then zoom = 0.2
+	if keyDown(cbKeyS) then zoom = -0.2
+	
+	editor\startpos = editor\startpos + zoom#
+	editor\endpos = editor\endpos - zoom#
+	
+	if editor\endpos - editor\startpos < 1.0
+		editor\endpos = editor\startpos + 1.0
+	endif
+
+	return bars
+endFunction
+	
+
+function drawEditor(editorp, bars#)
+	editor.EnvEditor = toType(editorp)
+	mousedz# = mouseMoveZ()
+	
+	
+	span# = editor\endpos - editor\startpos
+	hover = false
+	thisfirst = true
+	lastx# = 0
+	lasty# = 0
+	
+	if mouseOverlap(editor\x, editor\y, editor\width, editor\height) then
+		hover = true
+		editor\hover = true
+	else
+		editor\hover = false
+	endif
+	
+	if keydown(cbKeyLAlt) then snap = false else snap = true
+	snapsize# = 0.5
+	gridspacing# = 1.0
+	grid_lines = roundDown(span/gridspacing)
+	grid_size# = float(editor\width)/span
+	grid_start_x = (editor\startpos * grid_size) mod (gridspacing*grid_size)
+	
+	// render bg
+	
+	color UI_COLOR_BG
+	
+	box editor\x, editor\y, editor\width, editor\height, 1
+	
+	if hover then
+		color UI_COLOR_RIM
+	else
+		color UI_COLOR_DIM
+	endif
+	box editor\x, editor\y, editor\width, editor\height, 0	
+	
+	if editor\track = UNDEFINED then 
+		return false
+	endif
+	
+	// render grid
+	color UI_COLOR_DIM
+	for i=0 to grid_lines
+		line_x = grid_start_x + i * grid_size
+		line line_x, editor\y, line_x, editor\y + editor\height
+	next i	
+	
+	track.Synctrack = toType(editor\track)
+	
+	spointp = firstPointAfter(editor\track, editor\startpos)
+	ipointp = spointp
+	
+	if ipointp = UNDEFINED then
+		return false
+	endif
+	
+	spoint.Envpoint = toType(spointp)
+	
+	ipoint.Envpoint = spoint
+	ind = ipoint\index
+
+	while (ind < track\count)
+		px# = editor\x + ((ipoint\bars - editor\startpos)/span) * editor\width
+		py# = editor\y + editor\height - ipoint\value * editor\height
+		
+		if not thisfirst then
+			color UI_COLOR_MID
+			line lastx, lasty, px, py
+		endif
+		
+		// we have processed all visible points
+		if px > editor\x + editor\width then
+			exit
+		endif
+		
+		pointhover = drawPoint(px, py)
+		
+		if pointhover and mouseDown(1) then editor\selectedPoint = ind
+		if mouseUp(1) then editor\selectedPoint = UNDEFINED
+		
+		if ind=editor\selectedPoint and editor\selectedPoint <> UNDEFINED then
+			mx# = mouseX()
+			my# = mouseY()
+			
+			newbars# = editor\startpos + ((mx-editor\x)/editor\width) * span
+			newvalue# = 1.0 - ((my-editor\y)/editor\height) * 1.0
+			
+			if snap then
+				newbars = roundDown(newbars/snapsize)*snapsize
+			endif
+			
+			if newvalue > 1.0 then newvalue = 1.0
+			if newvalue < 0.0 then newvalue = 0.0
+			
+			if ind = 0 then
+				if newbars < 0.0 then newbars = 0.0
+			else
+				// not the first one, let's inspect neighbours
+				lpointp = getEnvpoint(editor\track, ind-1)
+				lpoint.EnvPoint = toType(lpointp)
+				if newbars < lpoint\bars then newbars = lpoint\bars
+				
+				// the right neighbour
+				if ind < track\count-1 then
+					rpointp = getEnvpoint(editor\track, ind+1)
+					rpoint.EnvPoint = toType(rpointp)
+					if newbars > rpoint\bars then newbars = rpoint\bars
+					delete rpoint
+				endif
+				
+				delete lpoint
+			endif
+
+			oldbars# = ipoint\bars
+			oldvalue# = ipoint\value
+			// setup temporary type instance
+			ipoint\bars = newbars
+			ipoint\value = newvalue
+			
+			// actually save the value to the array
+			setEnvpoint(editor\track, toInt(ipoint), ipoint\index)
+			
+			if keyDown(cbkeylcontrol) then
+				moveAllPointsFrom(editor\track, ipoint\index+1, ipoint\bars - oldbars)
+			endif
+			
+			color UI_COLOR_MID
+			text px + 15, py + 15, "" + ipoint\bars + ", " + ipoint\value
+		endif			
+		
+		thisfirst = false
+		lastx = px
+		lasty = py
+		
+		if ind+1 >= track\count then exit
+		
+		delete ipoint
+		ipoint = getEnvpoint(editor\track, ind+1)
+		ind = ipoint\index
+	wend		
+	
+	delete ipoint
+	
+	color UI_COLOR_MID
+	text editor\x + 4, editor\y + 4, editor\startpos + " - " + editor\endpos
+	
+endFunction
+
+function drawPoint(x,y)
+	hover = false
+	
+	margin = 3
+	if mouseOverlap(x-margin, y-margin, UI_POINT_SIZE + margin, UI_POINT_SIZE + margin) then
+		hover = true
+	endif
+
+	if hover then
+		color UI_COLOR_RIM
+	else
+		color UI_COLOR_LIGHT
+	endif
+	
+	box x - UI_POINT_SIZE/2, y - UI_POINT_SIZE/2, 8, 8
+	
+	return hover
+endFunction
+
+function moveAllPointsFrom(trackp, index, amount#)
+	track.Synctrack = toType(trackp)
+	if index >= track\count then
+		return false
+	endif
+	
+	ind = index
+	while (ind < track\count)
+		// setEnvpointValue(trackint, newbars#, newvalue#, index)
+		pointp = getEnvpoint(trackp, ind)
+		point.EnvPoint = toType(pointp)
+		point\bars = point\bars + amount
+		setEnvpoint(trackp, pointp, ind)
+		delete point
+		ind + 1
+	wend
+	
+	return true
+endFunction
+
+function firstPointAfter(trackint, startbar#)
+	track.Synctrack = toType(trackint)
+	
+	// linear search
+	for i=0 to track\count-1
+		point.Envpoint = getEnvpoint(trackint, i)
+		if point\bars >= startbar then
+			return toInt(point)
+		endif
+		
+		delete point
+	next i
+	
+	return UNDEFINED
+endFunction
+
+// returns a pointer to a created Synctrack type instance
+function createSyncTrack(name$)
+	track.Synctrack = new (Synctrack)
+	track\name = name
+	track\count = 1
+	//track\mem = allocEnvelopePoint(0.0, 0.0)
+	track\mem = malloc(4*2)
+	pokeFloat track\mem, 0, 0.0
+	pokeFloat track\mem, 4, 0.0
+	
+	return toInt(track)
+endFunction
+
+// index tells the place where to insert the new point
+// returns void
+function addEnvelopePoint(trackint, envint, index)
+	track.Synctrack = toType(trackint)
+	point.Envpoint = toType(envint)
+	
+	offset = index * POINT_STRIDE
+	movesize = (MEMBlockSize(track\mem))-offset
+	
+	realloc track\mem, MEMBlockSize(track\mem) + POINT_STRIDE
+	
+	assert(index <= track\count)
+	
+	if movesize > 0 then
+		// move rest of the memblock further to make room for the new var
+		memCopy track\mem, offset, track\mem, offset + POINT_STRIDE, movesize
+	endif
+
+	pokeFloat track\mem, offset		, point\bars 
+	pokeFloat track\mem, offset + 4	, point\value 
+	
+	track\count = track\count + 1
+	//temp = allocEnvpoint(envint)
+	//memCopy temp, 0, track\mem, track\count * 8, 2*4
+	//free temp
+endFunction
+
+function deleteEnvpoint(trackint, index)
+	track.Synctrack = toType(trackint)
+	assert(index < track\count)
+	
+	offset = index * POINT_STRIDE
+	movesize = (MEMBlockSize(track\mem))-offset
+	if movesize > 0 then
+		memCopy track\mem, offset + POINT_STRIDE, track\mem, offset, movesize
+	endif
+	
+	realloc track\mem, MEMBlockSize(track\mem) - POINT_STRIDE
+	
+	track\count = track\count - 1
+	
+endFunction
+
+// returns a temporary memblock, remember to free it!
+function allocEnvelopePoint(bars#, value#)
+	tempblock = malloc(POINT_STRIDE)
+	pokeFloat tempblock, 0, bars
+	pokeFloat tempblock, 4, value
+	return tempblock
+endFunction
+
+// returns an envpoint in a temporary type instance, remember to delete it
+function getEnvpoint(trackint, index)
+	track.Synctrack = toType(trackint)
+	assert(index < track\count)
+	
+	point.Envpoint = new(Envpoint)
+	point\bars	= peekFloat(track\mem, index*POINT_STRIDE)
+	point\value = peekFloat(track\mem, index*POINT_STRIDE + 4)
+	point\index = index
+	
+	return toInt(point)
+endFunction
+
+// returns void
+function setEnvpoint(trackint, pointint, index)
+	track.Synctrack = toType(trackint)
+	assert(index < track\count)
+	
+	offset = index * POINT_STRIDE
+	point.Envpoint = toType(pointint)
+	pokeFloat track\mem, offset		, point\bars
+	pokeFloat track\mem, offset + 4	, point\value
+endFunction
+
+function setEnvpointValue(trackint, newbars#, newvalue#, index)
+	track.Synctrack = toType(trackint)
+	assert(index < track\count)
+	offset = index * POINT_STRIDE
+	pokeFloat track\mem, offset		, newbars
+	pokeFloat track\mem, offset + 4	, newvalue
+endFunction
+// returns a string representation of the memory block contents
+function memDumpFloat(memblock)
+	out$ = ""
+	
+	i = 0
+	while i < MEMBlockSize(memblock)
+		if i mod 4 = 0 then
+			out = out + str(peekFloat(memblock, i))
+			out = out + ", "
+		endif
+		i + 4
+	wend
+	
+	return out
+endFunction
+
