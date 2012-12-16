@@ -39,6 +39,7 @@ endType
 
 type EnvEditor
 	field selectedPoint // just an id
+	field deletePoint	// we'll delete the point usually ON the next frame
 	field x
 	field y
 	field width
@@ -114,6 +115,7 @@ function createEnvEditor(x,y,w,h,startspan,endspan)
 	editor\track = UNDEFINED
 	editor\selectedPoint = UNDEFINED 
 	editor\hover = false
+	editor\deletePoint = UNDEFINED 
 	return toInt(editor)
 endFunction
 
@@ -147,6 +149,12 @@ function updateEditor(editorp, bars#)
 	if editor\endpos - editor\startpos < 1.0
 		editor\endpos = editor\startpos + 1.0
 	endif
+	
+	if editor\deletePoint <> UNDEFINED then
+		// deleteEnvpoint(trackint, index)
+		deleteEnvpoint(editor\track, editor\deletePoint)
+		editor\deletePoint = UNDEFINED
+	endif
 
 	return bars
 endFunction
@@ -154,8 +162,9 @@ endFunction
 
 function drawEditor(editorp, bars#)
 	editor.EnvEditor = toType(editorp)
+	mx# = mouseX()
+	my# = mouseY()
 	mousedz# = mouseMoveZ()
-	
 	
 	span# = editor\endpos - editor\startpos
 	hover = false
@@ -214,8 +223,39 @@ function drawEditor(editorp, bars#)
 	
 	ipoint.Envpoint = spoint
 	ind = ipoint\index
+			
+	// current mouse position
+	newbars# = editor\startpos + ((mx-editor\x)/editor\width) * span
+	newvalue# = 1.0 - ((my-editor\y)/editor\height) * 1.0
+	
+	if snap then
+		newbars = roundDown(newbars/snapsize)*snapsize
+	endif
+	
+	// a new point!
+	if mouseHit(2) then
+		before_pointp = firstPointBefore(editor\track, newbars)
+		if before_pointp = UNDEFINED then
+			// TODO write error to log
+		else
+			before_point.EnvPoint = toType(before_pointp)
+			temp_point.EnvPoint = new(EnvPoint)
+			temp_point\bars = newbars
+			temp_point\value = newvalue
+			
+			addEnvelopePoint(editor\track, toInt(temp_point), before_point\index + 1)
+			
+			delete temp_point
+			delete before_point
+		endif
+	endif
+	
+	// a flag used to detect when we want to lose focus
+	clicked_on_point = false
 
 	while (ind < track\count)
+		pointhover = false
+		delete_current_point = false
 		px# = editor\x + ((ipoint\bars - editor\startpos)/span) * editor\width
 		py# = editor\y + editor\height - ipoint\value * editor\height
 		
@@ -229,22 +269,25 @@ function drawEditor(editorp, bars#)
 			exit
 		endif
 		
-		pointhover = drawPoint(px, py)
+		if ind=editor\selectedPoint then
+			pointhover = drawPoint(px, py, true)
+		else
+			pointhover = drawPoint(px, py, false)
+		endif
+			
+		if pointhover and mouseDown(1) then 
+			editor\selectedPoint = ind
+			clicked_on_point = true
+		endif
 		
-		if pointhover and mouseDown(1) then editor\selectedPoint = ind
 		if mouseUp(1) then editor\selectedPoint = UNDEFINED
-		
+
 		if ind=editor\selectedPoint and editor\selectedPoint <> UNDEFINED then
-			mx# = mouseX()
-			my# = mouseY()
-			
-			newbars# = editor\startpos + ((mx-editor\x)/editor\width) * span
-			newvalue# = 1.0 - ((my-editor\y)/editor\height) * 1.0
-			
-			if snap then
-				newbars = roundDown(newbars/snapsize)*snapsize
+		
+			if keyHit(cbKeyDel) then
+				editor\deletePoint = ipoint\index
 			endif
-			
+		
 			if newvalue > 1.0 then newvalue = 1.0
 			if newvalue < 0.0 then newvalue = 0.0
 			
@@ -302,7 +345,7 @@ function drawEditor(editorp, bars#)
 	
 endFunction
 
-function drawPoint(x,y)
+function drawPoint(x,y,selected)
 	hover = false
 	
 	margin = 3
@@ -310,7 +353,7 @@ function drawPoint(x,y)
 		hover = true
 	endif
 
-	if hover then
+	if selected then
 		color UI_COLOR_RIM
 	else
 		color UI_COLOR_LIGHT
@@ -348,6 +391,23 @@ function firstPointAfter(trackint, startbar#)
 	for i=0 to track\count-1
 		point.Envpoint = getEnvpoint(trackint, i)
 		if point\bars >= startbar then
+			return toInt(point)
+		endif
+		
+		delete point
+	next i
+	
+	return UNDEFINED
+endFunction
+
+
+function firstPointBefore(trackint, startbar#)
+	track.Synctrack = toType(trackint)
+	
+	// linear search
+	for i=track\count-1 to 0 step -1
+		point.Envpoint = getEnvpoint(trackint, i)
+		if point\bars <= startbar then
 			return toInt(point)
 		endif
 		
