@@ -179,9 +179,10 @@ function drawEditor(editorp, bars#)
 	lasty# = 0
 	
 	gridspacing# = 1.0
+	bar_width_in_px# = editor\width / span
 	grid_lines = roundDown(span/gridspacing)
-	grid_size# = float(editor\width)/span
-	grid_start_x = (editor\startpos * grid_size) mod (gridspacing*grid_size)
+	grid_size# = gridspacing * bar_width_in_px
+	grid_start_x = bar_width_in_px - (int(editor\startpos * bar_width_in_px) mod int(bar_width_in_px))
 	
 	track.Synctrack = toType(editor\track)
 	
@@ -220,8 +221,7 @@ function drawEditor(editorp, bars#)
 	next i	
 	
 	// render time marker
-	bar_width# = editor\width / span
-	marker_x_pos = editor\x + (bars - editor\startpos) * bar_width
+	marker_x_pos = editor\x + (bars - editor\startpos) * bar_width_in_px
 	if bars >= editor\startpos and bars <= editor\endpos then
 		color UI_COLOR_HILIGHT
 		line marker_x_pos, editor\y, marker_x_pos, editor\y + editor\height
