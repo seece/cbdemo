@@ -13,6 +13,7 @@
 
 #define frac(_var) (_var-roundDown(_var))
 #define round(_val) ()
+#define barsToSecs(_bars, _tempo) (_bars * ((60.0/_tempo)*4.0))
 
 #define POINT_STRIDE 8
 #define UNDEFINED -1
@@ -99,18 +100,22 @@ editor\track = tracks(0)
 
 tempo# = 130.0
 tstart=timer()
+time_offset# = 0.0
 bar_offset# = 0.0
 repeat
-	t# = float(timer() - tstart)/1000.0
+	t# = float(timer() - tstart)/1000.0 + time_offset
 	beats# = (t/60.0)*(tempo)
-	bars# = beats/4.0 + bar_offset
+	bars# = beats/4.0 
 
-	updateEditor(toInt(editor), bars)
+	bars = updateEditor(toInt(editor), bars) // the editor processes looping
 	drawEditor(toInt(editor), bars)
+	
 	newbars# = drawEditorTimeline(toInt(editor), bars)
+	
 	if newbars <> bars then
 		diff# = newbars - bars
 		bar_offset = bar_offset + diff
+		time_offset = barsToSecs(bar_offset, tempo)
 	endif
 	//drawTrack(tracks(0), 0, 300, 800, 200, 0.0, 10.0) 
 	
@@ -393,7 +398,7 @@ function drawEditorTimeline(editorp, bars#)
 	endif
 	
 	// bg box
-	color UI_COLOR_DIM
+	color UI_COLOR_BG
 	box tl_x, tl_y, tl_w, tl_h
 	
 	// mouse marker
@@ -409,14 +414,13 @@ function drawEditorTimeline(editorp, bars#)
 	grid_size# = gridspacing * bar_width_in_px
 	grid_start_x = bar_width_in_px - (int(editor\startpos * bar_width_in_px) mod int(bar_width_in_px))
 	
-	
-	
-	for i=0 to grid_lines step 4
+	for i=-1 to grid_lines step 4
 		num_x = grid_start_x + i * grid_size
-		color UI_COLOR_BG
-		text num_x, tl_y + 2, roundDown(editor\startpos) + i
+		num =  roundDown(editor\startpos) + i + 1
+		color UI_COLOR_BG_FOCUS
+		text num_x, tl_y + 2, num
 		color UI_COLOR_MID
-		text num_x, tl_y + 1, roundDown(editor\startpos) + i
+		text num_x, tl_y + 1, num
 		//line line_x, editor\y, line_x, editor\y + editor\height
 	next i	
 	
