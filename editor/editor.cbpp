@@ -1,3 +1,9 @@
+// sync editor
+// hotkeys: hold ctrl or alt when dragging
+// 			hold x and click node to remove
+//			or keep mouse down on node and press DEL
+
+
 #define malloc(size) makeMEMBlock(size)
 #define free deleteMEMBlock
 #define realloc resizeMEMBlock
@@ -282,11 +288,7 @@ function drawEditor(editorp, bars#)
 		
 		if mouseUp(1) then editor\selectedPoint = UNDEFINED
 
-		if ind=editor\selectedPoint and editor\selectedPoint <> UNDEFINED then
-		
-			if keyHit(cbKeyDel) then
-				editor\deletePoint = ipoint\index
-			endif
+		if ind=editor\selectedPoint and editor\selectedPoint <> UNDEFINED then	
 		
 			if newvalue > 1.0 then newvalue = 1.0
 			if newvalue < 0.0 then newvalue = 0.0
@@ -325,6 +327,11 @@ function drawEditor(editorp, bars#)
 			
 			color UI_COLOR_MID
 			text px + 15, py + 15, "" + ipoint\bars + ", " + ipoint\value
+			
+			if keyHit(cbKeyDel) or (pointhover and mouseDown(1) and keyDown(cbKeyX)) then
+				editor\deletePoint = ipoint\index
+				editor\selectedPoint = UNDEFINED
+			endif
 		endif			
 		
 		thisfirst = false
