@@ -467,9 +467,9 @@ function drawEditorTimeline(editorp, bars#)
 	grid_size# = gridspacing * bar_width_in_px
 	grid_start_x = bar_width_in_px - (int(editor\startpos * bar_width_in_px) mod int(bar_width_in_px))
 	
-	for i=-1 to grid_lines step 4
+	for i=-1 to grid_lines step 1
 		num_x = grid_start_x + i * grid_size
-		num =  roundDown(editor\startpos) + i + 1
+		num =  roundDown(editor\startpos) + int(i*gridspacing) + 1
 		color UI_COLOR_DARK
 		text num_x, tl_y + 2, num
 		color UI_COLOR_MID
