@@ -17,11 +17,12 @@
 #define UNDEFINED -1
 
 #define UI_POINT_SIZE 8
-#define UI_COLOR_BG 64,64,64
+#define UI_COLOR_BG 50, 50,64
 #define UI_COLOR_DIM 80,80,80
 #define UI_COLOR_BG_FOCUS 72,64,64
 #define UI_COLOR_RIM 128,128,128
 #define UI_COLOR_LIGHT 255, 255, 255
+#define UI_COLOR_HILIGHT 240, 230, 210
 #define UI_COLOR_MID 128, 128, 140
 
 #define mouseOverlap(_x,_y,_w,_h) (mouseX() >= (_x) and mouseX() <= ((_x) + (_w)) and mouseY() >= (_y) and mouseY() <= ((_y) + (_h)))
@@ -83,12 +84,12 @@ next i
 for i=0 to TRACK_AMOUNT
 	it.Synctrack = tracks(i)
 	
-	addText "" + it\name + " count: " + it\count
+	//addText "" + it\name + " count: " + it\count
 	point.Envpoint = getEnvpoint(toInt(it), 0)
-	addText "" + point\bars + ", " + point\value
+	//addText "" + point\bars + ", " + point\value
 	delete point
 	
-	addText "" + memDumpFloat(it\mem)
+	//addText "" + memDumpFloat(it\mem)
 next i
 
 editorp = createEnvEditor(0, 300, 800, 200, 0.0, 10.0)
@@ -98,6 +99,7 @@ editor\track = tracks(0)
 
 tempo# = 130.0
 tstart=timer()
+
 repeat
 	t# = float(timer() - tstart)/1000.0
 	beats# = (t/60.0)*(tempo)
@@ -107,6 +109,7 @@ repeat
 	drawEditor(toInt(editor), bars)
 	//drawTrack(tracks(0), 0, 300, 800, 200, 0.0, 10.0) 
 	
+	text 0,0,"bars: " + bars
 	drawScreen
 forever
 
@@ -131,7 +134,6 @@ function updateEditor(editorp, bars#)
 	scrollspeed#  = 0.7
 	
 	origpos# = editor\startpos
-	
 
 	if keyDown(cbKeyA) then	
 		editor\startpos = max(editor\startpos - scrollspeed, 0.0)
@@ -160,6 +162,8 @@ function updateEditor(editorp, bars#)
 		deleteEnvpoint(editor\track, editor\deletePoint)
 		editor\deletePoint = UNDEFINED
 	endif
+	
+	return bars
 endFunction
 
 function drawEditor(editorp, bars#)
@@ -214,6 +218,15 @@ function drawEditor(editorp, bars#)
 		line_x = grid_start_x + i * grid_size
 		line line_x, editor\y, line_x, editor\y + editor\height
 	next i	
+	
+	// render time marker
+	bar_width# = editor\width / span
+	marker_x_pos = editor\x + (bars - editor\startpos) * bar_width
+	if bars >= editor\startpos and bars <= editor\endpos then
+		color UI_COLOR_HILIGHT
+		line marker_x_pos, editor\y, marker_x_pos, editor\y + editor\height
+		
+	endif
 	
 	spointp = firstPointAfter(editor\track, editor\startpos)
 	ipointp = spointp
