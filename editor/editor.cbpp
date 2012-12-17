@@ -14,11 +14,13 @@
 #define frac(_var) (_var-roundDown(_var))
 #define round(_val) ()
 #define barsToSecs(_bars, _tempo) (_bars * ((60.0/_tempo)*4.0))
+#define snapToGrid(_value, _size) (int(_value/_size)*_size)
 
 #define POINT_STRIDE 8
 #define UNDEFINED -1
 
 #define UI_POINT_SIZE 8
+#define UI_COLOR_DARK 24, 24, 30
 #define UI_COLOR_BG 50, 50,64
 #define UI_COLOR_DIM 80,80,80
 #define UI_COLOR_BG_FOCUS 64,64,70
@@ -57,6 +59,9 @@ type EnvEditor
 	field endpos#
 	field track
 	field hover
+	field snapsize as float
+	field gridsize as float
+	field timelineHeight 
 endType
 
 //#pragma dumb_debug
@@ -67,6 +72,9 @@ dim tracks(TRACK_AMOUNT)
 
 SCREEN 800, 600
 frameLimit 60
+
+font = loadFont("tahoma", 14)
+setFont font
 
 for i=0 to TRACK_AMOUNT
 	tracks(i) = createSyncTrack("track #" + i )
@@ -135,6 +143,9 @@ function createEnvEditor(x,y,w,h,startspan,endspan)
 	editor\selectedPoint = UNDEFINED 
 	editor\hover = false
 	editor\deletePoint = UNDEFINED 
+	editor\snapsize = 0.5
+	editor\gridsize = 1.0
+	editor\timelineHeight = 16
 	return toInt(editor)
 endFunction
 
@@ -188,7 +199,7 @@ function drawEditor(editorp, bars#)
 	lastx# = 0
 	lasty# = 0
 	
-	gridspacing# = 1.0
+	gridspacing# = editor\gridsize
 	bar_width_in_px# = editor\width / span
 	grid_lines = roundDown(span/gridspacing)
 	grid_size# = gridspacing * bar_width_in_px
@@ -204,7 +215,7 @@ function drawEditor(editorp, bars#)
 	endif
 	
 	if keydown(cbKeyLAlt) then snap = false else snap = true
-	snapsize# = 0.5
+	snapsize# = editor\snapsize
 	
 	// render bg
 	
@@ -255,7 +266,7 @@ function drawEditor(editorp, bars#)
 	newvalue# = 1.0 - ((my-editor\y)/editor\height) * 1.0
 	
 	if snap then
-		newbars = int(newbars/snapsize)*snapsize
+		newbars = snapToGrid(newbars, snapsize)
 	endif
 	
 	// a new point!
@@ -301,7 +312,7 @@ function drawEditor(editorp, bars#)
 			pointhover = drawPoint(px, py, false)
 		endif
 			
-		if pointhover and mouseDown(1) then 
+		if pointhover and mouseHit(1) then 
 			editor\selectedPoint = ind
 			clicked_on_point = true
 		endif
@@ -384,7 +395,7 @@ function drawEditorTimeline(editorp, bars#)
 	tl_x = editor\x
 	tl_y = editor\y + editor\height
 	tl_w = editor\width
-	tl_h = 24
+	tl_h = editor\timelineHeight
 	
 	hover = false
 	
@@ -417,7 +428,7 @@ function drawEditorTimeline(editorp, bars#)
 	for i=-1 to grid_lines step 4
 		num_x = grid_start_x + i * grid_size
 		num =  roundDown(editor\startpos) + i + 1
-		color UI_COLOR_BG_FOCUS
+		color UI_COLOR_DARK
 		text num_x, tl_y + 2, num
 		color UI_COLOR_MID
 		text num_x, tl_y + 1, num
@@ -435,11 +446,18 @@ function drawPoint(x,y,selected)
 		hover = true
 	endif
 
-	if selected then
+	if hover or selected
 		color UI_COLOR_RIM
-	else
+		box x - UI_POINT_SIZE/2-2, y - UI_POINT_SIZE/2-2, 8 + 4, 8 + 4, OFF
+	endif
+
+	if selected = 0 then
+		color UI_COLOR_RIM
+	elseIf selected = 1
 		color UI_COLOR_LIGHT
 	endif
+	
+	
 	
 	box x - UI_POINT_SIZE/2, y - UI_POINT_SIZE/2, 8, 8
 	
