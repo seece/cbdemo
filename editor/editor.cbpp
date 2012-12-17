@@ -125,7 +125,6 @@ function createEnvEditor(x,y,w,h,startspan,endspan)
 	return toInt(editor)
 endFunction
 
-// returns the new time variable because we can skip in time with the timeline
 function updateEditor(editorp, bars#)
 	editor.EnvEditor = toType(editorp)
 	mousedz# = mouseMoveZ()
@@ -161,10 +160,7 @@ function updateEditor(editorp, bars#)
 		deleteEnvpoint(editor\track, editor\deletePoint)
 		editor\deletePoint = UNDEFINED
 	endif
-
-	return bars
 endFunction
-	
 
 function drawEditor(editorp, bars#)
 	editor.EnvEditor = toType(editorp)
@@ -178,6 +174,13 @@ function drawEditor(editorp, bars#)
 	lastx# = 0
 	lasty# = 0
 	
+	gridspacing# = 1.0
+	grid_lines = roundDown(span/gridspacing)
+	grid_size# = float(editor\width)/span
+	grid_start_x = (editor\startpos * grid_size) mod (gridspacing*grid_size)
+	
+	track.Synctrack = toType(editor\track)
+	
 	if mouseOverlap(editor\x, editor\y, editor\width, editor\height) then
 		hover = true
 		editor\hover = true
@@ -187,10 +190,6 @@ function drawEditor(editorp, bars#)
 	
 	if keydown(cbKeyLAlt) then snap = false else snap = true
 	snapsize# = 0.5
-	gridspacing# = 1.0
-	grid_lines = roundDown(span/gridspacing)
-	grid_size# = float(editor\width)/span
-	grid_start_x = (editor\startpos * grid_size) mod (gridspacing*grid_size)
 	
 	// render bg
 	
@@ -215,8 +214,6 @@ function drawEditor(editorp, bars#)
 		line_x = grid_start_x + i * grid_size
 		line line_x, editor\y, line_x, editor\y + editor\height
 	next i	
-	
-	track.Synctrack = toType(editor\track)
 	
 	spointp = firstPointAfter(editor\track, editor\startpos)
 	ipointp = spointp
