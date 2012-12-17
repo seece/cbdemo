@@ -97,7 +97,6 @@ editorp = createEnvEditor(0, 300, 800, 200, 0.0, 10.0)
 editor.EnvEditor = toType(editorp)
 editor\track = tracks(0)
 
-
 tempo# = 130.0
 tstart=timer()
 
@@ -108,6 +107,7 @@ repeat
 
 	bars = updateEditor(toInt(editor), bars)
 	drawEditor(toInt(editor), bars)
+	bars = drawEditorTimeline(toInt(editor), bars)
 	//drawTrack(tracks(0), 0, 300, 800, 200, 0.0, 10.0) 
 	
 	text 0,0,"bars: " + bars
@@ -360,6 +360,42 @@ function drawEditor(editorp, bars#)
 	
 	color UI_COLOR_MID
 	text editor\x + 4, editor\y + 4, editor\startpos + " - " + editor\endpos
+
+endFunction
+
+function drawEditorTimeline(editorp, bars#)
+	editor.EnvEditor = toType(editorp)
+	mx# = mouseX()
+	my# = mouseY()
+	mousedz# = mouseMoveZ()
+	
+	span# = editor\endpos - editor\startpos
+	
+	tl_x = editor\x
+	tl_y = editor\y + editor\height
+	tl_w = editor\width
+	tl_h = 24
+	
+	// bg box
+	color UI_COLOR_DIM
+	box tl_x, tl_y, tl_w, tl_h
+	
+	// draw the numbers
+	gridspacing# = 1.0
+	bar_width_in_px# = editor\width / span
+	grid_lines = roundDown(span/gridspacing)
+	grid_size# = gridspacing * bar_width_in_px
+	grid_start_x = bar_width_in_px - (int(editor\startpos * bar_width_in_px) mod int(bar_width_in_px))
+	
+	color UI_COLOR_MID
+	for i=0 to grid_lines step 4
+		num_x = grid_start_x + i * grid_size
+		text num_x, tl_y + 2, roundDown(editor\startpos) + i
+		//line line_x, editor\y, line_x, editor\y + editor\height
+	next i	
+	
+	
+	return bars
 	
 endFunction
 
