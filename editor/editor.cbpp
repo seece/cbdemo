@@ -30,6 +30,7 @@
 #define UI_COLOR_MID 140, 130, 128
 
 #define mouseOverlap(_x,_y,_w,_h) (mouseX() >= (_x) and mouseX() <= ((_x) + (_w)) and mouseY() >= (_y) and mouseY() <= ((_y) + (_h)))
+#define toggle(x) (x xor 1)
 
 type Synctrack
 	// memblock data format
@@ -108,12 +109,19 @@ editor\track = tracks(0)
 
 tempo# = 130.0
 tstart=timer()
+pause_start=timer()
+pause_offset# = 0.0
 time_offset# = 0.0
 bar_offset# = 0.0
+
+playing = true
+old_t# = 0.0
+t# = 0.0
+bars# = 0.0
+
 repeat
-	t# = float(timer() - tstart)/1000.0 + time_offset
-	beats# = (t/60.0)*(tempo)
-	bars# = beats/4.0 
+	gosub update_time
+
 
 	bars = updateEditor(toInt(editor), bars) // the editor processes looping
 	drawEditor(toInt(editor), bars)
@@ -127,9 +135,43 @@ repeat
 	endif
 	//drawTrack(tracks(0), 0, 300, 800, 200, 0.0, 10.0) 
 	
-	text 0,0,"bars: " + bars + " bar offset " + bar_offset
+	
+	addText "bars: " + bars + " bar offset " + bar_offset
+	addText "playing: " + playing
+	
 	drawScreen
+	clearText
 forever
+
+update_time:
+	if keyHit(cbKeyBackspace) then
+		time_offset = 0.0
+		pause_offset = 0.0
+		tstart = timer()
+	endif
+	
+	if keyHit(cbKeySpace) then 
+		if playing then
+			playing = false
+			pause_start = timer()
+		else
+			time_offset = time_offset + pause_offset
+			pause_offset = 0.0
+			playing = true
+		endif
+	endif
+	
+	if playing then
+		old_t# = t
+	else
+		pause_offset# = -(timer()-pause_start)/1000.0
+	endif
+	
+	t# = pause_offset + time_offset + float(timer() - tstart)/1000.0
+	
+	beats# = (t/60.0)*(tempo)
+	bars# = beats/4.0 
+return 
 
 function createEnvEditor(x,y,w,h,startspan,endspan)
 	editor.EnvEditor = new(EnvEditor)
@@ -145,7 +187,7 @@ function createEnvEditor(x,y,w,h,startspan,endspan)
 	editor\deletePoint = UNDEFINED 
 	editor\snapsize = 0.5
 	editor\gridsize = 1.0
-	editor\timelineHeight = 16
+	editor\timelineHeight = 20
 	return toInt(editor)
 endFunction
 
@@ -403,7 +445,7 @@ function drawEditorTimeline(editorp, bars#)
 		hover = true
 	endif
 
-	if hover and mousehit(1) then
+	if hover and mouseDown(1) then
 		newpos# = editor\startpos + ((mx-editor\x)/editor\width) * span
 		newbars = newpos
 	endif
