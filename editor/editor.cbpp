@@ -12,6 +12,7 @@
 #define assert(statement) If Not (statement) Then makeError __LINE__ + ": assertion failed"
 
 #define frac(_var) (_var-roundDown(_var))
+#define round(_val) ()
 
 #define POINT_STRIDE 8
 #define UNDEFINED -1
@@ -19,11 +20,11 @@
 #define UI_POINT_SIZE 8
 #define UI_COLOR_BG 50, 50,64
 #define UI_COLOR_DIM 80,80,80
-#define UI_COLOR_BG_FOCUS 72,64,64
+#define UI_COLOR_BG_FOCUS 64,64,70
 #define UI_COLOR_RIM 128,128,128
 #define UI_COLOR_LIGHT 255, 255, 255
 #define UI_COLOR_HILIGHT 240, 230, 210
-#define UI_COLOR_MID 128, 128, 140
+#define UI_COLOR_MID 140, 130, 128
 
 #define mouseOverlap(_x,_y,_w,_h) (mouseX() >= (_x) and mouseX() <= ((_x) + (_w)) and mouseY() >= (_y) and mouseY() <= ((_y) + (_h)))
 
@@ -214,7 +215,7 @@ function drawEditor(editorp, bars#)
 	endif
 	
 	// render grid
-	color UI_COLOR_DIM
+	color UI_COLOR_BG_FOCUS
 	for i=0 to grid_lines
 		line_x = grid_start_x + i * grid_size
 		line line_x, editor\y, line_x, editor\y + editor\height
@@ -245,7 +246,7 @@ function drawEditor(editorp, bars#)
 	newvalue# = 1.0 - ((my-editor\y)/editor\height) * 1.0
 	
 	if snap then
-		newbars = roundDown(newbars/snapsize)*snapsize
+		newbars = int(newbars/snapsize)*snapsize
 	endif
 	
 	// a new point!
@@ -477,6 +478,10 @@ endFunction
 function deleteEnvpoint(trackint, index)
 	track.Synctrack = toType(trackint)
 	assert(index < track\count)
+	
+	if track\count = 1 then
+		return false
+	endif
 	
 	offset = index * POINT_STRIDE
 	movesize = (MEMBlockSize(track\mem))-offset
