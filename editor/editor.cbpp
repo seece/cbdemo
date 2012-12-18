@@ -7,6 +7,11 @@
 //			F6			save current track
 //			F9			load current track
 
+// config
+
+// #define STANDALONE_EDITOR
+
+// macros
 
 #define malloc(size) makeMEMBlock(size)
 #define free deleteMEMBlock
@@ -71,6 +76,8 @@ type EnvEditor
 endType
 
 //#pragma dumb_debug
+
+#ifdef STANDALONE_EDITOR
 
 const TRACK_AMOUNT = 3
 
@@ -185,6 +192,8 @@ update_time:
 	beats# = (t/60.0)*(tempo)
 	bars# = beats/4.0 
 return 
+
+#endif
 
 // returns the amount of bytes written
 function saveTrack(trackp, filename$)
