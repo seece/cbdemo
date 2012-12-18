@@ -123,7 +123,6 @@ bars# = 0.0
 repeat
 	gosub update_time
 
-
 	bars = updateEditor(toInt(editor), bars) // the editor processes looping
 	newbars# = drawEditorTimeline(toInt(editor), bars)
 	
@@ -136,9 +135,11 @@ repeat
 	
 	drawEditor(toInt(editor), bars)
 	
+	value# = getEnvelopeValue(tracks(0), bars)
 	
 	addText "bars: " + bars + " bar offset " + bar_offset
 	addText "playing: " + playing
+	addText "value: " + value
 	
 	drawScreen
 	clearText
@@ -192,8 +193,39 @@ function createEnvEditor(x,y,w,h,startspan,endspan)
 	return toInt(editor)
 endFunction
 
-function getEnvelopeValue(editorp, bars#)
+
+function getEnvelopeValue(trackp, bars#)
+	track.Synctrack = toType(trackp)
 	
+	firstpoint.EnvPoint = toType(getEnvPoint(trackp, 0))
+	lastpoint.EnvPoint = toType(getEnvPoint(trackp, track\count-1))
+	
+	if bars < firstpoint\bars then
+		return firstpoint\value
+	endif
+	
+	if bars > lastpoint\bars then
+		return lastpoint\value
+	endif
+	
+	// is this redundant?
+	if track\count = 1 then
+		return firstpoint\value
+	endif
+	
+	pointp = firstPointBefore(trackp, bars)
+	
+	if pointp <> UNDEFINED then
+		point.EnvPoint = toType(pointp)
+		nextPoint.EnvPoint = toType(getEnvPoint(trackp, point\index + 1))
+		value_diff# = nextPoint\value - point\value
+		time_diff# = nextPoint\bars - point\bars
+		
+		progress# = (bars - point\bars) / time_diff#
+		return lerp(point\value, nextPoint\value, progress)
+	endif
+	
+	return 0.0
 endFunction
 
 function updateEditor(editorp, bars#)
@@ -450,7 +482,7 @@ function drawEditorTimeline(editorp, bars#)
 		hover = true
 	endif
 
-	if hover and mouseDown(1) then
+	if hover and mouseDown(1) and editor\selectedPoint = UNDEFINED then
 		newpos# = editor\startpos + ((mx-editor\x)/editor\width) * span
 		newbars = newpos
 	endif
