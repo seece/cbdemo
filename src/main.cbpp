@@ -1,34 +1,34 @@
 #define assert(statement) If Not (statement) Then MakeError __LINE__ + ": assertion failed"
 
 SCREEN 640, 480, 0, 1
-FrameLimit 60
+frameLimit 60
 
-buffer=MakeImage(640, 360) // kuvasuhde 16:9
+buffer=makeImage(640, 360) // kuvasuhde 16:9
 
-Gosub main
+gosub main
 
 
 main:
-	start_time = Timer()
-	Repeat
-		t# = (Float(Timer())-Float(start_time)) / 1000.0
+	start_time = timer()
+	repeat
+		t# = (float(timer())-float(start_time)) / 1000.0
 
-		SetWindow "t: " + t
+		setWindow "t: " + t
 		
-		DrawToImage buffer
-		Gosub drawDemo
+		drawToImage buffer
+		gosub drawDemo
 		
-		DrawToScreen
-		Gosub drawBuffer
-	Forever
-Return
+		drawToScreen
+		gosub drawBuffer
+	forever
+return
 
 drawBuffer:
-	DrawImage buffer, 0, (ScreenHeight()-360)/2
-	DrawScreen
-Return
+	drawImage buffer, 0, (screenHeight()-360)/2
+	drawScreen
+return
 
 drawDemo:
-	Color 255, 0, 0
-	Box 0,0,640,480,1
-Return
+	color 255, 0, 0
+	box 0,0,640,480,1
+return
