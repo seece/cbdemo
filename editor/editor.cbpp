@@ -1,7 +1,11 @@
 // sync editor
-// hotkeys: hold ctrl or alt when dragging
-// 			hold x and click node to remove
-//			or keep mouse down on node and press DEL
+// hotkeys: HOLD CTRL	move all nodes to the right
+// 			HOLD ALT	disable snapping
+//			HOLD X		click to remove nodes
+//			DEL			when holding node, deletes node
+//			RIGHT CLICK	add node
+//			F6			save current track
+//			F9			load current track
 
 
 #define malloc(size) makeMEMBlock(size)
