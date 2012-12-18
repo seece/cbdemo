@@ -13,6 +13,7 @@
 
 #define frac(_var) (_var-roundDown(_var))
 #define round(_val) ()
+#define lerp(_val1, _val2, _amount) (_val1 + (_val2 - _val1) * _amount)
 #define barsToSecs(_bars, _tempo) (_bars * ((60.0/_tempo)*4.0))
 #define snapToGrid(_value, _size) (int(_value/_size)*_size)
 
@@ -189,6 +190,10 @@ function createEnvEditor(x,y,w,h,startspan,endspan)
 	editor\gridsize = 1.0
 	editor\timelineHeight = 20
 	return toInt(editor)
+endFunction
+
+function getEnvelopeValue(editorp, bars#)
+	
 endFunction
 
 function updateEditor(editorp, bars#)
