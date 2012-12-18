@@ -137,6 +137,13 @@ repeat
 	
 	value# = getEnvelopeValue(tracks(0), bars)
 	
+	if keyHit(cbKeyF6) then saveTrack(tracks(0), "test.dat")
+	if keyHit(cbKeyF9) then 
+		load_result = loadTrack(tracks(0), "test.dat")
+		
+		if load_result <= 0 then makeError "couldn't load track. error: "+ load_result
+	endif
+	
 	addText "bars: " + bars + " bar offset " + bar_offset
 	addText "playing: " + playing
 	addText "value: " + value
@@ -174,6 +181,59 @@ update_time:
 	beats# = (t/60.0)*(tempo)
 	bars# = beats/4.0 
 return 
+
+// returns the amount of bytes written
+function saveTrack(trackp, filename$)
+	track.Synctrack = toType(trackp)
+
+	f = openToWrite(filename)
+	
+	for i=0 to track\count-1
+		offset = i * POINT_STRIDE
+		writeFloat f, peekFloat(track\mem, offset)
+		writeFloat f, peekFloat(track\mem, offset + 4)
+	next i
+	
+	written = fileOffset(f)
+	closeFile(f)
+	
+	return written
+endFunction
+
+function loadTrack(trackp, filename$)
+	track.Synctrack = toType(trackp)
+	
+	bytes_read = 0
+	offset = 0
+	file_size = fileSize(filename)
+	
+	//makeError "" + file_size
+
+	//if file_size <= 0 then return -1
+	
+	memblock = malloc(file_size)
+	
+	if not fileExists (filename) then return bytes_read
+	
+	f = openToRead(filename)
+	
+	while not EOF(f)
+		char = readByte(f)
+		pokeByte memblock, offset, char
+		offset = offset + 1
+		//bars# = readFloat(f)
+		//value# = readFloat(f)
+	wend
+	
+	bytes_read = fileOffset(f)
+	closeFile(f)
+
+	free track\mem
+	track\count = (bytes_read/8)
+	track\mem = memblock
+
+	return bytes_read
+endFunction
 
 function createEnvEditor(x,y,w,h,startspan,endspan)
 	editor.EnvEditor = new(EnvEditor)
