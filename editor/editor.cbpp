@@ -9,7 +9,7 @@
 
 // config
 
-// #define STANDALONE_EDITOR
+#define STANDALONE_EDITOR
 
 // macros
 
@@ -167,6 +167,7 @@ update_time:
 	if keyHit(cbKeyBackspace) then
 		time_offset = 0.0
 		pause_offset = 0.0
+		pause_start = timer()
 		tstart = timer()
 	endif
 	

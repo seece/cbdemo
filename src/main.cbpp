@@ -1,5 +1,9 @@
 #define assert(statement) If Not (statement) Then MakeError __LINE__ + ": assertion failed"
 
+#define USE_EDITOR
+
+include "inc/editor.cb"
+
 SCREEN 640, 480, 0, 1
 frameLimit 60
 
@@ -9,11 +13,13 @@ gosub main
 
 
 main:
-	start_time = timer()
+	tempo# = 130.0
+	gosub timeInit
 	repeat
-		t# = (float(timer())-float(start_time)) / 1000.0
+		//t# = (float(timer())-float(start_time)) / 1000.0
+		gosub updateTime
 
-		setWindow "t: " + t
+		setWindow "t: " + t#
 		
 		drawToImage buffer
 		gosub drawDemo
@@ -21,6 +27,55 @@ main:
 		drawToScreen
 		gosub drawBuffer
 	forever
+return
+
+timeInit:
+	tstart=timer()
+	pause_start=timer()
+	pause_offset# = 0.0
+	time_offset# = 0.0
+	
+	playing = true
+	t# = 0.0
+	bars# = 0.0
+return
+
+updateTime:
+#ifdef USE_EDITOR
+	gosub updateTimeHotkeys
+#endif	
+	
+	if playing then
+	
+	else
+		pause_offset# = -(timer()-pause_start)/1000.0
+	endif
+	
+	t# = pause_offset + time_offset + float(timer() - tstart)/1000.0
+	
+	beats# = (t/60.0)*(tempo)
+	bars# = beats/4.0 
+return
+
+updateTimeHotkeys:
+	if keyHit(cbKeyBackspace) then
+		time_offset = 0.0
+		pause_offset = 0.0
+		t# = 0.0
+		pause_start = timer()
+		tstart = timer()
+	endif
+
+	if keyHit(cbKeySpace) then 
+		if playing then
+			playing = false
+			pause_start = timer()
+		else
+			time_offset = time_offset + pause_offset
+			pause_offset = 0.0
+			playing = true
+		endif
+	endif
 return
 
 drawBuffer:
