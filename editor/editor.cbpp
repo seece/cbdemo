@@ -9,7 +9,7 @@
 
 // config
 
-// #define STANDALONE_EDITOR		// compile with main loop etc.
+ #define STANDALONE_EDITOR		// compile with main loop etc.
  #define USE_EDITOR_COMPONENTS	// if this is disabled, only compiles the parts needed for playing back data
 
 // macros
@@ -98,7 +98,7 @@ for i=0 to TRACK_AMOUNT
 	
 	point.Envpoint = new (Envpoint)	// only a temporary var
 	
-	for u=0 to 0
+	for u=0 to 9
 		point\bars = float(u)
 		point\value = rnd(0, 1)
 		track.Synctrack = toType(tracks(i))
@@ -383,6 +383,13 @@ function drawEditor(editorp, bars#)
 	endif
 	
 	spoint.Envpoint = toType(spointp)
+		
+	// we take one to the left to only render also the point over to the left hand side of the SCREEN
+	if spoint\index > 0 then
+		spointp = getEnvPoint(editor\track, spoint\index - 1)
+		ipointp = spointp
+		spoint = toType(spointp)
+	endif
 	
 	ipoint.Envpoint = spoint
 	ind = ipoint\index
@@ -707,6 +714,7 @@ endFunction
 function getEnvpoint(trackint, index)
 	track.Synctrack = toType(trackint)
 	assert(index < track\count)
+	assert(index >= 0)
 	
 	point.Envpoint = new(Envpoint)
 	point\bars	= peekFloat(track\mem, index*POINT_STRIDE)
