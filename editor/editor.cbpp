@@ -94,7 +94,7 @@ for i=0 to TRACK_AMOUNT
 	
 	point.Envpoint = new (Envpoint)	// only a temporary var
 	
-	for u=0 to 9
+	for u=0 to 0
 		point\bars = float(u)
 		point\value = rnd(0, 1)
 		track.Synctrack = toType(tracks(i))
@@ -281,7 +281,7 @@ function getEnvelopeValue(trackp, bars#)
 	if bars > lastpoint\bars then
 		return lastpoint\value
 	endif
-	
+
 	// is this redundant?
 	if track\count = 1 then
 		return firstpoint\value
@@ -291,6 +291,11 @@ function getEnvelopeValue(trackp, bars#)
 	
 	if pointp <> UNDEFINED then
 		point.EnvPoint = toType(pointp)
+
+		if point\index = track\count-1 then
+			return point\value
+		endif
+		
 		nextPoint.EnvPoint = toType(getEnvPoint(trackp, point\index + 1))
 		value_diff# = nextPoint\value - point\value
 		time_diff# = nextPoint\bars - point\bars
