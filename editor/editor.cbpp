@@ -159,6 +159,8 @@ repeat
 		if load_result <= 0 then makeError "couldn't load track. error: "+ load_result
 	endif
 	
+	textButton(400, 100, 80, 30, "moi")
+	
 	addText "bars: " + bars + " bar offset " + bar_offset
 	addText "playing: " + playing
 	addText "value: " + value
@@ -200,7 +202,45 @@ return
 
 #endif
 
-
+function textButton(pos_x, pos_y, width, height, caption$)
+	hover = false
+	clicked = false
+	
+	if mouseOverlap(pos_x, pos_y, width, height) then hover = true
+	
+	if hover and mouseDown(1) then clicked = true
+	
+	button_x = pos_x
+	button_y = pos_y + clicked
+	
+	if clicked then
+		color UI_COLOR_BG_FOCUS
+	else
+		color UI_COLOR_DIM
+	endif
+	
+	box button_x, button_y, width, height, true
+	
+	if hover then
+		color UI_COLOR_RIM
+		
+		if clicked then color UI_COLOR_DARK
+	else
+		color UI_COLOR_DARK
+	endif
+	
+	box button_x, button_y, width, height, false 
+	
+	color UI_COLOR_HILIGHT
+	text button_x + (width/2) - textWidth(caption$)/2, button_y + (height/2) - textHeight(caption$)/2, caption$
+	
+	
+	
+	if hover and mouseUp(1) then return true
+	
+	return false
+	
+endFunction
 
 function loadTrack(trackp, filename$)
 	track.Synctrack = toType(trackp)
