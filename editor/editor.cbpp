@@ -443,7 +443,7 @@ function drawEditor(editorp, bars#)
 	endif
 	
 	// a new point!
-	if mouseHit(2) then
+	if mouseHit(2) and hover then
 		before_pointp = firstPointBefore(editor\track, newbars)
 		if before_pointp = UNDEFINED then
 			// TODO write error to log
@@ -490,7 +490,7 @@ function drawEditor(editorp, bars#)
 			clicked_on_point = true
 		endif
 		
-		if mouseUp(1) then editor\selectedPoint = UNDEFINED
+		if mouseUp(1) and hover then editor\selectedPoint = UNDEFINED
 
 		if ind=editor\selectedPoint and editor\selectedPoint <> UNDEFINED then	
 		
