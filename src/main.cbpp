@@ -1,33 +1,52 @@
-#define assert(statement) If Not (statement) Then MakeError __LINE__ + ": assertion failed"
-
+// options
 #define USE_EDITOR
+#define EDITOR_HEIGHT 200
+
+// macros
+#define malloc(size) makeMEMBlock(size)
+#define free deleteMEMBlock
+#define realloc resizeMEMBlock
+#define toType(integer) convertToType(integer)
+#define toInt(typevar) convertToInteger(typevar)
+#define assert(statement) If Not (statement) Then makeError __LINE__ + ": assertion failed"
+
+#define frac(_var) (_var-roundDown(_var))
+#define round(_val) ()
+#define lerp(_val1, _val2, _amount) (_val1 + (_val2 - _val1) * _amount)
+#define barsToSecs(_bars, _tempo) (_bars * ((60.0/_tempo)*4.0))
+#define snapToGrid(_value, _size) (int(_value/_size)*_size)
+
+#define POINT_STRIDE 8
+#define UNDEFINED -1
+
 
 include "inc/editor.cb"
 
-SCREEN 640, 480, 0, 1
+const SCREEN_WIDTH = 640
+const SCREEN_HEIGHT = 480
+#define PICTURE_WIDTH SCREEN_WIDTH
+#define PICTURE_HEIGHT (int(SCREEN_WIDTH * (9.0/16.0)))
+
+#ifdef USE_EDITOR
+SCREEN SCREEN_WIDTH, SCREEN_HEIGHT + EDITOR_HEIGHT, 0, 1
+#else
+SCREEN SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1
+#endif
 frameLimit 60
 
-buffer=makeImage(640, 360) // kuvasuhde 16:9
+buffer=makeImage(PICTURE_WIDTH, PICTURE_HEIGHT) // kuvasuhde 16:9
 
+#ifdef USE_EDITOR
+	font = loadFont("tahoma", 14)
+	setFont font
+
+	editorp = createEnvEditor(0, PICTURE_HEIGHT, SCREEN_WIDTH, EDITOR_HEIGHT-24, 0.0, 10.0)
+	editor.EnvEditor = toType(editorp)
+#endif
+
+gosub trackInit
 gosub main
-
-
-main:
-	tempo# = 130.0
-	gosub timeInit
-	repeat
-		//t# = (float(timer())-float(start_time)) / 1000.0
-		gosub updateTime
-
-		setWindow "t: " + t#
-		
-		drawToImage buffer
-		gosub drawDemo
-		
-		drawToScreen
-		gosub drawBuffer
-	forever
-return
+end
 
 timeInit:
 	tstart=timer()
@@ -40,10 +59,77 @@ timeInit:
 	bars# = 0.0
 return
 
+trackInit:
+	const TRACK_AMOUNT = 8
+	dim tracks(TRACK_AMOUNT)	// an array of track pointers
+	dim track_values(TRACK_AMOUNT) as float
+	
+	for i=0 to TRACK_AMOUNT
+		tracks(i) = createSyncTrack("synctrack #" + i )
+		
+		track.SyncTrack = toType(tracks(i))
+		
+		point.Envpoint = new (Envpoint)	// only a temporary var
+		point\bars = 0.0
+		point\value = 0.0
+		addEnvelopePoint(tracks(i), toInt(point), track\count)
+		//addEnvelopePoint(tracks(i), toInt(point), track\count)
+		delete point
+	next i
+	
+	editor\track = tracks(0)
+return	
+
+main:
+	tempo# = 130.0
+	gosub timeInit
+	
+	repeat
+		//t# = (float(timer())-float(start_time)) / 1000.0
+		gosub updateTime
+
+		setWindow "t: " + t#
+
+		gosub updateTracks
+		
+		drawToImage buffer
+		gosub drawDemo
+		drawToScreen
+		
+		gosub drawBuffer
+		
+		#ifdef USE_EDITOR
+			gosub updateEditor
+		#endif
+		
+		drawScreen
+	forever
+return
+
+updateTracks:
+	for i=0 to TRACK_AMOUNT
+		track_values(i) = getEnvelopeValue(tracks(i), bars)
+	next i
+return
+
+updateEditor:
+	bars# = updateEditor(toInt(editor), bars) // the editor processes looping
+	newbars# = drawEditorTimeline(toInt(editor), bars)
+	
+	if newbars <> bars then
+		diff# = newbars - bars
+		bar_offset# = bar_offset + diff
+		time_offset# = barsToSecs(bar_offset, tempo)
+	endif
+	
+	drawEditor(toInt(editor), bars)
+	
+return
+
 updateTime:
-#ifdef USE_EDITOR
-	gosub updateTimeHotkeys
-#endif	
+	#ifdef USE_EDITOR
+		gosub updateTimeHotkeys
+	#endif	
 	
 	if playing then
 	
@@ -79,8 +165,12 @@ updateTimeHotkeys:
 return
 
 drawBuffer:
-	drawImage buffer, 0, (screenHeight()-360)/2
-	drawScreen
+	#ifdef USE_EDITOR
+		drawImage buffer, 0, 0
+	#else
+		drawImage buffer, 0, (screenHeight()-PICTURE_HEIGHT)/2
+	#endif
+	
 return
 
 drawDemo:

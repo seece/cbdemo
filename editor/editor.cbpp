@@ -9,7 +9,8 @@
 
 // config
 
-#define STANDALONE_EDITOR
+// #define STANDALONE_EDITOR		// compile with main loop etc.
+ #define USE_EDITOR_COMPONENTS	// if this is disabled, only compiles the parts needed for playing back data
 
 // macros
 
@@ -60,6 +61,7 @@ type Envpoint
 	field index
 endType
 
+#ifdef USE_EDITOR_COMPONENTS
 type EnvEditor
 	field selectedPoint // just an id
 	field deletePoint	// we'll delete the point usually ON the next frame
@@ -75,6 +77,7 @@ type EnvEditor
 	field gridsize as float
 	field timelineHeight 
 endType
+#endif
 
 //#pragma dumb_debug
 
@@ -197,23 +200,7 @@ return
 
 #endif
 
-// returns the amount of bytes written
-function saveTrack(trackp, filename$)
-	track.Synctrack = toType(trackp)
 
-	f = openToWrite(filename)
-	
-	for i=0 to track\count-1
-		offset = i * POINT_STRIDE
-		writeFloat f, peekFloat(track\mem, offset)
-		writeFloat f, peekFloat(track\mem, offset + 4)
-	next i
-	
-	written = fileOffset(f)
-	closeFile(f)
-	
-	return written
-endFunction
 
 function loadTrack(trackp, filename$)
 	track.Synctrack = toType(trackp)
@@ -250,6 +237,26 @@ function loadTrack(trackp, filename$)
 	return bytes_read
 endFunction
 
+#ifdef USE_EDITOR_COMPONENTS
+// returns the amount of bytes written
+function saveTrack(trackp, filename$)
+	track.Synctrack = toType(trackp)
+
+	f = openToWrite(filename)
+	
+	for i=0 to track\count-1
+		offset = i * POINT_STRIDE
+		writeFloat f, peekFloat(track\mem, offset)
+		writeFloat f, peekFloat(track\mem, offset + 4)
+	next i
+	
+	written = fileOffset(f)
+	closeFile(f)
+	
+	return written
+endFunction
+
+
 function createEnvEditor(x,y,w,h,startspan,endspan)
 	editor.EnvEditor = new(EnvEditor)
 	editor\x = x
@@ -266,46 +273,6 @@ function createEnvEditor(x,y,w,h,startspan,endspan)
 	editor\gridsize = 1.0
 	editor\timelineHeight = 20
 	return toInt(editor)
-endFunction
-
-
-function getEnvelopeValue(trackp, bars#)
-	track.Synctrack = toType(trackp)
-	
-	firstpoint.EnvPoint = toType(getEnvPoint(trackp, 0))
-	lastpoint.EnvPoint = toType(getEnvPoint(trackp, track\count-1))
-	
-	if bars < firstpoint\bars then
-		return firstpoint\value
-	endif
-	
-	if bars > lastpoint\bars then
-		return lastpoint\value
-	endif
-
-	// is this redundant?
-	if track\count = 1 then
-		return firstpoint\value
-	endif
-	
-	pointp = firstPointBefore(trackp, bars)
-	
-	if pointp <> UNDEFINED then
-		point.EnvPoint = toType(pointp)
-
-		if point\index = track\count-1 then
-			return point\value
-		endif
-		
-		nextPoint.EnvPoint = toType(getEnvPoint(trackp, point\index + 1))
-		value_diff# = nextPoint\value - point\value
-		time_diff# = nextPoint\bars - point\bars
-		
-		progress# = (bars - point\bars) / time_diff#
-		return lerp(point\value, nextPoint\value, progress)
-	endif
-	
-	return 0.0
 endFunction
 
 function updateEditor(editorp, bars#)
@@ -643,6 +610,113 @@ function moveAllPointsFrom(trackp, index, amount#)
 	return true
 endFunction
 
+
+// index tells the place where to insert the new point
+// returns void
+function addEnvelopePoint(trackint, envint, index)
+	track.Synctrack = toType(trackint)
+	point.Envpoint = toType(envint)
+	
+	offset = index * POINT_STRIDE
+	movesize = (MEMBlockSize(track\mem))-offset
+	
+	realloc track\mem, MEMBlockSize(track\mem) + POINT_STRIDE
+	
+	assert(index <= track\count)
+	
+	if movesize > 0 then
+		// move rest of the memblock further to make room for the new var
+		memCopy track\mem, offset, track\mem, offset + POINT_STRIDE, movesize
+	endif
+
+	pokeFloat track\mem, offset		, point\bars 
+	pokeFloat track\mem, offset + 4	, point\value 
+	
+	track\count = track\count + 1
+	//temp = allocEnvpoint(envint)
+	//memCopy temp, 0, track\mem, track\count * 8, 2*4
+	//free temp
+endFunction
+
+function deleteEnvpoint(trackint, index)
+	track.Synctrack = toType(trackint)
+	assert(index < track\count)
+	
+	if track\count = 1 then
+		return false
+	endif
+	
+	offset = index * POINT_STRIDE
+	movesize = (MEMBlockSize(track\mem))-offset
+	if movesize > 0 then
+		memCopy track\mem, offset + POINT_STRIDE, track\mem, offset, movesize
+	endif
+	
+	realloc track\mem, MEMBlockSize(track\mem) - POINT_STRIDE
+	
+	track\count = track\count - 1
+endFunction
+
+// returns void
+function setEnvpoint(trackint, pointint, index)
+	track.Synctrack = toType(trackint)
+	assert(index < track\count)
+	
+	offset = index * POINT_STRIDE
+	point.Envpoint = toType(pointint)
+	pokeFloat track\mem, offset		, point\bars
+	pokeFloat track\mem, offset + 4	, point\value
+endFunction
+
+function setEnvpointValue(trackint, newbars#, newvalue#, index)
+	track.Synctrack = toType(trackint)
+	assert(index < track\count)
+	offset = index * POINT_STRIDE
+	pokeFloat track\mem, offset		, newbars
+	pokeFloat track\mem, offset + 4	, newvalue
+endFunction
+// returns a string representation of the memory block contents
+function memDumpFloat(memblock)
+	out$ = ""
+	
+	i = 0
+	while i < MEMBlockSize(memblock)
+		if i mod 4 = 0 then
+			out = out + str(peekFloat(memblock, i))
+			out = out + ", "
+		endif
+		i + 4
+	wend
+	
+	return out
+endFunction
+
+#endif
+
+// the bare core components start here
+
+// returns a temporary memblock, remember to free it!
+function allocEnvelopePoint(bars#, value#)
+	tempblock = malloc(POINT_STRIDE)
+	pokeFloat tempblock, 0, bars
+	pokeFloat tempblock, 4, value
+	return tempblock
+endFunction
+
+// returns an envpoint in a temporary type instance, remember to delete it
+function getEnvpoint(trackint, index)
+	track.Synctrack = toType(trackint)
+	assert(index < track\count)
+	
+	point.Envpoint = new(Envpoint)
+	point\bars	= peekFloat(track\mem, index*POINT_STRIDE)
+	point\value = peekFloat(track\mem, index*POINT_STRIDE + 4)
+	point\index = index
+	
+	return toInt(point)
+endFunction
+
+
 function firstPointAfter(trackint, startbar#)
 	track.Synctrack = toType(trackint)
 	
@@ -689,105 +763,41 @@ function createSyncTrack(name$)
 	return toInt(track)
 endFunction
 
-// index tells the place where to insert the new point
-// returns void
-function addEnvelopePoint(trackint, envint, index)
-	track.Synctrack = toType(trackint)
-	point.Envpoint = toType(envint)
+function getEnvelopeValue(trackp, bars#)
+	track.Synctrack = toType(trackp)
 	
-	offset = index * POINT_STRIDE
-	movesize = (MEMBlockSize(track\mem))-offset
+	firstpoint.EnvPoint = toType(getEnvPoint(trackp, 0))
+	lastpoint.EnvPoint = toType(getEnvPoint(trackp, track\count-1))
 	
-	realloc track\mem, MEMBlockSize(track\mem) + POINT_STRIDE
+	if bars < firstpoint\bars then
+		return firstpoint\value
+	endif
 	
-	assert(index <= track\count)
-	
-	if movesize > 0 then
-		// move rest of the memblock further to make room for the new var
-		memCopy track\mem, offset, track\mem, offset + POINT_STRIDE, movesize
+	if bars > lastpoint\bars then
+		return lastpoint\value
 	endif
 
-	pokeFloat track\mem, offset		, point\bars 
-	pokeFloat track\mem, offset + 4	, point\value 
-	
-	track\count = track\count + 1
-	//temp = allocEnvpoint(envint)
-	//memCopy temp, 0, track\mem, track\count * 8, 2*4
-	//free temp
-endFunction
-
-function deleteEnvpoint(trackint, index)
-	track.Synctrack = toType(trackint)
-	assert(index < track\count)
-	
+	// is this redundant?
 	if track\count = 1 then
-		return false
+		return firstpoint\value
 	endif
 	
-	offset = index * POINT_STRIDE
-	movesize = (MEMBlockSize(track\mem))-offset
-	if movesize > 0 then
-		memCopy track\mem, offset + POINT_STRIDE, track\mem, offset, movesize
-	endif
+	pointp = firstPointBefore(trackp, bars)
 	
-	realloc track\mem, MEMBlockSize(track\mem) - POINT_STRIDE
-	
-	track\count = track\count - 1
-	
-endFunction
+	if pointp <> UNDEFINED then
+		point.EnvPoint = toType(pointp)
 
-// returns a temporary memblock, remember to free it!
-function allocEnvelopePoint(bars#, value#)
-	tempblock = malloc(POINT_STRIDE)
-	pokeFloat tempblock, 0, bars
-	pokeFloat tempblock, 4, value
-	return tempblock
-endFunction
-
-// returns an envpoint in a temporary type instance, remember to delete it
-function getEnvpoint(trackint, index)
-	track.Synctrack = toType(trackint)
-	assert(index < track\count)
-	
-	point.Envpoint = new(Envpoint)
-	point\bars	= peekFloat(track\mem, index*POINT_STRIDE)
-	point\value = peekFloat(track\mem, index*POINT_STRIDE + 4)
-	point\index = index
-	
-	return toInt(point)
-endFunction
-
-// returns void
-function setEnvpoint(trackint, pointint, index)
-	track.Synctrack = toType(trackint)
-	assert(index < track\count)
-	
-	offset = index * POINT_STRIDE
-	point.Envpoint = toType(pointint)
-	pokeFloat track\mem, offset		, point\bars
-	pokeFloat track\mem, offset + 4	, point\value
-endFunction
-
-function setEnvpointValue(trackint, newbars#, newvalue#, index)
-	track.Synctrack = toType(trackint)
-	assert(index < track\count)
-	offset = index * POINT_STRIDE
-	pokeFloat track\mem, offset		, newbars
-	pokeFloat track\mem, offset + 4	, newvalue
-endFunction
-// returns a string representation of the memory block contents
-function memDumpFloat(memblock)
-	out$ = ""
-	
-	i = 0
-	while i < MEMBlockSize(memblock)
-		if i mod 4 = 0 then
-			out = out + str(peekFloat(memblock, i))
-			out = out + ", "
+		if point\index = track\count-1 then
+			return point\value
 		endif
-		i + 4
-	wend
+		
+		nextPoint.EnvPoint = toType(getEnvPoint(trackp, point\index + 1))
+		value_diff# = nextPoint\value - point\value
+		time_diff# = nextPoint\bars - point\bars
+		
+		progress# = (bars - point\bars) / time_diff#
+		return lerp(point\value, nextPoint\value, progress)
+	endif
 	
-	return out
+	return 0.0
 endFunction
-

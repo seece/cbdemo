@@ -9,7 +9,8 @@
 
 // config
 
-// #define STANDALONE_EDITOR
+// #define STANDALONE_EDITOR		// compile with main loop etc.
+//  #define USE_EDITOR_COMPONENTS	// if this is disabled, only compiles the parts needed for playing back data
 
 // macros
 
@@ -25,6 +26,7 @@
 // #define lerp(_val1, _val2, _amount) (_val1 + (_val2 - _val1) * _amount)
 // #define barsToSecs(_bars, _tempo) (_bars * ((60.0/_tempo)*4.0))
 // #define snapToGrid(_value, _size) (int(_value/_size)*_size)
+// #define clamp(_val) (max(0.0,min(1.0, _val)))
 
 // #define POINT_STRIDE 8
 // #define UNDEFINED -1
@@ -59,6 +61,7 @@ type Envpoint
 	field index
 endType
 
+// #ifdef USE_EDITOR_COMPONENTS
 type EnvEditor
 	field selectedPoint // just an id
 	field deletePoint	// we'll delete the point usually ON the next frame
@@ -74,6 +77,7 @@ type EnvEditor
 	field gridsize as float
 	field timelineHeight 
 endType
+// #endif
 
 //#pragma dumb_debug
 
@@ -195,23 +199,8 @@ endType
 
 
 
-// returns the amount of bytes written
-function saveTrack(trackp, filename$)
-	track.Synctrack = convertToType(trackp)
 
-	f = openToWrite(filename)
-	
-	for i=0 to track\count-1
-		offset = i * 8
-		writeFloat f, peekFloat(track\mem, offset)
-		writeFloat f, peekFloat(track\mem, offset + 4)
-	next i
-	
-	written = fileOffset(f)
-	closeFile(f)
-	
-	return written
-endFunction
+
 
 function loadTrack(trackp, filename$)
 	track.Synctrack = convertToType(trackp)
@@ -248,6 +237,26 @@ function loadTrack(trackp, filename$)
 	return bytes_read
 endFunction
 
+// #ifdef USE_EDITOR_COMPONENTS
+// returns the amount of bytes written
+function saveTrack(trackp, filename$)
+	track.Synctrack = convertToType(trackp)
+
+	f = openToWrite(filename)
+	
+	for i=0 to track\count-1
+		offset = i * 8
+		writeFloat f, peekFloat(track\mem, offset)
+		writeFloat f, peekFloat(track\mem, offset + 4)
+	next i
+	
+	written = fileOffset(f)
+	closeFile(f)
+	
+	return written
+endFunction
+
+
 function createEnvEditor(x,y,w,h,startspan,endspan)
 	editor.EnvEditor = new(EnvEditor)
 	editor\x = x
@@ -264,41 +273,6 @@ function createEnvEditor(x,y,w,h,startspan,endspan)
 	editor\gridsize = 1.0
 	editor\timelineHeight = 20
 	return convertToInteger(editor)
-endFunction
-
-
-function getEnvelopeValue(trackp, bars#)
-	track.Synctrack = convertToType(trackp)
-	
-	firstpoint.EnvPoint = convertToType(getEnvPoint(trackp, 0))
-	lastpoint.EnvPoint = convertToType(getEnvPoint(trackp, track\count-1))
-	
-	if bars < firstpoint\bars then
-		return firstpoint\value
-	endif
-	
-	if bars > lastpoint\bars then
-		return lastpoint\value
-	endif
-	
-	// is this redundant?
-	if track\count = 1 then
-		return firstpoint\value
-	endif
-	
-	pointp = firstPointBefore(trackp, bars)
-	
-	if pointp <> -1 then
-		point.EnvPoint = convertToType(pointp)
-		nextPoint.EnvPoint = convertToType(getEnvPoint(trackp, point\index + 1))
-		value_diff# = nextPoint\value - point\value
-		time_diff# = nextPoint\bars - point\bars
-		
-		progress# = (bars - point\bars) / time_diff#
-		return (point\value + ( nextPoint\value - point\value) *  progress)
-	endif
-	
-	return 0.0
 endFunction
 
 function updateEditor(editorp, bars#)
@@ -430,7 +404,7 @@ function drawEditor(editorp, bars#)
 			before_point.EnvPoint = convertToType(before_pointp)
 			temp_point.EnvPoint = new(EnvPoint)
 			temp_point\bars = newbars
-			temp_point\value = newvalue
+			temp_point\value = (max(0.0,min(1.0, newvalue)))
 			
 			addEnvelopePoint(editor\track, convertToInteger(temp_point), before_point\index + 1)
 			
@@ -636,6 +610,113 @@ function moveAllPointsFrom(trackp, index, amount#)
 	return true
 endFunction
 
+
+// index tells the place where to insert the new point
+// returns void
+function addEnvelopePoint(trackint, envint, index)
+	track.Synctrack = convertToType(trackint)
+	point.Envpoint = convertToType(envint)
+	
+	offset = index * 8
+	movesize = (MEMBlockSize(track\mem))-offset
+	
+	resizeMEMBlock track\mem, MEMBlockSize(track\mem) + 8
+	
+	If Not (index <= track\count) Then makeError 625 + ": assertion failed"
+	
+	if movesize > 0 then
+		// move rest of the memblock further to make room for the new var
+		memCopy track\mem, offset, track\mem, offset + 8, movesize
+	endif
+
+	pokeFloat track\mem, offset		, point\bars 
+	pokeFloat track\mem, offset + 4	, point\value 
+	
+	track\count = track\count + 1
+	//temp = allocEnvpoint(envint)
+	//memCopy temp, 0, track\mem, track\count * 8, 2*4
+	//free temp
+endFunction
+
+function deleteEnvpoint(trackint, index)
+	track.Synctrack = convertToType(trackint)
+	If Not (index < track\count) Then makeError 643 + ": assertion failed"
+	
+	if track\count = 1 then
+		return false
+	endif
+	
+	offset = index * 8
+	movesize = (MEMBlockSize(track\mem))-offset
+	if movesize > 0 then
+		memCopy track\mem, offset + 8, track\mem, offset, movesize
+	endif
+	
+	resizeMEMBlock track\mem, MEMBlockSize(track\mem) - 8
+	
+	track\count = track\count - 1
+endFunction
+
+// returns void
+function setEnvpoint(trackint, pointint, index)
+	track.Synctrack = convertToType(trackint)
+	If Not (index < track\count) Then makeError 663 + ": assertion failed"
+	
+	offset = index * 8
+	point.Envpoint = convertToType(pointint)
+	pokeFloat track\mem, offset		, point\bars
+	pokeFloat track\mem, offset + 4	, point\value
+endFunction
+
+function setEnvpointValue(trackint, newbars#, newvalue#, index)
+	track.Synctrack = convertToType(trackint)
+	If Not (index < track\count) Then makeError 673 + ": assertion failed"
+	offset = index * 8
+	pokeFloat track\mem, offset		, newbars
+	pokeFloat track\mem, offset + 4	, newvalue
+endFunction
+// returns a string representation of the memory block contents
+function memDumpFloat(memblock)
+	out$ = ""
+	
+	i = 0
+	while i < MEMBlockSize(memblock)
+		if i mod 4 = 0 then
+			out = out + str(peekFloat(memblock, i))
+			out = out + ", "
+		endif
+		i + 4
+	wend
+	
+	return out
+endFunction
+
+// #endif
+
+// the bare core components start here
+
+// returns a temporary memblock, remember to free it!
+function allocEnvelopePoint(bars#, value#)
+	tempblock = makeMEMBlock(8)
+	pokeFloat tempblock, 0, bars
+	pokeFloat tempblock, 4, value
+	return tempblock
+endFunction
+
+// returns an envpoint in a temporary type instance, remember to delete it
+function getEnvpoint(trackint, index)
+	track.Synctrack = convertToType(trackint)
+	If Not (index < track\count) Then makeError 709 + ": assertion failed"
+	
+	point.Envpoint = new(Envpoint)
+	point\bars	= peekFloat(track\mem, index*8)
+	point\value = peekFloat(track\mem, index*8 + 4)
+	point\index = index
+	
+	return convertToInteger(point)
+endFunction
+
+
 function firstPointAfter(trackint, startbar#)
 	track.Synctrack = convertToType(trackint)
 	
@@ -682,105 +763,41 @@ function createSyncTrack(name$)
 	return convertToInteger(track)
 endFunction
 
-// index tells the place where to insert the new point
-// returns void
-function addEnvelopePoint(trackint, envint, index)
-	track.Synctrack = convertToType(trackint)
-	point.Envpoint = convertToType(envint)
+function getEnvelopeValue(trackp, bars#)
+	track.Synctrack = convertToType(trackp)
 	
-	offset = index * 8
-	movesize = (MEMBlockSize(track\mem))-offset
+	firstpoint.EnvPoint = convertToType(getEnvPoint(trackp, 0))
+	lastpoint.EnvPoint = convertToType(getEnvPoint(trackp, track\count-1))
 	
-	resizeMEMBlock track\mem, MEMBlockSize(track\mem) + 8
+	if bars < firstpoint\bars then
+		return firstpoint\value
+	endif
 	
-	If Not (index <= track\count) Then makeError 696 + ": assertion failed"
-	
-	if movesize > 0 then
-		// move rest of the memblock further to make room for the new var
-		memCopy track\mem, offset, track\mem, offset + 8, movesize
+	if bars > lastpoint\bars then
+		return lastpoint\value
 	endif
 
-	pokeFloat track\mem, offset		, point\bars 
-	pokeFloat track\mem, offset + 4	, point\value 
-	
-	track\count = track\count + 1
-	//temp = allocEnvpoint(envint)
-	//memCopy temp, 0, track\mem, track\count * 8, 2*4
-	//free temp
-endFunction
-
-function deleteEnvpoint(trackint, index)
-	track.Synctrack = convertToType(trackint)
-	If Not (index < track\count) Then makeError 714 + ": assertion failed"
-	
+	// is this redundant?
 	if track\count = 1 then
-		return false
+		return firstpoint\value
 	endif
 	
-	offset = index * 8
-	movesize = (MEMBlockSize(track\mem))-offset
-	if movesize > 0 then
-		memCopy track\mem, offset + 8, track\mem, offset, movesize
-	endif
+	pointp = firstPointBefore(trackp, bars)
 	
-	resizeMEMBlock track\mem, MEMBlockSize(track\mem) - 8
-	
-	track\count = track\count - 1
-	
-endFunction
+	if pointp <> -1 then
+		point.EnvPoint = convertToType(pointp)
 
-// returns a temporary memblock, remember to free it!
-function allocEnvelopePoint(bars#, value#)
-	tempblock = makeMEMBlock(8)
-	pokeFloat tempblock, 0, bars
-	pokeFloat tempblock, 4, value
-	return tempblock
-endFunction
-
-// returns an envpoint in a temporary type instance, remember to delete it
-function getEnvpoint(trackint, index)
-	track.Synctrack = convertToType(trackint)
-	If Not (index < track\count) Then makeError 743 + ": assertion failed"
-	
-	point.Envpoint = new(Envpoint)
-	point\bars	= peekFloat(track\mem, index*8)
-	point\value = peekFloat(track\mem, index*8 + 4)
-	point\index = index
-	
-	return convertToInteger(point)
-endFunction
-
-// returns void
-function setEnvpoint(trackint, pointint, index)
-	track.Synctrack = convertToType(trackint)
-	If Not (index < track\count) Then makeError 756 + ": assertion failed"
-	
-	offset = index * 8
-	point.Envpoint = convertToType(pointint)
-	pokeFloat track\mem, offset		, point\bars
-	pokeFloat track\mem, offset + 4	, point\value
-endFunction
-
-function setEnvpointValue(trackint, newbars#, newvalue#, index)
-	track.Synctrack = convertToType(trackint)
-	If Not (index < track\count) Then makeError 766 + ": assertion failed"
-	offset = index * 8
-	pokeFloat track\mem, offset		, newbars
-	pokeFloat track\mem, offset + 4	, newvalue
-endFunction
-// returns a string representation of the memory block contents
-function memDumpFloat(memblock)
-	out$ = ""
-	
-	i = 0
-	while i < MEMBlockSize(memblock)
-		if i mod 4 = 0 then
-			out = out + str(peekFloat(memblock, i))
-			out = out + ", "
+		if point\index = track\count-1 then
+			return point\value
 		endif
-		i + 4
-	wend
+		
+		nextPoint.EnvPoint = convertToType(getEnvPoint(trackp, point\index + 1))
+		value_diff# = nextPoint\value - point\value
+		time_diff# = nextPoint\bars - point\bars
+		
+		progress# = (bars - point\bars) / time_diff#
+		return (point\value + ( nextPoint\value - point\value) *  progress)
+	endif
 	
-	return out
+	return 0.0
 endFunction
-
