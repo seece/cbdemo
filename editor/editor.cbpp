@@ -77,6 +77,15 @@ type EnvEditor
 	field gridsize as float
 	field timelineHeight 
 endType
+
+type TrackSelector
+	field x
+	field y
+	field width
+	field height
+	field count
+	field selectedTrack	// track id
+endType
 #endif
 
 //#pragma dumb_debug
@@ -119,6 +128,8 @@ for i=0 to TRACK_AMOUNT
 	//addText "" + memDumpFloat(it\mem)
 next i
 
+selector.TrackSelector = toType(createTrackSelector(50, 50, 300, 40, 10))
+
 editorp = createEnvEditor(0, 300, 800, 200, 0.0, 10.0)
 editor.EnvEditor = toType(editorp)
 editor\track = tracks(0)
@@ -150,6 +161,8 @@ repeat
 	
 	drawEditor(toInt(editor), bars)
 	
+	drawTrackSelector(toInt(selector))
+	
 	value# = getEnvelopeValue(tracks(0), bars)
 	
 	if keyHit(cbKeyF6) then saveTrack(tracks(0), "test.dat")
@@ -159,7 +172,7 @@ repeat
 		if load_result <= 0 then makeError "couldn't load track. error: "+ load_result
 	endif
 	
-	textButton(400, 100, 80, 30, "moi")
+	textButton(400, 100, 80, 30, "moi", false)
 	
 	addText "bars: " + bars + " bar offset " + bar_offset
 	addText "playing: " + playing
@@ -202,7 +215,7 @@ return
 
 #endif
 
-function textButton(pos_x, pos_y, width, height, caption$)
+function textButton(pos_x, pos_y, width, height, caption$, held_down)
 	hover = false
 	clicked = false
 	
@@ -211,9 +224,9 @@ function textButton(pos_x, pos_y, width, height, caption$)
 	if hover and mouseDown(1) then clicked = true
 	
 	button_x = pos_x
-	button_y = pos_y + clicked
+	button_y = pos_y + (clicked or held_down)
 	
-	if clicked then
+	if clicked or held_down then
 		color UI_COLOR_BG_FOCUS
 	else
 		color UI_COLOR_DIM
@@ -231,10 +244,12 @@ function textButton(pos_x, pos_y, width, height, caption$)
 	
 	box button_x, button_y, width, height, false 
 	
-	color UI_COLOR_HILIGHT
+	if clicked or held_down then
+		color UI_COLOR_MID
+	else
+		color UI_COLOR_HILIGHT
+	endif
 	text button_x + (width/2) - textWidth(caption$)/2, button_y + (height/2) - textHeight(caption$)/2, caption$
-	
-	
 	
 	if hover and mouseUp(1) then return true
 	
@@ -278,6 +293,38 @@ function loadTrack(trackp, filename$)
 endFunction
 
 #ifdef USE_EDITOR_COMPONENTS
+function createTrackSelector(x,y,w,h,amountOfTracks)
+	selector.TrackSelector = new (TrackSelector)
+	selector\count = amountOfTracks
+
+	assert(amountOfTracks > 0)
+
+	selector\x = x
+	selector\y = y
+	selector\width = w
+	selector\height = h
+
+	return toInt(selector)
+endFunction
+
+function drawTrackSelector(selectorp)
+	assert(selectorp <> UNDEFINED)
+	
+	selector.TrackSelector = toType(selectorp)
+	buttonsize# = selector\width / selector\count
+	
+	for i=0 to selector\count - 1
+		caption$ = str(i)
+		button_x = selector\x + i * buttonsize 
+		button_y = selector\y 
+		held = false
+		if i = selector\selectedTrack then held = true
+		clicked = textButton(button_x, button_y, buttonsize, selector\height, caption, held)
+		
+		if clicked then selector\selectedTrack = i
+	next i
+endFunction
+
 // returns the amount of bytes written
 function saveTrack(trackp, filename$)
 	track.Synctrack = toType(trackp)
