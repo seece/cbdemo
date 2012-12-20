@@ -25,6 +25,7 @@
 #define lerp(_val1, _val2, _amount) (_val1 + (_val2 - _val1) * _amount)
 #define barsToSecs(_bars, _tempo) (_bars * ((60.0/_tempo)*4.0))
 #define snapToGrid(_value, _size) (int(_value/_size)*_size)
+#define clamp(_val) (max(0.0,min(1.0, _val)))
 
 #define POINT_STRIDE 8
 #define UNDEFINED -1
@@ -436,7 +437,7 @@ function drawEditor(editorp, bars#)
 			before_point.EnvPoint = toType(before_pointp)
 			temp_point.EnvPoint = new(EnvPoint)
 			temp_point\bars = newbars
-			temp_point\value = newvalue
+			temp_point\value = clamp(newvalue)
 			
 			addEnvelopePoint(editor\track, toInt(temp_point), before_point\index + 1)
 			
