@@ -46,6 +46,8 @@
 
 #define mouseOverlap(_x,_y,_w,_h) (mouseX() >= (_x) and mouseX() <= ((_x) + (_w)) and mouseY() >= (_y) and mouseY() <= ((_y) + (_h)))
 #define toggle(x) (x xor 1)
+#define confirmDialog(_message) dialog(mouseX(), mouseY() - 100, _message)	// shows a dialog above mouse position
+
 
 type Synctrack
 	// memblock data format
@@ -178,9 +180,9 @@ repeat
 	selected_track = selector\selectedTrack
 	value# = getEnvelopeValue(tracks(selected_track), bars)
 	
-	if keyHit(cbKeyF6) then saveTrack(tracks(selected_track), "test.dat")
+	if keyHit(cbKeyF6) then saveTrack(tracks(selected_track), getTrackFilename(selected_track))
 	if keyHit(cbKeyF9) then 
-		load_result = loadTrack(tracks(selected_track), "test.dat")
+		load_result = loadTrack(tracks(selected_track), getTrackFilename(selected_track))
 		
 		if load_result <= 0 then makeError "couldn't load track. error: "+ load_result
 	endif
@@ -236,14 +238,10 @@ function loadTrack(trackp, filename$)
 	bytes_read = 0
 	offset = 0
 	file_size = fileSize(filename)
-	
-	//makeError "" + file_size
 
-	//if file_size <= 0 then return -1
+	if not fileExists (filename) then return bytes_read
 	
 	memblock = malloc(file_size)
-	
-	if not fileExists (filename) then return bytes_read
 	
 	f = openToRead(filename)
 	
@@ -267,6 +265,7 @@ endFunction
 
 #ifdef USE_EDITOR_COMPONENTS
 
+// sori tästä tuli vähän sotkuinen
 draw_action_buttons:
 	buttonsize# = UI_BUTTONSTRIP_WIDTH/3
 	buttonheight = 24
@@ -284,18 +283,27 @@ draw_action_buttons:
 	
 	if savebutton then
 		trackp = tracks(selected_track)
-
 		if trackp = UNDEFINED then	return
 		
 		track.SyncTrack = toType(trackp)
-		if dialog(mouseX(), mouseY() - 100, "save track '" + track\name + "'?") then
-		
+		if confirmDialog("save track '" + track\name + "' to "+getTrackFilename(selected_track)+"?") then
+			saveTrack(tracks(selected_track), getTrackFilename(selected_track))
 		endif
 	endif
 	
 	if loadbutton then
-		if dialog(mouseX(), mouseY() - 100, "load track '" + track\name + "' from file?") then
+		trackp = tracks(selected_track)
+		if trackp = UNDEFINED then	return
+		track.SyncTrack = toType(trackp)
+		filename$ = getTrackFilename(selected_track)
 		
+		if confirmDialog("load track '" + track\name + "' from file "+filename$+"?") then
+			load_result = loadTrack(tracks(selected_track), filename$)
+			
+			if load_result = 0 then
+				cls 
+				confirmDialog("couldn't load file: " + filename$)
+			endif
 		endif
 	endif
 return
@@ -893,7 +901,9 @@ endFunction
 
 #endif
 
+//////////////////////////////////////////////
 // the bare core components start here
+//////////////////////////////////////////////
 
 // returns a temporary memblock, remember to free it!
 function allocEnvelopePoint(bars#, value#)
@@ -1001,4 +1011,8 @@ function getEnvelopeValue(trackp, bars#)
 	endif
 	
 	return 0.0
+endFunction
+
+function getTrackFilename(id)
+	return "sync\testtrack"+id+".dat"
 endFunction
