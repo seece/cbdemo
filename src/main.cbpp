@@ -1,6 +1,7 @@
 // options
 #define USE_EDITOR
 #define EDITOR_HEIGHT 200
+#define SEEK_SPEED 0.4
 
 // macros
 #define malloc(size) makeMEMBlock(size)
@@ -15,6 +16,10 @@
 #define lerp(_val1, _val2, _amount) (_val1 + (_val2 - _val1) * _amount)
 #define barsToSecs(_bars, _tempo) (_bars * ((60.0/_tempo)*4.0))
 #define snapToGrid(_value, _size) (int(_value/_size)*_size)
+#define clamp(_val) (max(0.0,min(1.0, _val)))
+
+#define mouseOverlap(_x,_y,_w,_h) (mouseX() >= (_x) and mouseX() <= ((_x) + (_w)) and mouseY() >= (_y) and mouseY() <= ((_y) + (_h)))
+#define toggle(x) (x xor 1)
 
 #define POINT_STRIDE 8
 #define UNDEFINED -1
@@ -77,7 +82,9 @@ trackInit:
 		delete point
 	next i
 	
+	#ifdef USE_EDITOR
 	editor\track = tracks(0)
+	#endif
 return	
 
 main:
@@ -112,6 +119,7 @@ updateTracks:
 	next i
 return
 
+#ifdef USE_EDITOR
 updateEditor:
 	bars# = updateEditor(toInt(editor), bars) // the editor processes looping
 	newbars# = drawEditorTimeline(toInt(editor), bars)
@@ -125,6 +133,7 @@ updateEditor:
 	drawEditor(toInt(editor), bars)
 	
 return
+#endif
 
 updateTime:
 	#ifdef USE_EDITOR
@@ -143,6 +152,7 @@ updateTime:
 	bars# = beats/4.0 
 return
 
+#ifdef USE_EDITOR
 updateTimeHotkeys:
 	if keyHit(cbKeyBackspace) then
 		time_offset = 0.0
@@ -162,7 +172,14 @@ updateTimeHotkeys:
 			playing = true
 		endif
 	endif
+	
+	if keyDown(cbKeyRight) then
+		time_offset = time_offset + SEEK_SPEED
+	elseIf keyDown(cbKeyLeft) then
+		time_offset = time_offset - SEEK_SPEED
+	endif	
 return
+#endif
 
 drawBuffer:
 	#ifdef USE_EDITOR

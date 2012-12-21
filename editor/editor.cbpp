@@ -13,6 +13,7 @@
 
  #define STANDALONE_EDITOR		// compile with main loop etc.
  #define USE_EDITOR_COMPONENTS	// if this is disabled, only compiles the parts needed for playing back data
+ #define UI_BUTTONSTRIP_WIDTH 150	// oikean laidan toimintonappulat
 
 // macros
 
@@ -95,7 +96,7 @@ endType
 
 #ifdef STANDALONE_EDITOR
 
-const TRACK_AMOUNT = 3
+const TRACK_AMOUNT = 5
 
 dim tracks(TRACK_AMOUNT)
 
@@ -138,7 +139,7 @@ editor.EnvEditor = toType(editorp)
 editor\track = tracks(0)
 
 selector.TrackSelector = UNDEFINED
-selector = toType(createTrackSelector(editor\x, editor\y + editor\height + editor\timelineHeight, editor\width, 30, TRACK_AMOUNT))
+selector = toType(createTrackSelector(editor\x, editor\y + editor\height + editor\timelineHeight, editor\width - UI_BUTTONSTRIP_WIDTH, 30, TRACK_AMOUNT))
 selector\trackNames = "eka|toka|kolmas|ja|nii"
 
 tempo# = 130.0
@@ -172,6 +173,7 @@ repeat
 	
 	drawEditor(toInt(editor), bars)
 	drawTrackSelector(toInt(selector))
+	gosub draw_action_buttons
 	
 	selected_track = selector\selectedTrack
 	value# = getEnvelopeValue(tracks(selected_track), bars)
@@ -192,6 +194,7 @@ repeat
 	drawScreen
 	clearText
 forever
+
 
 update_time:
 	if keyHit(cbKeyBackspace) then
@@ -225,6 +228,103 @@ update_time:
 return 
 
 #endif
+
+
+function loadTrack(trackp, filename$)
+	track.Synctrack = toType(trackp)
+	
+	bytes_read = 0
+	offset = 0
+	file_size = fileSize(filename)
+	
+	//makeError "" + file_size
+
+	//if file_size <= 0 then return -1
+	
+	memblock = malloc(file_size)
+	
+	if not fileExists (filename) then return bytes_read
+	
+	f = openToRead(filename)
+	
+	while not EOF(f)
+		char = readByte(f)
+		pokeByte memblock, offset, char
+		offset = offset + 1
+		//bars# = readFloat(f)
+		//value# = readFloat(f)
+	wend
+	
+	bytes_read = fileOffset(f)
+	closeFile(f)
+
+	free track\mem
+	track\count = (bytes_read/8)
+	track\mem = memblock
+
+	return bytes_read
+endFunction
+
+#ifdef USE_EDITOR_COMPONENTS
+
+draw_action_buttons:
+	buttonsize# = UI_BUTTONSTRIP_WIDTH/3
+	buttonheight = 24
+	buttonstrip_x = editor\x + editor\width - UI_BUTTONSTRIP_WIDTH
+	buttonstrip_y = editor\y + editor\height + editor\timelineHeight
+	clearbutton = textButton(buttonstrip_x + 0*buttonsize, buttonstrip_y, buttonsize, 24, "clear", false)
+	savebutton  = textButton(buttonstrip_x + 1*buttonsize, buttonstrip_y, buttonsize, 24, "save",  false)
+	loadbutton  = textButton(buttonstrip_x + 2*buttonsize, buttonstrip_y, buttonsize, 24, "load",  false)
+	
+	if clearbutton then
+		if dialog(mouseX(), mouseY() - 100, "clear all points from track '" + track\name + "'?") then
+			clearTrack(tracks(selected_track))
+		endif
+	endif
+	
+	if savebutton then
+		trackp = tracks(selected_track)
+
+		if trackp = UNDEFINED then	return
+		
+		track.SyncTrack = toType(trackp)
+		if dialog(mouseX(), mouseY() - 100, "save track '" + track\name + "'?") then
+		
+		endif
+	endif
+	
+	if loadbutton then
+		if dialog(mouseX(), mouseY() - 100, "load track '" + track\name + "' from file?") then
+		
+		endif
+	endif
+return
+
+// message dialog with OK and CANCEL buttons
+// freezes the program execution until exit
+function dialog(pos_x, pos_y, message$)	
+	margin = 8
+	dialogwidth = max(220, textWidth(message$) + margin*2)
+	dialogheight = 100
+	real_x = max(0, min(pos_x, screenWidth() - dialogwidth))
+	real_y = max(0, min(pos_y, screenHeight() - dialogheight))
+	okwidth = min(50, dialogwidth * 0.4)
+	okheight = 24
+	
+	repeat
+		color UI_COLOR_DARK
+		box real_x, real_y, dialogwidth, dialogheight, 1
+		
+		color UI_COLOR_LIGHT
+		text real_x + dialogwidth/2 - textWidth(message$)/2, real_y + dialogheight * 0.4, message$
+		btn_ok = textButton(real_x + dialogwidth - margin - okwidth, real_y + dialogheight - margin - okheight, okwidth, okheight, "OK", false)
+		btn_cancel = textButton(real_x + dialogwidth - margin*2 - okwidth*2, real_y + dialogheight - margin - okheight, okwidth, okheight, "cancel", false)
+		
+		if btn_ok then return true
+		if btn_cancel then return false
+		drawScreen OFF
+	forever
+endFunction
 
 function textButton(pos_x, pos_y, width, height, caption$, held_down)
 	hover = false
@@ -268,42 +368,6 @@ function textButton(pos_x, pos_y, width, height, caption$, held_down)
 	
 endFunction
 
-function loadTrack(trackp, filename$)
-	track.Synctrack = toType(trackp)
-	
-	bytes_read = 0
-	offset = 0
-	file_size = fileSize(filename)
-	
-	//makeError "" + file_size
-
-	//if file_size <= 0 then return -1
-	
-	memblock = malloc(file_size)
-	
-	if not fileExists (filename) then return bytes_read
-	
-	f = openToRead(filename)
-	
-	while not EOF(f)
-		char = readByte(f)
-		pokeByte memblock, offset, char
-		offset = offset + 1
-		//bars# = readFloat(f)
-		//value# = readFloat(f)
-	wend
-	
-	bytes_read = fileOffset(f)
-	closeFile(f)
-
-	free track\mem
-	track\count = (bytes_read/8)
-	track\mem = memblock
-
-	return bytes_read
-endFunction
-
-#ifdef USE_EDITOR_COMPONENTS
 function createTrackSelector(x,y,w,h,amountOfTracks)
 	selector.TrackSelector = new (TrackSelector)
 	selector\count = amountOfTracks
@@ -330,7 +394,7 @@ function drawTrackSelector(selectorp)
 
 		if not selector\trackNames = "" then
 			trackname$ = getWord(selector\trackNames, i+1, "|")
-			if not trackname = "" then caption = trackname
+			if (not trackname = "") and (textWidth(trackname) < buttonsize) then caption = trackname
 		endif
 		
 		button_x = selector\x + i * buttonsize 
@@ -796,6 +860,21 @@ function setEnvpointValue(trackint, newbars#, newvalue#, index)
 	pokeFloat track\mem, offset		, newbars
 	pokeFloat track\mem, offset + 4	, newvalue
 endFunction
+
+// clears the track, inserts one point at (0, 0)
+function clearTrack(trackp)
+	assert(trackp <> UNDEFINED)
+	track.Synctrack = toType(trackp)
+	
+	free track\mem
+	
+	track\mem = malloc(4*2)
+	pokeFloat track\mem, 0, 0.0
+	pokeFloat track\mem, 4, 0.0
+	
+	track\count = 1
+endFunction
+
 // returns a string representation of the memory block contents
 function memDumpFloat(memblock)
 	out$ = ""
