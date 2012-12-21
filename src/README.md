@@ -1,4 +1,0 @@
-cbdemo
-======
-
-THE CoolBasic demo

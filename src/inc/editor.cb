@@ -6,11 +6,14 @@
 //			RIGHT CLICK	add node
 //			F6			save current track
 //			F9			load current track
+//			A and D		move on the timeline (hold shift for speed boost)
+//			W and S		zoom in and out	(hold shift for speed boost)
 
 // config
 
 // #define STANDALONE_EDITOR		// compile with main loop etc.
 //  #define USE_EDITOR_COMPONENTS	// if this is disabled, only compiles the parts needed for playing back data
+//  #define UI_BUTTONSTRIP_WIDTH 150	// oikean laidan toimintonappulat
 
 // macros
 
@@ -43,6 +46,8 @@
 
 // #define mouseOverlap(_x,_y,_w,_h) (mouseX() >= (_x) and mouseX() <= ((_x) + (_w)) and mouseY() >= (_y) and mouseY() <= ((_y) + (_h)))
 // #define toggle(x) (x xor 1)
+// #define confirmDialog(_message) dialog(mouseX(), mouseY() - 100, _message)	// shows a dialog above mouse position
+
 
 type Synctrack
 	// memblock data format
@@ -77,9 +82,77 @@ type EnvEditor
 	field gridsize as float
 	field timelineHeight 
 endType
+
+type TrackSelector
+	field x
+	field y
+	field width
+	field height
+	field count
+	field selectedTrack	// track id
+	field trackNames as string
+endType
 // #endif
 
 //#pragma dumb_debug
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -208,14 +281,10 @@ function loadTrack(trackp, filename$)
 	bytes_read = 0
 	offset = 0
 	file_size = fileSize(filename)
-	
-	//makeError "" + file_size
 
-	//if file_size <= 0 then return -1
+	if not fileExists (filename) then return bytes_read
 	
 	memblock = makeMEMBlock(file_size)
-	
-	if not fileExists (filename) then return bytes_read
 	
 	f = openToRead(filename)
 	
@@ -238,6 +307,114 @@ function loadTrack(trackp, filename$)
 endFunction
 
 // #ifdef USE_EDITOR_COMPONENTS
+
+// message dialog with OK and CANCEL buttons
+// freezes the program execution until exit
+function dialog(pos_x, pos_y, message$)	
+	margin = 8
+	dialogwidth = max(220, textWidth(message$) + margin*2)
+	dialogheight = 100
+	real_x = max(0, min(pos_x, screenWidth() - dialogwidth))
+	real_y = max(0, min(pos_y, screenHeight() - dialogheight))
+	okwidth = min(50, dialogwidth * 0.4)
+	okheight = 24
+	
+	repeat
+		color 24, 24, 30
+		box real_x, real_y, dialogwidth, dialogheight, 1
+		
+		color 255, 255, 255
+		text real_x + dialogwidth/2 - textWidth(message$)/2, real_y + dialogheight * 0.4, message$
+		btn_ok = textButton(real_x + dialogwidth - margin - okwidth, real_y + dialogheight - margin - okheight, okwidth, okheight, "OK", false)
+		btn_cancel = textButton(real_x + dialogwidth - margin*2 - okwidth*2, real_y + dialogheight - margin - okheight, okwidth, okheight, "cancel", false)
+		
+		if btn_ok then return true
+		if btn_cancel then return false
+		drawScreen OFF
+	forever
+endFunction
+
+function textButton(pos_x, pos_y, width, height, caption$, held_down)
+	hover = false
+	clicked = false
+	
+	if (mouseX() >= (pos_x) and mouseX() <= ((pos_x) + ( width)) and mouseY() >= ( pos_y) and mouseY() <= (( pos_y) + ( height))) then hover = true
+	
+	if hover and mouseDown(1) then clicked = true
+	
+	button_x = pos_x
+	button_y = pos_y + (clicked or held_down)
+	
+	if clicked or held_down then
+		color 64,64,70
+	else
+		color 80,80,80
+	endif
+	
+	box button_x, button_y, width, height, true
+	
+	if hover then
+		color 128,128,128
+		
+		if clicked then color 24, 24, 30
+	else
+		color 24, 24, 30
+	endif
+	
+	box button_x, button_y, width, height, false 
+	
+	if clicked or held_down then
+		color 140, 130, 128
+	else
+		color 240, 230, 210
+	endif
+	text button_x + (width/2) - textWidth(caption$)/2, button_y + (height/2) - textHeight(caption$)/2, caption$
+	
+	if hover and mouseUp(1) then return true
+	
+	return false
+	
+endFunction
+
+function createTrackSelector(x,y,w,h,amountOfTracks)
+	selector.TrackSelector = new (TrackSelector)
+	selector\count = amountOfTracks
+
+	If Not (amountOfTracks > 0) Then makeError 383 + ": assertion failed"
+
+	selector\x = x
+	selector\y = y
+	selector\width = w
+	selector\height = h
+
+	return convertToInteger(selector)
+endFunction
+
+function drawTrackSelector(selectorp)
+	If Not (selectorp <> -1) Then makeError 394 + ": assertion failed"
+	
+	selector.TrackSelector = convertToType(selectorp)
+	buttonsize# = selector\width / selector\count
+	buttonsize = min(150, buttonsize)	// maximum width for the button
+	
+	for i=0 to selector\count - 1
+		caption$ = str(i)
+
+		if not selector\trackNames = "" then
+			trackname$ = getWord(selector\trackNames, i+1, "|")
+			if (not trackname = "") and (textWidth(trackname) < buttonsize) then caption = trackname
+		endif
+		
+		button_x = selector\x + i * buttonsize 
+		button_y = selector\y 
+		held = false
+		if i = selector\selectedTrack then held = true
+		clicked = textButton(button_x, button_y, buttonsize, selector\height, caption, held)
+		
+		if clicked then selector\selectedTrack = i
+	next i
+endFunction
+
 // returns the amount of bytes written
 function saveTrack(trackp, filename$)
 	track.Synctrack = convertToType(trackp)
@@ -282,27 +459,33 @@ function updateEditor(editorp, bars#)
 	
 	origpos# = editor\startpos
 
+	speedboost# = 1.0
+	if keyDown(42) then speedboost = 2.5	// left shift
+
 	if keyDown(cbKeyA) then	
-		editor\startpos = max(editor\startpos - scrollspeed, 0.0)
+		editor\startpos = max(editor\startpos - scrollspeed * speedboost, 0.0)
 		editor\endpos = editor\endpos - (origpos - editor\startpos)
 	elseIf keyDown(cbKeyD) then
-		editor\startpos = editor\startpos + scrollspeed
-		editor\endpos = editor\endpos + scrollspeed
+		editor\startpos = editor\startpos + scrollspeed * speedboost
+		editor\endpos = editor\endpos + scrollspeed * speedboost
 	endif
 	
 	span# = editor\endpos - editor\startpos
 	middle# = editor\startpos + span*0.5
-	zoom# = mousedz * 1.0
+	zoom# = mousedz * 1.2
 
-	if keyDown(cbKeyW) then zoom = 0.2
-	if keyDown(cbKeyS) then zoom = -0.2
+	if keyDown(cbKeyW) then zoom = 0.2 * speedboost
+	if keyDown(cbKeyS) then zoom = -0.2	* speedboost
 	
 	editor\startpos = editor\startpos + zoom#
 	editor\endpos = editor\endpos - zoom#
 	
+	editor\startpos = max(0.0, editor\startpos)
+	
 	if editor\endpos - editor\startpos < 1.0
 		editor\endpos = editor\startpos + 1.0
 	endif
+
 	
 	if editor\deletePoint <> -1 then
 		// deleteEnvpoint(trackint, index)
@@ -379,10 +562,20 @@ function drawEditor(editorp, bars#)
 	ipointp = spointp
 	
 	if ipointp = -1 then
-		return false
+		track.SyncTrack = convertToType(editor\track)
+		spointp = getEnvPoint(editor\track, track\count- 1)
+		ipointp = spointp
+		//return false
 	endif
 	
 	spoint.Envpoint = convertToType(spointp)
+		
+	// we take one to the left to only render also the point over to the left hand side of the SCREEN
+	if spoint\index > 0 then
+		spointp = getEnvPoint(editor\track, spoint\index - 1)
+		ipointp = spointp
+		spoint = convertToType(spointp)
+	endif
 	
 	ipoint.Envpoint = spoint
 	ind = ipoint\index
@@ -396,7 +589,7 @@ function drawEditor(editorp, bars#)
 	endif
 	
 	// a new point!
-	if mouseHit(2) then
+	if mouseHit(2) and hover then
 		before_pointp = firstPointBefore(editor\track, newbars)
 		if before_pointp = -1 then
 			// TODO write error to log
@@ -550,6 +743,7 @@ function drawEditorTimeline(editorp, bars#)
 	grid_lines = roundDown(span/gridspacing)
 	grid_size# = gridspacing * bar_width_in_px
 	grid_start_x = bar_width_in_px - (int(editor\startpos * bar_width_in_px) mod int(bar_width_in_px))
+
 	
 	for i=-1 to grid_lines step 1
 		num_x = grid_start_x + i * grid_size
@@ -568,7 +762,7 @@ function drawPoint(x,y,selected)
 	hover = false
 	
 	margin = 3
-	if (mouseX() >= (x-margin) and mouseX() <= ((x-margin) + ( 8 + margin)) and mouseY() >= ( y-margin) and mouseY() <= (( y-margin) + ( 8 + margin))) then
+	if (mouseX() >= (x-margin -8/2) and mouseX() <= ((x-margin -8/2) + ( 8 + margin*2)) and mouseY() >= ( y-margin -8/2) and mouseY() <= (( y-margin -8/2) + ( 8 + margin*2))) then
 		hover = true
 	endif
 
@@ -622,7 +816,7 @@ function addEnvelopePoint(trackint, envint, index)
 	
 	resizeMEMBlock track\mem, MEMBlockSize(track\mem) + 8
 	
-	If Not (index <= track\count) Then makeError 625 + ": assertion failed"
+	If Not (index <= track\count) Then makeError 819 + ": assertion failed"
 	
 	if movesize > 0 then
 		// move rest of the memblock further to make room for the new var
@@ -640,7 +834,7 @@ endFunction
 
 function deleteEnvpoint(trackint, index)
 	track.Synctrack = convertToType(trackint)
-	If Not (index < track\count) Then makeError 643 + ": assertion failed"
+	If Not (index < track\count) Then makeError 837 + ": assertion failed"
 	
 	if track\count = 1 then
 		return false
@@ -660,7 +854,7 @@ endFunction
 // returns void
 function setEnvpoint(trackint, pointint, index)
 	track.Synctrack = convertToType(trackint)
-	If Not (index < track\count) Then makeError 663 + ": assertion failed"
+	If Not (index < track\count) Then makeError 857 + ": assertion failed"
 	
 	offset = index * 8
 	point.Envpoint = convertToType(pointint)
@@ -670,11 +864,26 @@ endFunction
 
 function setEnvpointValue(trackint, newbars#, newvalue#, index)
 	track.Synctrack = convertToType(trackint)
-	If Not (index < track\count) Then makeError 673 + ": assertion failed"
+	If Not (index < track\count) Then makeError 867 + ": assertion failed"
 	offset = index * 8
 	pokeFloat track\mem, offset		, newbars
 	pokeFloat track\mem, offset + 4	, newvalue
 endFunction
+
+// clears the track, inserts one point at (0, 0)
+function clearTrack(trackp)
+	If Not (trackp <> -1) Then makeError 875 + ": assertion failed"
+	track.Synctrack = convertToType(trackp)
+	
+	deleteMEMBlock track\mem
+	
+	track\mem = makeMEMBlock(4*2)
+	pokeFloat track\mem, 0, 0.0
+	pokeFloat track\mem, 4, 0.0
+	
+	track\count = 1
+endFunction
+
 // returns a string representation of the memory block contents
 function memDumpFloat(memblock)
 	out$ = ""
@@ -693,7 +902,9 @@ endFunction
 
 // #endif
 
+//////////////////////////////////////////////
 // the bare core components start here
+//////////////////////////////////////////////
 
 // returns a temporary memblock, remember to free it!
 function allocEnvelopePoint(bars#, value#)
@@ -706,7 +917,8 @@ endFunction
 // returns an envpoint in a temporary type instance, remember to delete it
 function getEnvpoint(trackint, index)
 	track.Synctrack = convertToType(trackint)
-	If Not (index < track\count) Then makeError 709 + ": assertion failed"
+	If Not (index < track\count) Then makeError 920 + ": assertion failed"
+	If Not (index >= 0) Then makeError 921 + ": assertion failed"
 	
 	point.Envpoint = new(Envpoint)
 	point\bars	= peekFloat(track\mem, index*8)
@@ -800,4 +1012,8 @@ function getEnvelopeValue(trackp, bars#)
 	endif
 	
 	return 0.0
+endFunction
+
+function getTrackFilename(id)
+	return "sync\testtrack"+id+".dat"
 endFunction

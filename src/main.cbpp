@@ -2,6 +2,11 @@
 #define USE_EDITOR
 #define EDITOR_HEIGHT 200
 #define SEEK_SPEED 0.4
+#define TRACK_AMOUNT 8
+
+#ifdef USE_EDITOR
+	 #define UI_BUTTONSTRIP_WIDTH 150	// oikean laidan toimintonappulat
+#endif
 
 // macros
 #define malloc(size) makeMEMBlock(size)
@@ -20,6 +25,7 @@
 
 #define mouseOverlap(_x,_y,_w,_h) (mouseX() >= (_x) and mouseX() <= ((_x) + (_w)) and mouseY() >= (_y) and mouseY() <= ((_y) + (_h)))
 #define toggle(x) (x xor 1)
+#define confirmDialog(_message) dialog(mouseX(), mouseY() - 100, _message)	// shows a dialog above mouse position
 
 #define POINT_STRIDE 8
 #define UNDEFINED -1
@@ -41,15 +47,24 @@ frameLimit 60
 
 buffer=makeImage(PICTURE_WIDTH, PICTURE_HEIGHT) // kuvasuhde 16:9
 
+dim tracks(TRACK_AMOUNT)	// an array of track pointers
+dim track_values(TRACK_AMOUNT) as float
+gosub trackInit
+
 #ifdef USE_EDITOR
 	font = loadFont("tahoma", 14)
 	setFont font
 
 	editorp = createEnvEditor(0, PICTURE_HEIGHT, SCREEN_WIDTH, EDITOR_HEIGHT-24, 0.0, 10.0)
 	editor.EnvEditor = toType(editorp)
+	editor\track = tracks(selected_track)
+	
+	selector.TrackSelector = UNDEFINED
+	selector = toType(createTrackSelector(editor\x, editor\y + editor\height + editor\timelineHeight, editor\width - UI_BUTTONSTRIP_WIDTH, 30, TRACK_AMOUNT))
+	selector\trackNames = "eka|toka|kolmas|ja|nii"
 #endif
 
-gosub trackInit
+
 gosub main
 end
 
@@ -64,11 +79,7 @@ timeInit:
 	bars# = 0.0
 return
 
-trackInit:
-	const TRACK_AMOUNT = 8
-	dim tracks(TRACK_AMOUNT)	// an array of track pointers
-	dim track_values(TRACK_AMOUNT) as float
-	
+trackInit:	
 	for i=0 to TRACK_AMOUNT
 		tracks(i) = createSyncTrack("synctrack #" + i )
 		
@@ -82,9 +93,7 @@ trackInit:
 		delete point
 	next i
 	
-	#ifdef USE_EDITOR
-	editor\track = tracks(0)
-	#endif
+	selected_track = 0
 return	
 
 main:
@@ -107,6 +116,8 @@ main:
 		
 		#ifdef USE_EDITOR
 			gosub updateEditor
+			gosub updateHotkeys
+			gosub draw_action_buttons
 		#endif
 		
 		drawScreen
@@ -121,6 +132,8 @@ return
 
 #ifdef USE_EDITOR
 updateEditor:
+	editor\track = tracks(selected_track)
+	
 	bars# = updateEditor(toInt(editor), bars) // the editor processes looping
 	newbars# = drawEditorTimeline(toInt(editor), bars)
 	
@@ -131,7 +144,63 @@ updateEditor:
 	endif
 	
 	drawEditor(toInt(editor), bars)
+	drawTrackSelector(toInt(selector))
+	selected_track = selector\selectedTrack
 	
+return
+
+// we assume there exists a selected_track variable and a global tracks-array
+updateHotkeys:
+	if keyHit(cbKeyF6) then saveTrack(tracks(selected_track), getTrackFilename(selected_track))
+	if keyHit(cbKeyF9) then 
+		load_result = loadTrack(tracks(selected_track), getTrackFilename(selected_track))
+		
+		if load_result <= 0 then confirmDialog("couldn't load file: " + getTrackFilename(selected_track))
+	endif
+	
+return
+
+// sori tästä tuli vähän sotkuinen
+draw_action_buttons:
+	buttonsize# = UI_BUTTONSTRIP_WIDTH/3
+	buttonheight = 24
+	buttonstrip_x = editor\x + editor\width - UI_BUTTONSTRIP_WIDTH
+	buttonstrip_y = editor\y + editor\height + editor\timelineHeight
+	clearbutton = textButton(buttonstrip_x + 0*buttonsize, buttonstrip_y, buttonsize, 24, "clear", false)
+	savebutton  = textButton(buttonstrip_x + 1*buttonsize, buttonstrip_y, buttonsize, 24, "save",  false)
+	loadbutton  = textButton(buttonstrip_x + 2*buttonsize, buttonstrip_y, buttonsize, 24, "load",  false)
+	
+	if clearbutton then
+		if dialog(mouseX(), mouseY() - 100, "clear all points from track '" + track\name + "'?") then
+			clearTrack(tracks(selected_track))
+		endif
+	endif
+	
+	if savebutton then
+		trackp = tracks(selected_track)
+		if trackp = UNDEFINED then	return
+		
+		track.SyncTrack = toType(trackp)
+		if confirmDialog("save track '" + track\name + "' to "+getTrackFilename(selected_track)+"?") then
+			saveTrack(tracks(selected_track), getTrackFilename(selected_track))
+		endif
+	endif
+	
+	if loadbutton then
+		trackp = tracks(selected_track)
+		if trackp = UNDEFINED then	return
+		track.SyncTrack = toType(trackp)
+		filename$ = getTrackFilename(selected_track)
+		
+		if confirmDialog("load track '" + track\name + "' from file "+filename$+"?") then
+			load_result = loadTrack(tracks(selected_track), filename$)
+			
+			if load_result = 0 then
+				cls 
+				confirmDialog("couldn't load file: " + filename$)
+			endif
+		endif
+	endif
 return
 #endif
 

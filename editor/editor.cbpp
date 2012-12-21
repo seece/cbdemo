@@ -229,42 +229,6 @@ update_time:
 	bars# = beats/4.0 
 return 
 
-#endif
-
-
-function loadTrack(trackp, filename$)
-	track.Synctrack = toType(trackp)
-	
-	bytes_read = 0
-	offset = 0
-	file_size = fileSize(filename)
-
-	if not fileExists (filename) then return bytes_read
-	
-	memblock = malloc(file_size)
-	
-	f = openToRead(filename)
-	
-	while not EOF(f)
-		char = readByte(f)
-		pokeByte memblock, offset, char
-		offset = offset + 1
-		//bars# = readFloat(f)
-		//value# = readFloat(f)
-	wend
-	
-	bytes_read = fileOffset(f)
-	closeFile(f)
-
-	free track\mem
-	track\count = (bytes_read/8)
-	track\mem = memblock
-
-	return bytes_read
-endFunction
-
-#ifdef USE_EDITOR_COMPONENTS
-
 // sori tästä tuli vähän sotkuinen
 draw_action_buttons:
 	buttonsize# = UI_BUTTONSTRIP_WIDTH/3
@@ -307,6 +271,42 @@ draw_action_buttons:
 		endif
 	endif
 return
+
+#endif
+
+
+function loadTrack(trackp, filename$)
+	track.Synctrack = toType(trackp)
+	
+	bytes_read = 0
+	offset = 0
+	file_size = fileSize(filename)
+
+	if not fileExists (filename) then return bytes_read
+	
+	memblock = malloc(file_size)
+	
+	f = openToRead(filename)
+	
+	while not EOF(f)
+		char = readByte(f)
+		pokeByte memblock, offset, char
+		offset = offset + 1
+		//bars# = readFloat(f)
+		//value# = readFloat(f)
+	wend
+	
+	bytes_read = fileOffset(f)
+	closeFile(f)
+
+	free track\mem
+	track\count = (bytes_read/8)
+	track\mem = memblock
+
+	return bytes_read
+endFunction
+
+#ifdef USE_EDITOR_COMPONENTS
 
 // message dialog with OK and CANCEL buttons
 // freezes the program execution until exit
@@ -743,6 +743,7 @@ function drawEditorTimeline(editorp, bars#)
 	grid_lines = roundDown(span/gridspacing)
 	grid_size# = gridspacing * bar_width_in_px
 	grid_start_x = bar_width_in_px - (int(editor\startpos * bar_width_in_px) mod int(bar_width_in_px))
+
 	
 	for i=-1 to grid_lines step 1
 		num_x = grid_start_x + i * grid_size
