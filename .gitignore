@@ -3,4 +3,5 @@
 *.*~
 temp/
 test.dat
+test*.dat
 pythonlocation.txt
