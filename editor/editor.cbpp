@@ -6,6 +6,8 @@
 //			RIGHT CLICK	add node
 //			F6			save current track
 //			F9			load current track
+//			A and D		move on the timeline (hold shift for speed boost)
+//			W and S		zoom in and out	(hold shift for speed boost)
 
 // config
 
@@ -85,6 +87,7 @@ type TrackSelector
 	field height
 	field count
 	field selectedTrack	// track id
+	field trackNames as string
 endType
 #endif
 
@@ -128,11 +131,15 @@ for i=0 to TRACK_AMOUNT
 	//addText "" + memDumpFloat(it\mem)
 next i
 
-selector.TrackSelector = toType(createTrackSelector(50, 50, 300, 40, 10))
+
 
 editorp = createEnvEditor(0, 300, 800, 200, 0.0, 10.0)
 editor.EnvEditor = toType(editorp)
 editor\track = tracks(0)
+
+selector.TrackSelector = UNDEFINED
+selector = toType(createTrackSelector(editor\x, editor\y + editor\height + editor\timelineHeight, editor\width, 30, TRACK_AMOUNT))
+selector\trackNames = "eka|toka|kolmas|ja|nii"
 
 tempo# = 130.0
 tstart=timer()
@@ -145,6 +152,8 @@ playing = true
 old_t# = 0.0
 t# = 0.0
 bars# = 0.0
+
+selected_track = 0
 
 repeat
 	gosub update_time
@@ -159,15 +168,17 @@ repeat
 	endif
 	//drawTrack(tracks(0), 0, 300, 800, 200, 0.0, 10.0) 
 	
-	drawEditor(toInt(editor), bars)
+	editor\track = tracks(selected_track)
 	
+	drawEditor(toInt(editor), bars)
 	drawTrackSelector(toInt(selector))
 	
-	value# = getEnvelopeValue(tracks(0), bars)
+	selected_track = selector\selectedTrack
+	value# = getEnvelopeValue(tracks(selected_track), bars)
 	
-	if keyHit(cbKeyF6) then saveTrack(tracks(0), "test.dat")
+	if keyHit(cbKeyF6) then saveTrack(tracks(selected_track), "test.dat")
 	if keyHit(cbKeyF9) then 
-		load_result = loadTrack(tracks(0), "test.dat")
+		load_result = loadTrack(tracks(selected_track), "test.dat")
 		
 		if load_result <= 0 then makeError "couldn't load track. error: "+ load_result
 	endif
@@ -312,9 +323,16 @@ function drawTrackSelector(selectorp)
 	
 	selector.TrackSelector = toType(selectorp)
 	buttonsize# = selector\width / selector\count
+	buttonsize = min(150, buttonsize)	// maximum width for the button
 	
 	for i=0 to selector\count - 1
 		caption$ = str(i)
+
+		if not selector\trackNames = "" then
+			trackname$ = getWord(selector\trackNames, i+1, "|")
+			if not trackname = "" then caption = trackname
+		endif
+		
 		button_x = selector\x + i * buttonsize 
 		button_y = selector\y 
 		held = false
@@ -369,27 +387,33 @@ function updateEditor(editorp, bars#)
 	
 	origpos# = editor\startpos
 
+	speedboost# = 1.0
+	if keyDown(42) then speedboost = 2.5	// left shift
+
 	if keyDown(cbKeyA) then	
-		editor\startpos = max(editor\startpos - scrollspeed, 0.0)
+		editor\startpos = max(editor\startpos - scrollspeed * speedboost, 0.0)
 		editor\endpos = editor\endpos - (origpos - editor\startpos)
 	elseIf keyDown(cbKeyD) then
-		editor\startpos = editor\startpos + scrollspeed
-		editor\endpos = editor\endpos + scrollspeed
+		editor\startpos = editor\startpos + scrollspeed * speedboost
+		editor\endpos = editor\endpos + scrollspeed * speedboost
 	endif
 	
 	span# = editor\endpos - editor\startpos
 	middle# = editor\startpos + span*0.5
-	zoom# = mousedz * 1.0
+	zoom# = mousedz * 1.2
 
-	if keyDown(cbKeyW) then zoom = 0.2
-	if keyDown(cbKeyS) then zoom = -0.2
+	if keyDown(cbKeyW) then zoom = 0.2 * speedboost
+	if keyDown(cbKeyS) then zoom = -0.2	* speedboost
 	
 	editor\startpos = editor\startpos + zoom#
 	editor\endpos = editor\endpos - zoom#
 	
+	editor\startpos = max(0.0, editor\startpos)
+	
 	if editor\endpos - editor\startpos < 1.0
 		editor\endpos = editor\startpos + 1.0
 	endif
+
 	
 	if editor\deletePoint <> UNDEFINED then
 		// deleteEnvpoint(trackint, index)
@@ -466,7 +490,10 @@ function drawEditor(editorp, bars#)
 	ipointp = spointp
 	
 	if ipointp = UNDEFINED then
-		return false
+		track.SyncTrack = toType(editor\track)
+		spointp = getEnvPoint(editor\track, track\count- 1)
+		ipointp = spointp
+		//return false
 	endif
 	
 	spoint.Envpoint = toType(spointp)
@@ -537,7 +564,7 @@ function drawEditor(editorp, bars#)
 			clicked_on_point = true
 		endif
 		
-		if mouseUp(1) and hover then editor\selectedPoint = UNDEFINED
+		if mouseUp(1) then editor\selectedPoint = UNDEFINED
 
 		if ind=editor\selectedPoint and editor\selectedPoint <> UNDEFINED then	
 		
@@ -662,7 +689,7 @@ function drawPoint(x,y,selected)
 	hover = false
 	
 	margin = 3
-	if mouseOverlap(x-margin, y-margin, UI_POINT_SIZE + margin, UI_POINT_SIZE + margin) then
+	if mouseOverlap(x-margin -UI_POINT_SIZE/2, y-margin -UI_POINT_SIZE/2, UI_POINT_SIZE + margin*2, UI_POINT_SIZE + margin*2) then
 		hover = true
 	endif
 
