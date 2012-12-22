@@ -1,5 +1,4 @@
 // sync editor
-//
 // hotkeys: HOLD CTRL	move all nodes to the right
 // 			HOLD ALT	disable snapping
 //			HOLD X		click to remove nodes
@@ -38,6 +37,7 @@
 // #define UI_POINT_SIZE 8
 // #define UI_COLOR_DARK 24, 24, 30
 // #define UI_COLOR_BG 50, 50,64
+// #define UI_COLOR_BG_RED 90, 50,50
 // #define UI_COLOR_DIM 80,80,80
 // #define UI_COLOR_BG_FOCUS 64,64,70
 // #define UI_COLOR_RIM 128,128,128
@@ -82,6 +82,9 @@ type EnvEditor
 	field snapsize as float
 	field gridsize as float
 	field timelineHeight 
+	field loopstart as float	// no looping if loopstart == loopend
+	field loopend as float
+	field status as string
 endType
 
 type TrackSelector
@@ -93,9 +96,14 @@ type TrackSelector
 	field selectedTrack	// track id
 	field trackNames as string
 endType
+
 // #endif
 
 //#pragma dumb_debug
+
+
+
+
 
 
 
@@ -307,8 +315,32 @@ function loadTrack(trackp, filename$)
 	return bytes_read
 endFunction
 
-// #ifdef USE_EDITOR_COMPONENTS
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// #ifdef USE_EDITOR_COMPONENTS
 // message dialog with OK and CANCEL buttons
 // freezes the program execution until exit
 function dialog(pos_x, pos_y, message$)	
@@ -381,7 +413,7 @@ function createTrackSelector(x,y,w,h,amountOfTracks)
 	selector.TrackSelector = new (TrackSelector)
 	selector\count = amountOfTracks
 
-	If Not (amountOfTracks > 0) Then makeError 383 + ": assertion failed"
+	If Not (amountOfTracks > 0) Then makeError 416 + ": assertion failed"
 
 	selector\x = x
 	selector\y = y
@@ -392,7 +424,7 @@ function createTrackSelector(x,y,w,h,amountOfTracks)
 endFunction
 
 function drawTrackSelector(selectorp)
-	If Not (selectorp <> -1) Then makeError 394 + ": assertion failed"
+	If Not (selectorp <> -1) Then makeError 427 + ": assertion failed"
 	
 	selector.TrackSelector = convertToType(selectorp)
 	buttonsize# = selector\width / selector\count
@@ -449,7 +481,9 @@ function createEnvEditor(x,y,w,h,startspan,endspan)
 	editor\deletePoint = -1 
 	editor\snapsize = 0.5
 	editor\gridsize = 1.0
-	editor\timelineHeight = 20
+	editor\timelineHeight = 26
+	editor\loopstart = 0.0
+	editor\loopend = editor\loopstart
 	return convertToInteger(editor)
 endFunction
 
@@ -486,12 +520,18 @@ function updateEditor(editorp, bars#)
 	if editor\endpos - editor\startpos < 1.0
 		editor\endpos = editor\startpos + 1.0
 	endif
-
 	
 	if editor\deletePoint <> -1 then
 		// deleteEnvpoint(trackint, index)
 		deleteEnvpoint(editor\track, editor\deletePoint)
 		editor\deletePoint = -1
+	endif
+
+	if editor\loopend > editor\loopstart then 
+		// update the loop region
+		loop_span# = editor\loopend - editor\loopstart
+		looped_bars# = editor\loopstart + (bars/loop_span-roundDown(bars/loop_span)) * loop_span
+		return looped_bars
 	endif
 	
 	return bars
@@ -710,6 +750,8 @@ function drawEditorTimeline(editorp, bars#)
 	mousedz# = mouseMoveZ()
 	newbars# = bars
 	
+	loop_length# = editor\loopend - editor\loopstart
+	
 	span# = editor\endpos - editor\startpos
 	
 	tl_x = editor\x
@@ -731,6 +773,36 @@ function drawEditorTimeline(editorp, bars#)
 	// bg box
 	color 50, 50,64
 	box tl_x, tl_y, tl_w, tl_h
+	
+	if keyDown(cbKeyLAlt) then 
+		snap = false
+	else
+		snap = true
+	endif
+	
+	// marking loops with the right mouse button
+	if hover then
+		mousepos# = editor\startpos + ((float(mouseX())-editor\x)/editor\width) * span
+		text 500, 50, "pos: " + mousepos
+		
+		if snap then mousepos = (int(mousepos/ editor\snapsize)* editor\snapsize)
+		
+		if mouseHit(2) then editor\loopstart = mousepos
+		if mouseDown(2) then editor\loopend = mousepos
+
+	endif
+	
+	// loop marker
+	if loop_length > 0
+		loop_start_x# 	= editor\x + ((editor\loopstart - editor\startpos)/span) * editor\width
+		loop_end_x# 	= editor\x + ((editor\loopend - editor\startpos)/span) * editor\width
+		
+		if loop_start_x <= editor\x + editor\width and loop_end_x >= editor\x then
+			color 90, 50,50
+			box loop_start_x, tl_y, loop_end_x-loop_start_x, tl_h
+			
+		endif
+	endif
 	
 	// mouse marker
 	if hover then
@@ -817,7 +889,7 @@ function addEnvelopePoint(trackint, envint, index)
 	
 	resizeMEMBlock track\mem, MEMBlockSize(track\mem) + 8
 	
-	If Not (index <= track\count) Then makeError 819 + ": assertion failed"
+	If Not (index <= track\count) Then makeError 892 + ": assertion failed"
 	
 	if movesize > 0 then
 		// move rest of the memblock further to make room for the new var
@@ -835,7 +907,7 @@ endFunction
 
 function deleteEnvpoint(trackint, index)
 	track.Synctrack = convertToType(trackint)
-	If Not (index < track\count) Then makeError 837 + ": assertion failed"
+	If Not (index < track\count) Then makeError 910 + ": assertion failed"
 	
 	if track\count = 1 then
 		return false
@@ -855,7 +927,7 @@ endFunction
 // returns void
 function setEnvpoint(trackint, pointint, index)
 	track.Synctrack = convertToType(trackint)
-	If Not (index < track\count) Then makeError 857 + ": assertion failed"
+	If Not (index < track\count) Then makeError 930 + ": assertion failed"
 	
 	offset = index * 8
 	point.Envpoint = convertToType(pointint)
@@ -865,7 +937,7 @@ endFunction
 
 function setEnvpointValue(trackint, newbars#, newvalue#, index)
 	track.Synctrack = convertToType(trackint)
-	If Not (index < track\count) Then makeError 867 + ": assertion failed"
+	If Not (index < track\count) Then makeError 940 + ": assertion failed"
 	offset = index * 8
 	pokeFloat track\mem, offset		, newbars
 	pokeFloat track\mem, offset + 4	, newvalue
@@ -873,7 +945,7 @@ endFunction
 
 // clears the track, inserts one point at (0, 0)
 function clearTrack(trackp)
-	If Not (trackp <> -1) Then makeError 875 + ": assertion failed"
+	If Not (trackp <> -1) Then makeError 948 + ": assertion failed"
 	track.Synctrack = convertToType(trackp)
 	
 	deleteMEMBlock track\mem
@@ -918,8 +990,8 @@ endFunction
 // returns an envpoint in a temporary type instance, remember to delete it
 function getEnvpoint(trackint, index)
 	track.Synctrack = convertToType(trackint)
-	If Not (index < track\count) Then makeError 920 + ": assertion failed"
-	If Not (index >= 0) Then makeError 921 + ": assertion failed"
+	If Not (index < track\count) Then makeError 993 + ": assertion failed"
+	If Not (index >= 0) Then makeError 994 + ": assertion failed"
 	
 	point.Envpoint = new(Envpoint)
 	point\bars	= peekFloat(track\mem, index*8)

@@ -8,10 +8,12 @@
 //			F9			load current track
 //			A and D		move on the timeline (hold shift for speed boost)
 //			W and S		zoom in and out	(hold shift for speed boost)
+//
+//			RMB + DRAG	on timeline to select loop region
 
 // config
 
- #define STANDALONE_EDITOR		// compile with main loop etc.
+// #define STANDALONE_EDITOR		// compile with main loop etc.
  #define USE_EDITOR_COMPONENTS	// if this is disabled, only compiles the parts needed for playing back data
  #define UI_BUTTONSTRIP_WIDTH 150	// oikean laidan toimintonappulat
 
@@ -284,17 +286,6 @@ return
 
 #endif
 
-// loads all track ID's between 0 and until_track-1
-function loadMultipleTracks(until_track)
-	loaded_tracks = 0
-	for i=0 to until_track-1
-		result = loadTrack(tracks(i), getTrackFilename(i))
-		if result > 0 then loaded_tracks = loaded_tracks + 1
-	next i
-	
-	return loaded_tracks
-endFunction
-
 function loadTrack(trackp, filename$)
 	track.Synctrack = toType(trackp)
 	
@@ -326,8 +317,32 @@ function loadTrack(trackp, filename$)
 	return bytes_read
 endFunction
 
-#ifdef USE_EDITOR_COMPONENTS
+#ifdef STANDALONE_EDITOR
+	// loads all track ID's between 0 and until_track-1
+	function loadMultipleTracks(until_track)
+		loaded_tracks = 0
+		for i=0 to until_track-1
+			result = loadTrack(tracks(i), getTrackFilename(i))
+			if result > 0 then loaded_tracks = loaded_tracks + 1
+		next i
+		
+		return loaded_tracks
+	endFunction
+	
+	// saves all tracks between 0 and until_track-1
+	function saveMultipleTracks(until_track) 
+		saved_tracks = 0
+		
+		for i=0 to until_track-1
+			result = saveTrack(tracks(i), getTrackFilename(i))
+			if result > 0 then saved_tracks = saved_tracks + 1
+		next i
+		
+		return saved_tracks
+	endFunction
+#endif
 
+#ifdef USE_EDITOR_COMPONENTS
 // message dialog with OK and CANCEL buttons
 // freezes the program execution until exit
 function dialog(pos_x, pos_y, message$)	
@@ -435,18 +450,6 @@ function drawTrackSelector(selectorp)
 	next i
 endFunction
 
-// saves all tracks between 0 and until_track-1
-function saveMultipleTracks(until_track) 
-	saved_tracks = 0
-	
-	for i=0 to until_track-1
-		result = saveTrack(tracks(i), getTrackFilename(i))
-		if result > 0 then saved_tracks = saved_tracks + 1
-	next i
-	
-	return saved_tracks
-endFunction
-
 // returns the amount of bytes written
 function saveTrack(trackp, filename$)
 	track.Synctrack = toType(trackp)
@@ -481,8 +484,8 @@ function createEnvEditor(x,y,w,h,startspan,endspan)
 	editor\snapsize = 0.5
 	editor\gridsize = 1.0
 	editor\timelineHeight = 26
-	editor\loopstart = 1.0
-	editor\loopend = 5.0
+	editor\loopstart = 0.0
+	editor\loopend = editor\loopstart
 	return toInt(editor)
 endFunction
 

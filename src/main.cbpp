@@ -30,16 +30,16 @@
 #define POINT_STRIDE 8
 #define UNDEFINED -1
 
-
 include "inc/editor.cb"
 
 const SCREEN_WIDTH = 640
 const SCREEN_HEIGHT = 480
 #define PICTURE_WIDTH SCREEN_WIDTH
-#define PICTURE_HEIGHT (int(SCREEN_WIDTH * (9.0/16.0)))
+#define PICTURE_HEIGHT int(SCREEN_WIDTH * (9.0/16.0))
 
 #ifdef USE_EDITOR
-SCREEN SCREEN_WIDTH, SCREEN_HEIGHT + EDITOR_HEIGHT, 0, 1
+#define EDITOR_WIDTH int(SCREEN_WIDTH*1.8)
+SCREEN EDITOR_WIDTH, SCREEN_HEIGHT + EDITOR_HEIGHT, 0, 1
 #else
 SCREEN SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1
 #endif
@@ -55,9 +55,10 @@ gosub trackInit
 	font = loadFont("tahoma", 14)
 	setFont font
 
-	editorp = createEnvEditor(0, PICTURE_HEIGHT, SCREEN_WIDTH, EDITOR_HEIGHT-24, 0.0, 10.0)
+	editorp = createEnvEditor(0, PICTURE_HEIGHT, EDITOR_WIDTH, EDITOR_HEIGHT-24, 0.0, 10.0)
 	editor.EnvEditor = toType(editorp)
 	editor\track = tracks(selected_track)
+	editor\status = "ready"
 	
 	selector.TrackSelector = UNDEFINED
 	selector = toType(createTrackSelector(editor\x, editor\y + editor\height + editor\timelineHeight, editor\width - UI_BUTTONSTRIP_WIDTH, 30, TRACK_AMOUNT))
@@ -105,7 +106,14 @@ main:
 		gosub updateTime
 
 		setWindow "t: " + t#
-
+		
+		#ifdef USE_EDITOR
+			gosub updateEditor
+			gosub updateHotkeys
+			gosub draw_action_buttons
+			gosub draw_editor_misc
+		#endif
+		
 		gosub updateTracks
 		
 		drawToImage buffer
@@ -113,12 +121,6 @@ main:
 		drawToScreen
 		
 		gosub drawBuffer
-		
-		#ifdef USE_EDITOR
-			gosub updateEditor
-			gosub updateHotkeys
-			gosub draw_action_buttons
-		#endif
 		
 		drawScreen
 	forever
@@ -151,13 +153,20 @@ return
 
 // we assume there exists a selected_track variable and a global tracks-array
 updateHotkeys:
-	if keyHit(cbKeyF6) then saveTrack(tracks(selected_track), getTrackFilename(selected_track))
-	if keyHit(cbKeyF9) then 
-		load_result = loadTrack(tracks(selected_track), getTrackFilename(selected_track))
-		
-		if load_result <= 0 then confirmDialog("couldn't load file: " + getTrackFilename(selected_track))
+	if keyHit(cbKeyF6) then
+		save_result = saveMultipleTracks(TRACK_AMOUNT)
+		editor\status = "saved " + save_result + " tracks"
 	endif
 	
+	if keyHit(cbKeyF9) then 
+		load_result = loadMultipleTracks(TRACK_AMOUNT)
+		editor\status = "loaded " + load_result + " tracks"
+	endif
+	
+return
+
+draw_editor_misc:
+	text 8, screenHeight() - 20, editor\status
 return
 
 // sori tästä tuli vähän sotkuinen
@@ -248,7 +257,31 @@ updateTimeHotkeys:
 		time_offset = time_offset - SEEK_SPEED
 	endif	
 return
+
+// loads all track ID's between 0 and until_track-1
+function loadMultipleTracks(until_track)
+	loaded_tracks = 0
+	for i=0 to until_track-1
+		result = loadTrack(tracks(i), getTrackFilename(i))
+		if result > 0 then loaded_tracks = loaded_tracks + 1
+	next i
+	
+	return loaded_tracks
+endFunction
+
+// saves all tracks between 0 and until_track-1
+function saveMultipleTracks(until_track) 
+	saved_tracks = 0
+	
+	for i=0 to until_track-1
+		result = saveTrack(tracks(i), getTrackFilename(i))
+		if result > 0 then saved_tracks = saved_tracks + 1
+	next i
+	
+	return saved_tracks
+endFunction
 #endif
+
 
 drawBuffer:
 	#ifdef USE_EDITOR
