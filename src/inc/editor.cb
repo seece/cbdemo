@@ -1,4 +1,5 @@
 // sync editor
+//
 // hotkeys: HOLD CTRL	move all nodes to the right
 // 			HOLD ALT	disable snapping
 //			HOLD X		click to remove nodes
