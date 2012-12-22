@@ -1,0 +1,290 @@
+// options
+// #define USE_EDITOR
+// #define EDITOR_HEIGHT 200
+// #define SEEK_SPEED 0.4
+// #define TRACK_AMOUNT 8
+
+// #ifdef USE_EDITOR
+// 	 #define UI_BUTTONSTRIP_WIDTH 150	// oikean laidan toimintonappulat
+// #endif
+
+// macros
+// #define malloc(size) makeMEMBlock(size)
+// #define free deleteMEMBlock
+// #define realloc resizeMEMBlock
+// #define toType(integer) convertToType(integer)
+// #define toInt(typevar) convertToInteger(typevar)
+// #define assert(statement) If Not (statement) Then makeError __LINE__ + ": assertion failed"
+
+// #define frac(_var) (_var-roundDown(_var))
+// #define round(_val) ()
+// #define lerp(_val1, _val2, _amount) (_val1 + (_val2 - _val1) * _amount)
+// #define barsToSecs(_bars, _tempo) (_bars * ((60.0/_tempo)*4.0))
+// #define snapToGrid(_value, _size) (int(_value/_size)*_size)
+// #define clamp(_val) (max(0.0,min(1.0, _val)))
+
+// #define mouseOverlap(_x,_y,_w,_h) (mouseX() >= (_x) and mouseX() <= ((_x) + (_w)) and mouseY() >= (_y) and mouseY() <= ((_y) + (_h)))
+// #define toggle(x) (x xor 1)
+// #define confirmDialog(_message) dialog(mouseX(), mouseY() - 100, _message)	// shows a dialog above mouse position
+
+// #define POINT_STRIDE 8
+// #define UNDEFINED -1
+
+include "inc/sync.cb"
+
+const SCREEN_WIDTH = 640
+const SCREEN_HEIGHT = 480
+// #define PICTURE_WIDTH SCREEN_WIDTH
+// #define PICTURE_HEIGHT int(SCREEN_WIDTH * (9.0/16.0))
+
+// #ifdef USE_EDITOR
+// #define EDITOR_WIDTH int(SCREEN_WIDTH*1.8)
+SCREEN int(SCREEN_WIDTH*1.8), SCREEN_HEIGHT + 200, 0, 1
+// #else
+
+
+frameLimit 60
+
+buffer=makeImage(SCREEN_WIDTH, int(SCREEN_WIDTH * (9.0/16.0))) // kuvasuhde 16:9
+
+dim tracks(8)	// an array of track pointers
+dim track_values(8) as float
+gosub trackInit
+
+// #ifdef USE_EDITOR
+	font = loadFont("tahoma", 14)
+	setFont font
+
+	editorp = createEnvEditor(0, int(SCREEN_WIDTH * (9.0/16.0)), int(SCREEN_WIDTH*1.8), 200-24, 0.0, 10.0)
+	editor.EnvEditor = convertToType(editorp)
+	editor\track = tracks(selected_track)
+	editor\status = "ready"
+	
+	selector.TrackSelector = -1
+	selector = convertToType(createTrackSelector(editor\x, editor\y + editor\height + editor\timelineHeight, editor\width - 150, 30, 8))
+	selector\trackNames = "x-axis|y-axis|shade"
+// #endif
+
+
+gosub main
+end
+
+timeInit:
+	tstart=timer()
+	pause_start=timer()
+	pause_offset# = 0.0
+	time_offset# = 0.0
+	
+	playing = true
+	t# = 0.0
+	bars# = 0.0
+return
+
+trackInit:	
+	for i=0 to 8
+		tracks(i) = createSyncTrack("synctrack #" + i )
+		
+		track.SyncTrack = convertToType(tracks(i))
+		
+		point.Envpoint = new (Envpoint)	// only a temporary var
+		point\bars = 0.0
+		point\value = 0.0
+		addEnvelopePoint(tracks(i), convertToInteger(point), track\count)
+		//addEnvelopePoint(tracks(i), toInt(point), track\count)
+		delete point
+	next i
+	
+	selected_track = 0
+return	
+
+main:
+	tempo# = 130.0
+	gosub timeInit
+	
+	repeat
+		//t# = (float(timer())-float(start_time)) / 1000.0
+		gosub updateTime
+
+		setWindow "t: " + t#
+		
+// 		#ifdef USE_EDITOR
+			gosub updateEditor
+			gosub updateHotkeys
+			gosub draw_action_buttons
+			gosub draw_editor_misc
+// 		#endif
+		
+		gosub updateTracks
+		
+		drawToImage buffer
+		gosub drawDemo
+		drawToScreen
+		
+		gosub drawBuffer
+		
+		drawScreen
+	forever
+return
+
+updateTracks:
+	for i=0 to 8
+		track_values(i) = getEnvelopeValue(tracks(i), bars)
+	next i
+return
+
+// #ifdef USE_EDITOR
+updateEditor:
+	editor\track = tracks(selected_track)
+	
+	bars# = updateEditor(convertToInteger(editor), bars) // the editor processes looping
+	newbars# = drawEditorTimeline(convertToInteger(editor), bars)
+	
+	if newbars <> bars then
+		diff# = newbars - bars
+		bar_offset# = bar_offset + diff
+		time_offset# = (bar_offset * ((60.0/ tempo)*4.0))
+	endif
+	
+	drawEditor(convertToInteger(editor), bars)
+	drawTrackSelector(convertToInteger(selector))
+	selected_track = selector\selectedTrack
+	
+return
+
+// we assume there exists a selected_track variable and a global tracks-array
+updateHotkeys:
+	if keyHit(cbKeyF6) then
+		save_result = saveMultipleTracks(8)
+		editor\status = "saved " + save_result + " tracks"
+	endif
+	
+	if keyHit(cbKeyF9) then 
+		load_result = loadMultipleTracks(8)
+		editor\status = "loaded " + load_result + " tracks"
+	endif
+	
+return
+
+draw_editor_misc:
+	text 8, screenHeight() - 20, editor\status
+return
+
+// sori tästä tuli vähän sotkuinen
+draw_action_buttons:
+	buttonsize# = 150/3
+	buttonheight = 24
+	buttonstrip_x = editor\x + editor\width - 150
+	buttonstrip_y = editor\y + editor\height + editor\timelineHeight
+	clearbutton = textButton(buttonstrip_x + 0*buttonsize, buttonstrip_y, buttonsize, 24, "clear", false)
+	savebutton  = textButton(buttonstrip_x + 1*buttonsize, buttonstrip_y, buttonsize, 24, "save",  false)
+	loadbutton  = textButton(buttonstrip_x + 2*buttonsize, buttonstrip_y, buttonsize, 24, "load",  false)
+	
+	if clearbutton then
+		if dialog(mouseX(), mouseY() - 100, "clear all points from track '" + track\name + "'?") then
+			clearTrack(tracks(selected_track))
+		endif
+	endif
+	
+	if savebutton then
+		trackp = tracks(selected_track)
+		if trackp = -1 then	return
+		
+		track.SyncTrack = convertToType(trackp)
+		if dialog(mouseX(), mouseY() - 100, "save track '" + track\name + "' to "+getTrackFilename(selected_track)+"?") then
+			saveTrack(tracks(selected_track), getTrackFilename(selected_track))
+		endif
+	endif
+	
+	if loadbutton then
+		trackp = tracks(selected_track)
+		if trackp = -1 then	return
+		track.SyncTrack = convertToType(trackp)
+		filename$ = getTrackFilename(selected_track)
+		
+		if dialog(mouseX(), mouseY() - 100, "load track '" + track\name + "' from file "+filename$+"?") then
+			load_result = loadTrack(tracks(selected_track), filename$)
+			
+			if load_result = 0 then
+				cls 
+				dialog(mouseX(), mouseY() - 100, "couldn't load file: " + filename$)
+			endif
+		endif
+	endif
+return
+// #endif
+
+updateTime:
+// 	#ifdef USE_EDITOR
+		gosub updateTimeHotkeys
+// 	#endif	
+	
+	if playing then
+	
+	else
+		pause_offset# = -(timer()-pause_start)/1000.0
+	endif
+	
+	t# = pause_offset + time_offset + float(timer() - tstart)/1000.0
+	
+	beats# = (t/60.0)*(tempo)
+	bars# = beats/4.0 
+return
+
+// #ifdef USE_EDITOR
+updateTimeHotkeys:
+	if keyHit(cbKeyBackspace) then
+		time_offset = 0.0
+		pause_offset = 0.0
+		t# = 0.0
+		pause_start = timer()
+		tstart = timer()
+	endif
+
+	if keyHit(cbKeySpace) then 
+		if playing then
+			playing = false
+			pause_start = timer()
+		else
+			time_offset = time_offset + pause_offset
+			pause_offset = 0.0
+			playing = true
+		endif
+	endif
+	
+	if keyDown(cbKeyRight) then
+		time_offset = time_offset + 0.4
+	elseIf keyDown(cbKeyLeft) then
+		time_offset = time_offset - 0.4
+	endif	
+return
+
+// loads all track ID's between 0 and until_track-1
+function loadMultipleTracks(until_track)
+	loaded_tracks = 0
+	for i=0 to until_track-1
+		result = loadTrack(tracks(i), getTrackFilename(i))
+		if result > 0 then loaded_tracks = loaded_tracks + 1
+	next i
+	
+	return loaded_tracks
+endFunction
+
+// saves all tracks between 0 and until_track-1
+function saveMultipleTracks(until_track) 
+	saved_tracks = 0
+	
+	for i=0 to until_track-1
+		result = saveTrack(tracks(i), getTrackFilename(i))
+		if result > 0 then saved_tracks = saved_tracks + 1
+	next i
+	
+	return saved_tracks
+endFunction
+// #endif
+
+
+drawBuffer:
+// 	#ifdef USE_EDITOR
+		drawImage buffer, 0, 0
+// 	#else
+return

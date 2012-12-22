@@ -1,0 +1,293 @@
+// options
+//#define USE_EDITOR
+// #define EDITOR_HEIGHT 200
+// #define SEEK_SPEED 0.4
+// #define TRACK_AMOUNT 8
+
+
+
+
+
+// macros
+// #define malloc(size) makeMEMBlock(size)
+// #define free deleteMEMBlock
+// #define realloc resizeMEMBlock
+// #define toType(integer) convertToType(integer)
+// #define toInt(typevar) convertToInteger(typevar)
+// #define assert(statement) If Not (statement) Then makeError __LINE__ + ": assertion failed"
+
+// #define frac(_var) (_var-roundDown(_var))
+// #define round(_val) ()
+// #define lerp(_val1, _val2, _amount) (_val1 + (_val2 - _val1) * _amount)
+// #define barsToSecs(_bars, _tempo) (_bars * ((60.0/_tempo)*4.0))
+// #define snapToGrid(_value, _size) (int(_value/_size)*_size)
+// #define clamp(_val) (max(0.0,min(1.0, _val)))
+
+// #define mouseOverlap(_x,_y,_w,_h) (mouseX() >= (_x) and mouseX() <= ((_x) + (_w)) and mouseY() >= (_y) and mouseY() <= ((_y) + (_h)))
+// #define toggle(x) (x xor 1)
+// #define confirmDialog(_message) dialog(mouseX(), mouseY() - 100, _message)	// shows a dialog above mouse position
+
+// #define POINT_STRIDE 8
+// #define UNDEFINED -1
+
+include "inc/sync.cb"
+
+const SCREEN_WIDTH = 640
+const SCREEN_HEIGHT = 480
+// #define PICTURE_WIDTH SCREEN_WIDTH
+// #define PICTURE_HEIGHT int(SCREEN_WIDTH * (9.0/16.0))
+
+
+
+
+
+SCREEN SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1
+// #endif
+frameLimit 60
+
+buffer=makeImage(SCREEN_WIDTH, int(SCREEN_WIDTH * (9.0/16.0))) // kuvasuhde 16:9
+
+dim tracks(8)	// an array of track pointers
+dim track_values(8) as float
+gosub trackInit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+gosub main
+end
+
+timeInit:
+	tstart=timer()
+	pause_start=timer()
+	pause_offset# = 0.0
+	time_offset# = 0.0
+	
+	playing = true
+	t# = 0.0
+	bars# = 0.0
+return
+
+trackInit:	
+	for i=0 to 8
+		tracks(i) = createSyncTrack("synctrack #" + i )
+		
+		track.SyncTrack = convertToType(tracks(i))
+		
+		point.Envpoint = new (Envpoint)	// only a temporary var
+		point\bars = 0.0
+		point\value = 0.0
+		addEnvelopePoint(tracks(i), convertToInteger(point), track\count)
+		//addEnvelopePoint(tracks(i), toInt(point), track\count)
+		delete point
+	next i
+	
+	selected_track = 0
+return	
+
+main:
+	tempo# = 130.0
+	gosub timeInit
+	
+	repeat
+		//t# = (float(timer())-float(start_time)) / 1000.0
+		gosub updateTime
+
+		setWindow "t: " + t#
+		
+
+
+
+
+
+
+		
+		gosub updateTracks
+		
+		drawToImage buffer
+		gosub drawDemo
+		drawToScreen
+		
+		gosub drawBuffer
+		
+		drawScreen
+	forever
+return
+
+updateTracks:
+	for i=0 to 8
+		track_values(i) = getEnvelopeValue(tracks(i), bars)
+	next i
+return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+updateTime:
+
+
+
+	
+	if playing then
+	
+	else
+		pause_offset# = -(timer()-pause_start)/1000.0
+	endif
+	
+	t# = pause_offset + time_offset + float(timer() - tstart)/1000.0
+	
+	beats# = (t/60.0)*(tempo)
+	bars# = beats/4.0 
+return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+drawBuffer:
+
+
+
+		drawImage buffer, 0, (screenHeight()-int(SCREEN_WIDTH * (9.0/16.0)))/2
+// 	#endif
+	
+return
