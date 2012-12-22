@@ -37,6 +37,7 @@
 #define UI_POINT_SIZE 8
 #define UI_COLOR_DARK 24, 24, 30
 #define UI_COLOR_BG 50, 50,64
+#define UI_COLOR_BG_RED 90, 50,50
 #define UI_COLOR_DIM 80,80,80
 #define UI_COLOR_BG_FOCUS 64,64,70
 #define UI_COLOR_RIM 128,128,128
@@ -81,6 +82,8 @@ type EnvEditor
 	field snapsize as float
 	field gridsize as float
 	field timelineHeight 
+	field loopstart as float	// no looping if loopstart == loopend
+	field loopend as float
 endType
 
 type TrackSelector
@@ -447,6 +450,8 @@ function createEnvEditor(x,y,w,h,startspan,endspan)
 	editor\snapsize = 0.5
 	editor\gridsize = 1.0
 	editor\timelineHeight = 26
+	editor\loopstart = 1.0
+	editor\loopend = 5.0
 	return toInt(editor)
 endFunction
 
@@ -483,12 +488,18 @@ function updateEditor(editorp, bars#)
 	if editor\endpos - editor\startpos < 1.0
 		editor\endpos = editor\startpos + 1.0
 	endif
-
 	
 	if editor\deletePoint <> UNDEFINED then
 		// deleteEnvpoint(trackint, index)
 		deleteEnvpoint(editor\track, editor\deletePoint)
 		editor\deletePoint = UNDEFINED
+	endif
+
+	if editor\loopend > editor\loopstart then 
+		// update the loop region
+		loop_span# = editor\loopend - editor\loopstart
+		looped_bars# = editor\loopstart + frac(bars/loop_span) * loop_span
+		return looped_bars
 	endif
 	
 	return bars
@@ -707,6 +718,8 @@ function drawEditorTimeline(editorp, bars#)
 	mousedz# = mouseMoveZ()
 	newbars# = bars
 	
+	loop_length# = editor\loopend - editor\loopstart
+	
 	span# = editor\endpos - editor\startpos
 	
 	tl_x = editor\x
@@ -728,6 +741,36 @@ function drawEditorTimeline(editorp, bars#)
 	// bg box
 	color UI_COLOR_BG
 	box tl_x, tl_y, tl_w, tl_h
+	
+	if keyDown(cbKeyLAlt) then 
+		snap = false
+	else
+		snap = true
+	endif
+	
+	// marking loops with the right mouse button
+	if hover then
+		mousepos# = editor\startpos + ((float(mouseX())-editor\x)/editor\width) * span
+		text 500, 50, "pos: " + mousepos
+		
+		if snap then mousepos = snapToGrid(mousepos, editor\snapsize)
+		
+		if mouseHit(2) then editor\loopstart = mousepos
+		if mouseDown(2) then editor\loopend = mousepos
+
+	endif
+	
+	// loop marker
+	if loop_length > 0
+		loop_start_x# 	= editor\x + ((editor\loopstart - editor\startpos)/span) * editor\width
+		loop_end_x# 	= editor\x + ((editor\loopend - editor\startpos)/span) * editor\width
+		
+		if loop_start_x <= editor\x + editor\width and loop_end_x >= editor\x then
+			color UI_COLOR_BG_RED
+			box loop_start_x, tl_y, loop_end_x-loop_start_x, tl_h
+			
+		endif
+	endif
 	
 	// mouse marker
 	if hover then
