@@ -61,7 +61,7 @@ gosub trackInit
 	
 	selector.TrackSelector = UNDEFINED
 	selector = toType(createTrackSelector(editor\x, editor\y + editor\height + editor\timelineHeight, editor\width - UI_BUTTONSTRIP_WIDTH, 30, TRACK_AMOUNT))
-	selector\trackNames = "eka|toka|kolmas|ja|nii"
+	selector\trackNames = "x-axis|y-axis|shade"
 #endif
 
 
@@ -262,4 +262,11 @@ return
 drawDemo:
 	color 255, 0, 0
 	box 0,0,640,480,1
+	
+	c = 200 * track_values(2)
+	color c,c,c
+	x_pos = 100 + track_values(0) * 300
+	y_pos = 100 + track_values(1) * 200
+	box x_pos, y_pos, 100, 100, true
+	
 return
