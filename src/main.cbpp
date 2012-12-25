@@ -1,4 +1,6 @@
 
+#pragma anticrap
+
 //#define RELEASE
 
 #ifdef RELEASE
@@ -6,6 +8,10 @@ include "inc/editor_release.cb"
 #else
 include "inc/editor_debug.cb"
 #endif
+
+demoInit:
+	setWindow "peisik demo"
+return
 
 drawDemo:
 	color 255, 0, 0

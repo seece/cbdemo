@@ -1,8 +1,12 @@
-// options
+// precompiler options
+#pragma anticrap
+
 //#define USE_EDITOR
+//#define USE_TEST_EFFECTS
+
 #define EDITOR_HEIGHT 200
 #define SEEK_SPEED 0.4
-#define TRACK_AMOUNT 8
+#define TRACK_AMOUNT 12
 
 #ifdef USE_EDITOR
 	 #define UI_BUTTONSTRIP_WIDTH 150	// oikean laidan toimintonappulat
@@ -56,13 +60,18 @@ gosub trackInit
 	setFont font
 
 	editorp = createEnvEditor(0, PICTURE_HEIGHT, EDITOR_WIDTH, EDITOR_HEIGHT-24, 0.0, 10.0)
-	editor.EnvEditor = toType(editorp)
-	editor\track = tracks(selected_track)
-	editor\status = "ready"
+	editor\EnvEditor = toType(editorp)
+	editor.track = tracks(selected_track)
+	editor.status = "ready"
 	
-	selector.TrackSelector = UNDEFINED
-	selector = toType(createTrackSelector(editor\x, editor\y + editor\height + editor\timelineHeight, editor\width - UI_BUTTONSTRIP_WIDTH, 30, TRACK_AMOUNT))
-	selector\trackNames = "x-axis|y-axis|shade"
+	selector\TrackSelector = UNDEFINED
+	selector = toType(createTrackSelector(editor.x, editor.y + editor.height + editor.timelineHeight, editor.width - UI_BUTTONSTRIP_WIDTH, 30, TRACK_AMOUNT))
+	selector.trackNames = "x-axis|y-axis|shade"
+	
+	flag_draw_editor = true
+#else
+	// in the finished demo we want to load all saved tracks automatically
+	loadMultipleTracks(TRACK_AMOUNT)
 #endif
 
 
@@ -84,12 +93,12 @@ trackInit:
 	for i=0 to TRACK_AMOUNT
 		tracks(i) = createSyncTrack("synctrack #" + i )
 		
-		track.SyncTrack = toType(tracks(i))
+		track\SyncTrack = toType(tracks(i))
 		
-		point.Envpoint = new (Envpoint)	// only a temporary var
-		point\bars = 0.0
-		point\value = 0.0
-		addEnvelopePoint(tracks(i), toInt(point), track\count)
+		point\Envpoint = new (Envpoint)	// only a temporary var
+		point.bars = 0.0
+		point.value = 0.0
+		addEnvelopePoint(tracks(i), toInt(point), track.count)
 		//addEnvelopePoint(tracks(i), toInt(point), track\count)
 		delete point
 	next i
@@ -99,13 +108,12 @@ return
 
 main:
 	tempo# = 130.0
+	gosub demoInit
 	gosub timeInit
 	
 	repeat
 		//t# = (float(timer())-float(start_time)) / 1000.0
 		gosub updateTime
-
-		setWindow "t: " + t#
 		
 		#ifdef USE_EDITOR
 			gosub updateEditor
@@ -134,10 +142,13 @@ return
 
 #ifdef USE_EDITOR
 updateEditor:
-	editor\track = tracks(selected_track)
+	editor.track = tracks(selected_track)
 	
 	bars# = updateEditor(toInt(editor), bars) // the editor processes looping
-	newbars# = drawEditorTimeline(toInt(editor), bars)
+	newbars# = bars
+	if flag_draw_editor then
+		newbars# = drawEditorTimeline(toInt(editor), bars)
+	endif
 	
 	if newbars <> bars then
 		diff# = newbars - bars
@@ -145,9 +156,12 @@ updateEditor:
 		time_offset# = barsToSecs(bar_offset, tempo)
 	endif
 	
-	drawEditor(toInt(editor), bars)
+	if flag_draw_editor then
+		drawEditor(toInt(editor), bars)
+	endif
+	
 	drawTrackSelector(toInt(selector))
-	selected_track = selector\selectedTrack
+	selected_track = selector.selectedTrack
 	
 return
 
@@ -155,32 +169,38 @@ return
 updateHotkeys:
 	if keyHit(cbKeyF6) then
 		save_result = saveMultipleTracks(TRACK_AMOUNT)
-		editor\status = "saved " + save_result + " tracks"
+		editor.status = "saved " + save_result + " tracks"
 	endif
 	
 	if keyHit(cbKeyF9) then 
 		load_result = loadMultipleTracks(TRACK_AMOUNT)
-		editor\status = "loaded " + load_result + " tracks"
+		editor.status = "loaded " + load_result + " tracks"
 	endif
+	
+	// toggle editor with TAB
+	if keyHit(15) then flag_draw_editor = toggle(flag_draw_editor)
 	
 return
 
 draw_editor_misc:
-	text 8, screenHeight() - 20, editor\status
+	text 8, screenHeight() - 20, editor.status
+	text 8, screenHeight() - 32, "time (secs): " + t#
+	text 8, screenHeight() - 44, "bars: " + bars#
+	text 8, screenHeight() - 56, "FPS: " + FPS()
 return
 
 // sori tästä tuli vähän sotkuinen
 draw_action_buttons:
 	buttonsize# = UI_BUTTONSTRIP_WIDTH/3
 	buttonheight = 24
-	buttonstrip_x = editor\x + editor\width - UI_BUTTONSTRIP_WIDTH
-	buttonstrip_y = editor\y + editor\height + editor\timelineHeight
+	buttonstrip_x = editor.x + editor.width - UI_BUTTONSTRIP_WIDTH
+	buttonstrip_y = editor.y + editor.height + editor.timelineHeight
 	clearbutton = textButton(buttonstrip_x + 0*buttonsize, buttonstrip_y, buttonsize, 24, "clear", false)
 	savebutton  = textButton(buttonstrip_x + 1*buttonsize, buttonstrip_y, buttonsize, 24, "save",  false)
 	loadbutton  = textButton(buttonstrip_x + 2*buttonsize, buttonstrip_y, buttonsize, 24, "load",  false)
 	
 	if clearbutton then
-		if dialog(mouseX(), mouseY() - 100, "clear all points from track '" + track\name + "'?") then
+		if dialog(mouseX(), mouseY() - 100, "clear all points from track '" + track.name + "'?") then
 			clearTrack(tracks(selected_track))
 		endif
 	endif
@@ -189,8 +209,8 @@ draw_action_buttons:
 		trackp = tracks(selected_track)
 		if trackp = UNDEFINED then	return
 		
-		track.SyncTrack = toType(trackp)
-		if confirmDialog("save track '" + track\name + "' to "+getTrackFilename(selected_track)+"?") then
+		track\SyncTrack = toType(trackp)
+		if confirmDialog("save track '" + track.name + "' to "+getTrackFilename(selected_track)+"?") then
 			saveTrack(tracks(selected_track), getTrackFilename(selected_track))
 		endif
 	endif
@@ -198,10 +218,10 @@ draw_action_buttons:
 	if loadbutton then
 		trackp = tracks(selected_track)
 		if trackp = UNDEFINED then	return
-		track.SyncTrack = toType(trackp)
+		track\SyncTrack = toType(trackp)
 		filename$ = getTrackFilename(selected_track)
 		
-		if confirmDialog("load track '" + track\name + "' from file "+filename$+"?") then
+		if confirmDialog("load track '" + track.name + "' from file "+filename$+"?") then
 			load_result = loadTrack(tracks(selected_track), filename$)
 			
 			if load_result = 0 then
@@ -258,17 +278,6 @@ updateTimeHotkeys:
 	endif	
 return
 
-// loads all track ID's between 0 and until_track-1
-function loadMultipleTracks(until_track)
-	loaded_tracks = 0
-	for i=0 to until_track-1
-		result = loadTrack(tracks(i), getTrackFilename(i))
-		if result > 0 then loaded_tracks = loaded_tracks + 1
-	next i
-	
-	return loaded_tracks
-endFunction
-
 // saves all tracks between 0 and until_track-1
 function saveMultipleTracks(until_track) 
 	saved_tracks = 0
@@ -282,6 +291,16 @@ function saveMultipleTracks(until_track)
 endFunction
 #endif
 
+// loads all track ID's between 0 and until_track-1
+function loadMultipleTracks(until_track)
+	loaded_tracks = 0
+	for i=0 to until_track-1
+		result = loadTrack(tracks(i), getTrackFilename(i))
+		if result > 0 then loaded_tracks = loaded_tracks + 1
+	next i
+	
+	return loaded_tracks
+endFunction
 
 drawBuffer:
 	#ifdef USE_EDITOR
@@ -290,6 +309,11 @@ drawBuffer:
 		drawImage buffer, 0, (screenHeight()-PICTURE_HEIGHT)/2
 	#endif
 	
+return
+
+#ifdef USE_TEST_EFFECTS
+demoInit:
+	// nothing here!
 return
 
 drawDemo:
@@ -303,3 +327,4 @@ drawDemo:
 	box x_pos, y_pos, 100, 100, true
 	
 return
+#endif

@@ -1,8 +1,12 @@
-// options
+// precompiler options
+// #pragma anticrap
+
 //#define USE_EDITOR
+//#define USE_TEST_EFFECTS
+
 // #define EDITOR_HEIGHT 200
 // #define SEEK_SPEED 0.4
-// #define TRACK_AMOUNT 8
+// #define TRACK_AMOUNT 12
 
 
 
@@ -47,8 +51,8 @@ frameLimit 60
 
 buffer=makeImage(SCREEN_WIDTH, int(SCREEN_WIDTH * (9.0/16.0))) // kuvasuhde 16:9
 
-dim tracks(8)	// an array of track pointers
-dim track_values(8) as float
+dim tracks(12)	// an array of track pointers
+dim track_values(12) as float
 gosub trackInit
 
 
@@ -66,6 +70,11 @@ gosub trackInit
 
 
 
+	// in the finished demo we want to load all saved tracks automatically
+	loadMultipleTracks(12)
+// #endif
+
+
 gosub main
 end
 
@@ -81,7 +90,7 @@ timeInit:
 return
 
 trackInit:	
-	for i=0 to 8
+	for i=0 to 12
 		tracks(i) = createSyncTrack("synctrack #" + i )
 		
 		track.SyncTrack = convertToType(tracks(i))
@@ -90,7 +99,7 @@ trackInit:
 		point\bars = 0.0
 		point\value = 0.0
 		addEnvelopePoint(tracks(i), convertToInteger(point), track\count)
-		//addEnvelopePoint(tracks(i), toInt(point), track\count)
+		//addEnvelopePoint(tracks(i), toInt(point), track.count)
 		delete point
 	next i
 	
@@ -99,13 +108,12 @@ return
 
 main:
 	tempo# = 130.0
+	gosub demoInit
 	gosub timeInit
 	
 	repeat
 		//t# = (float(timer())-float(start_time)) / 1000.0
 		gosub updateTime
-
-		setWindow "t: " + t#
 		
 
 
@@ -127,10 +135,22 @@ main:
 return
 
 updateTracks:
-	for i=0 to 8
+	for i=0 to 12
 		track_values(i) = getEnvelopeValue(tracks(i), bars)
 	next i
 return
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -271,17 +291,16 @@ return
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+// loads all track ID's between 0 and until_track-1
+function loadMultipleTracks(until_track)
+	loaded_tracks = 0
+	for i=0 to until_track-1
+		result = loadTrack(tracks(i), getTrackFilename(i))
+		if result > 0 then loaded_tracks = loaded_tracks + 1
+	next i
+	
+	return loaded_tracks
+endFunction
 
 drawBuffer:
 
@@ -291,3 +310,21 @@ drawBuffer:
 // 	#endif
 	
 return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
