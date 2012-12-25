@@ -11,11 +11,15 @@
 //
 //			RMB + DRAG	on timeline to select loop region
 
+// precompiler settings
+#pragma anticrap
+
+
 // config
 
-// #define STANDALONE_EDITOR		// compile with main loop etc.
- #define USE_EDITOR_COMPONENTS	// if this is disabled, only compiles the parts needed for playing back data
- #define UI_BUTTONSTRIP_WIDTH 150	// oikean laidan toimintonappulat
+#define STANDALONE_EDITOR		// compile with main loop etc\
+#define USE_EDITOR_COMPONENTS	// if this is disabled, only compiles the parts needed for playing back data
+#define UI_BUTTONSTRIP_WIDTH 150	// oikean laidan toimintonappulat
 
 // macros
 
@@ -101,8 +105,6 @@ endType
 
 #endif
 
-//#pragma dumb_debug
-
 #ifdef STANDALONE_EDITOR
 
 const TRACK_AMOUNT = 5
@@ -118,37 +120,37 @@ setFont font
 for i=0 to TRACK_AMOUNT
 	tracks(i) = createSyncTrack("track #" + i )
 	
-	point.Envpoint = new (Envpoint)	// only a temporary var
+	point\Envpoint = new (Envpoint)	// only a temporary var
 	
 	for u=0 to 9
-		point\bars = float(u)
-		point\value = rnd(0, 1)
-		track.Synctrack = toType(tracks(i))
-		addEnvelopePoint(tracks(i), toInt(point), track\count)
+		point.bars = float(u)
+		point.value = rnd(0, 1)
+		track\Synctrack = toType(tracks(i))
+		addEnvelopePoint(tracks(i), toInt(point), track.count)
 	next u
 	
 	delete point
 next i
 
 for i=0 to TRACK_AMOUNT
-	it.Synctrack = tracks(i)
+	it\Synctrack = tracks(i)
 	
-	//addText "" + it\name + " count: " + it\count
-	point.Envpoint = getEnvpoint(toInt(it), 0)
-	//addText "" + point\bars + ", " + point\value
+	//addText "" + it.name + " count: " + it.count
+	point\Envpoint = getEnvpoint(toInt(it), 0)
+	//addText "" + point.bars + ", " + point.value
 	delete point
 	
-	//addText "" + memDumpFloat(it\mem)
+	//addText "" + memDumpFloat(it.mem)
 next i
 
 editorp = createEnvEditor(0, 300, 800, 200, 0.0, 10.0)
-editor.EnvEditor = toType(editorp)
-editor\track = tracks(0)
-editor\status = "ready"
+editor\EnvEditor = toType(editorp)
+editor.track = tracks(0)
+editor.status = "ready"
 
-selector.TrackSelector = UNDEFINED
-selector = toType(createTrackSelector(editor\x, editor\y + editor\height + editor\timelineHeight, editor\width - UI_BUTTONSTRIP_WIDTH, 30, TRACK_AMOUNT))
-selector\trackNames = "eka|toka|kolmas|ja|nii"
+selector\TrackSelector = UNDEFINED
+selector = toType(createTrackSelector(editor.x, editor.y + editor.height + editor.timelineHeight, editor.width - UI_BUTTONSTRIP_WIDTH, 30, TRACK_AMOUNT))
+selector.trackNames = "eka|toka|kolmas|ja|nii"
 
 tempo# = 130.0
 tstart=timer()
@@ -177,29 +179,29 @@ repeat
 	endif
 	//drawTrack(tracks(0), 0, 300, 800, 200, 0.0, 10.0) 
 	
-	editor\track = tracks(selected_track)
+	editor.track = tracks(selected_track)
 	
 	drawEditor(toInt(editor), bars)
 	drawTrackSelector(toInt(selector))
 	gosub draw_action_buttons
 	
-	selected_track = selector\selectedTrack
+	selected_track = selector.selectedTrack
 	value# = getEnvelopeValue(tracks(selected_track), bars)
 	
 	if keyHit(cbKeyF6) then
 		save_result = saveMultipleTracks(TRACK_AMOUNT)
-		editor\status = "saved " + save_result + " tracks"
+		editor.status = "saved " + save_result + " tracks"
 	 //saveTrack(tracks(selected_track), getTrackFilename(selected_track))
 	endif
 	
 	if keyHit(cbKeyF9) then 
 		//load_result = loadTrack(tracks(selected_track), getTrackFilename(selected_track))
 		load_result = loadMultipleTracks(TRACK_AMOUNT)
-		editor\status = "loaded " + load_result + " tracks"
+		editor.status = "loaded " + load_result + " tracks"
 	endif
 	
 	color UI_COLOR_MID
-	text 8, screenHeight() - 20, editor\status
+	text 8, screenHeight() - 20, editor.status
 	
 	addText "bars: " + bars + " bar offset " + bar_offset
 	addText "playing: " + playing
@@ -245,14 +247,14 @@ return
 draw_action_buttons:
 	buttonsize# = UI_BUTTONSTRIP_WIDTH/3
 	buttonheight = 24
-	buttonstrip_x = editor\x + editor\width - UI_BUTTONSTRIP_WIDTH
-	buttonstrip_y = editor\y + editor\height + editor\timelineHeight
+	buttonstrip_x = editor.x + editor.width - UI_BUTTONSTRIP_WIDTH
+	buttonstrip_y = editor.y + editor.height + editor.timelineHeight
 	clearbutton = textButton(buttonstrip_x + 0*buttonsize, buttonstrip_y, buttonsize, 24, "clear", false)
 	savebutton  = textButton(buttonstrip_x + 1*buttonsize, buttonstrip_y, buttonsize, 24, "save",  false)
 	loadbutton  = textButton(buttonstrip_x + 2*buttonsize, buttonstrip_y, buttonsize, 24, "load",  false)
 	
 	if clearbutton then
-		if dialog(mouseX(), mouseY() - 100, "clear all points from track '" + track\name + "'?") then
+		if dialog(mouseX(), mouseY() - 100, "clear all points from track '" + track.name + "'?") then
 			clearTrack(tracks(selected_track))
 		endif
 	endif
@@ -261,8 +263,8 @@ draw_action_buttons:
 		trackp = tracks(selected_track)
 		if trackp = UNDEFINED then	return
 		
-		track.SyncTrack = toType(trackp)
-		if confirmDialog("save track '" + track\name + "' to "+getTrackFilename(selected_track)+"?") then
+		track\SyncTrack = toType(trackp)
+		if confirmDialog("save track '" + track.name + "' to "+getTrackFilename(selected_track)+"?") then
 			saveTrack(tracks(selected_track), getTrackFilename(selected_track))
 		endif
 	endif
@@ -270,10 +272,10 @@ draw_action_buttons:
 	if loadbutton then
 		trackp = tracks(selected_track)
 		if trackp = UNDEFINED then	return
-		track.SyncTrack = toType(trackp)
+		track\SyncTrack = toType(trackp)
 		filename$ = getTrackFilename(selected_track)
 		
-		if confirmDialog("load track '" + track\name + "' from file "+filename$+"?") then
+		if confirmDialog("load track '" + track.name + "' from file "+filename$+"?") then
 			load_result = loadTrack(tracks(selected_track), filename$)
 			
 			if load_result = 0 then
@@ -287,7 +289,7 @@ return
 #endif
 
 function loadTrack(trackp, filename$)
-	track.Synctrack = toType(trackp)
+	track\Synctrack = toType(trackp)
 	
 	bytes_read = 0
 	offset = 0
@@ -310,9 +312,9 @@ function loadTrack(trackp, filename$)
 	bytes_read = fileOffset(f)
 	closeFile(f)
 
-	free track\mem
-	track\count = (bytes_read/8)
-	track\mem = memblock
+	free track.mem
+	track.count = (bytes_read/8)
+	track.mem = memblock
 
 	return bytes_read
 endFunction
@@ -412,15 +414,15 @@ function textButton(pos_x, pos_y, width, height, caption$, held_down)
 endFunction
 
 function createTrackSelector(x,y,w,h,amountOfTracks)
-	selector.TrackSelector = new (TrackSelector)
-	selector\count = amountOfTracks
+	selector\TrackSelector = new (TrackSelector)
+	selector.count = amountOfTracks
 
 	assert(amountOfTracks > 0)
 
-	selector\x = x
-	selector\y = y
-	selector\width = w
-	selector\height = h
+	selector.x = x
+	selector.y = y
+	selector.width = w
+	selector.height = h
 
 	return toInt(selector)
 endFunction
@@ -428,38 +430,38 @@ endFunction
 function drawTrackSelector(selectorp)
 	assert(selectorp <> UNDEFINED)
 	
-	selector.TrackSelector = toType(selectorp)
-	buttonsize# = selector\width / selector\count
+	selector\TrackSelector = toType(selectorp)
+	buttonsize# = selector.width / selector.count
 	buttonsize = min(150, buttonsize)	// maximum width for the button
 	
-	for i=0 to selector\count - 1
+	for i=0 to selector.count - 1
 		caption$ = str(i)
 
-		if not selector\trackNames = "" then
-			trackname$ = getWord(selector\trackNames, i+1, "|")
+		if not selector.trackNames = "" then
+			trackname$ = getWord(selector.trackNames, i+1, "|")
 			if (not trackname = "") and (textWidth(trackname) < buttonsize) then caption = trackname
 		endif
 		
-		button_x = selector\x + i * buttonsize 
-		button_y = selector\y 
+		button_x = selector.x + i * buttonsize 
+		button_y = selector.y 
 		held = false
-		if i = selector\selectedTrack then held = true
-		clicked = textButton(button_x, button_y, buttonsize, selector\height, caption, held)
+		if i = selector.selectedTrack then held = true
+		clicked = textButton(button_x, button_y, buttonsize, selector.height, caption, held)
 		
-		if clicked then selector\selectedTrack = i
+		if clicked then selector.selectedTrack = i
 	next i
 endFunction
 
 // returns the amount of bytes written
 function saveTrack(trackp, filename$)
-	track.Synctrack = toType(trackp)
+	track\Synctrack = toType(trackp)
 
 	f = openToWrite(filename)
 	
-	for i=0 to track\count-1
+	for i=0 to track.count-1
 		offset = i * POINT_STRIDE
-		writeFloat f, peekFloat(track\mem, offset)
-		writeFloat f, peekFloat(track\mem, offset + 4)
+		writeFloat f, peekFloat(track.mem, offset)
+		writeFloat f, peekFloat(track.mem, offset + 4)
 	next i
 	
 	written = fileOffset(f)
@@ -470,69 +472,69 @@ endFunction
 
 
 function createEnvEditor(x,y,w,h,startspan,endspan)
-	editor.EnvEditor = new(EnvEditor)
-	editor\x = x
-	editor\y = y
-	editor\width = w
-	editor\height = h
-	editor\startpos = startspan
-	editor\endpos = endspan
-	editor\track = UNDEFINED
-	editor\selectedPoint = UNDEFINED 
-	editor\hover = false
-	editor\deletePoint = UNDEFINED 
-	editor\snapsize = 0.5
-	editor\gridsize = 1.0
-	editor\timelineHeight = 26
-	editor\loopstart = 0.0
-	editor\loopend = editor\loopstart
+	editor\EnvEditor = new(EnvEditor)
+	editor.x = x
+	editor.y = y
+	editor.width = w
+	editor.height = h
+	editor.startpos = startspan
+	editor.endpos = endspan
+	editor.track = UNDEFINED
+	editor.selectedPoint = UNDEFINED 
+	editor.hover = false
+	editor.deletePoint = UNDEFINED 
+	editor.snapsize = 0.5
+	editor.gridsize = 1.0
+	editor.timelineHeight = 26
+	editor.loopstart = 0.0
+	editor.loopend = editor.loopstart
 	return toInt(editor)
 endFunction
 
 function updateEditor(editorp, bars#)
-	editor.EnvEditor = toType(editorp)
+	editor\EnvEditor = toType(editorp)
 	mousedz# = mouseMoveZ()
 	scrollspeed#  = 0.7
 	
-	origpos# = editor\startpos
+	origpos# = editor.startpos
 
 	speedboost# = 1.0
 	if keyDown(42) then speedboost = 2.5	// left shift
 
 	if keyDown(cbKeyA) then	
-		editor\startpos = max(editor\startpos - scrollspeed * speedboost, 0.0)
-		editor\endpos = editor\endpos - (origpos - editor\startpos)
+		editor.startpos = max(editor.startpos - scrollspeed * speedboost, 0.0)
+		editor.endpos = editor.endpos - (origpos - editor.startpos)
 	elseIf keyDown(cbKeyD) then
-		editor\startpos = editor\startpos + scrollspeed * speedboost
-		editor\endpos = editor\endpos + scrollspeed * speedboost
+		editor.startpos = editor.startpos + scrollspeed * speedboost
+		editor.endpos = editor.endpos + scrollspeed * speedboost
 	endif
 	
-	span# = editor\endpos - editor\startpos
-	middle# = editor\startpos + span*0.5
+	span# = editor.endpos - editor.startpos
+	middle# = editor.startpos + span*0.5
 	zoom# = mousedz * 1.2
 
 	if keyDown(cbKeyW) then zoom = 0.2 * speedboost
 	if keyDown(cbKeyS) then zoom = -0.2	* speedboost
 	
-	editor\startpos = editor\startpos + zoom#
-	editor\endpos = editor\endpos - zoom#
+	editor.startpos = editor.startpos + zoom#
+	editor.endpos = editor.endpos - zoom#
 	
-	editor\startpos = max(0.0, editor\startpos)
+	editor.startpos = max(0.0, editor.startpos)
 	
-	if editor\endpos - editor\startpos < 1.0
-		editor\endpos = editor\startpos + 1.0
+	if editor.endpos - editor.startpos < 1.0
+		editor.endpos = editor.startpos + 1.0
 	endif
 	
-	if editor\deletePoint <> UNDEFINED then
+	if editor.deletePoint <> UNDEFINED then
 		// deleteEnvpoint(trackint, index)
-		deleteEnvpoint(editor\track, editor\deletePoint)
-		editor\deletePoint = UNDEFINED
+		deleteEnvpoint(editor.track, editor.deletePoint)
+		editor.deletePoint = UNDEFINED
 	endif
 
-	if editor\loopend > editor\loopstart then 
+	if editor.loopend > editor.loopstart then 
 		// update the loop region
-		loop_span# = editor\loopend - editor\loopstart
-		looped_bars# = editor\loopstart + frac(bars/loop_span) * loop_span
+		loop_span# = editor.loopend - editor.loopstart
+		looped_bars# = editor.loopstart + frac(bars/loop_span) * loop_span
 		return looped_bars
 	endif
 	
@@ -540,49 +542,49 @@ function updateEditor(editorp, bars#)
 endFunction
 
 function drawEditor(editorp, bars#)
-	editor.EnvEditor = toType(editorp)
+	editor\EnvEditor = toType(editorp)
 	mx# = mouseX()
 	my# = mouseY()
 	mousedz# = mouseMoveZ()
 	
-	span# = editor\endpos - editor\startpos
+	span# = editor.endpos - editor.startpos
 	hover = false
 	thisfirst = true
 	lastx# = 0
 	lasty# = 0
 	
-	gridspacing# = editor\gridsize
-	bar_width_in_px# = editor\width / span
+	gridspacing# = editor.gridsize
+	bar_width_in_px# = editor.width / span
 	grid_lines = roundDown(span/gridspacing)
 	grid_size# = gridspacing * bar_width_in_px
-	grid_start_x = bar_width_in_px - (int(editor\startpos * bar_width_in_px) mod int(bar_width_in_px))
+	grid_start_x = bar_width_in_px - (int(editor.startpos * bar_width_in_px) mod int(bar_width_in_px))
 	
-	track.Synctrack = toType(editor\track)
+	track\Synctrack = toType(editor.track)
 	
-	if mouseOverlap(editor\x, editor\y, editor\width, editor\height) then
+	if mouseOverlap(editor.x, editor.y, editor.width, editor.height) then
 		hover = true
-		editor\hover = true
+		editor.hover = true
 	else
-		editor\hover = false
+		editor.hover = false
 	endif
 	
 	if keydown(cbKeyLAlt) then snap = false else snap = true
-	snapsize# = editor\snapsize
+	snapsize# = editor.snapsize
 	
 	// render bg
 	
 	color UI_COLOR_BG
 	
-	box editor\x, editor\y, editor\width, editor\height, 1
+	box editor.x, editor.y, editor.width, editor.height, 1
 	
 	if hover then
 		color UI_COLOR_RIM
 	else
 		color UI_COLOR_DIM
 	endif
-	box editor\x, editor\y, editor\width, editor\height, 0	
+	box editor.x, editor.y, editor.width, editor.height, 0	
 	
-	if editor\track = UNDEFINED then 
+	if editor.track = UNDEFINED then 
 		return false
 	endif
 	
@@ -590,42 +592,42 @@ function drawEditor(editorp, bars#)
 	color UI_COLOR_BG_FOCUS
 	for i=0 to grid_lines
 		line_x = grid_start_x + i * grid_size
-		line line_x, editor\y, line_x, editor\y + editor\height
+		line line_x, editor.y, line_x, editor.y + editor.height
 	next i	
 	
 	// render time marker
-	marker_x_pos = editor\x + (bars - editor\startpos) * bar_width_in_px
-	if bars >= editor\startpos and bars <= editor\endpos then
+	marker_x_pos = editor.x + (bars - editor.startpos) * bar_width_in_px
+	if bars >= editor.startpos and bars <= editor.endpos then
 		color UI_COLOR_HILIGHT
-		line marker_x_pos, editor\y, marker_x_pos, editor\y + editor\height + editor\timelineHeight
+		line marker_x_pos, editor.y, marker_x_pos, editor.y + editor.height + editor.timelineHeight
 		
 	endif
 	
-	spointp = firstPointAfter(editor\track, editor\startpos)
+	spointp = firstPointAfter(editor.track, editor.startpos)
 	ipointp = spointp
 	
 	if ipointp = UNDEFINED then
-		track.SyncTrack = toType(editor\track)
-		spointp = getEnvPoint(editor\track, track\count- 1)
+		track\SyncTrack = toType(editor.track)
+		spointp = getEnvPoint(editor.track, track.count- 1)
 		ipointp = spointp
 		//return false
 	endif
 	
-	spoint.Envpoint = toType(spointp)
+	spoint\Envpoint = toType(spointp)
 		
 	// we take one to the left to only render also the point over to the left hand side of the SCREEN
-	if spoint\index > 0 then
-		spointp = getEnvPoint(editor\track, spoint\index - 1)
+	if spoint.index > 0 then
+		spointp = getEnvPoint(editor.track, spoint.index - 1)
 		ipointp = spointp
 		spoint = toType(spointp)
 	endif
 	
-	ipoint.Envpoint = spoint
-	ind = ipoint\index
+	ipoint\Envpoint = spoint
+	ind = ipoint.index
 			
 	// current mouse position
-	newbars# = editor\startpos + ((mx-editor\x)/editor\width) * span
-	newvalue# = 1.0 - ((my-editor\y)/editor\height) * 1.0
+	newbars# = editor.startpos + ((mx-editor.x)/editor.width) * span
+	newvalue# = 1.0 - ((my-editor.y)/editor.height) * 1.0
 	
 	if snap then
 		newbars = snapToGrid(newbars, snapsize)
@@ -633,16 +635,16 @@ function drawEditor(editorp, bars#)
 	
 	// a new point!
 	if mouseHit(2) and hover then
-		before_pointp = firstPointBefore(editor\track, newbars)
+		before_pointp = firstPointBefore(editor.track, newbars)
 		if before_pointp = UNDEFINED then
 			// TODO write error to log
 		else
-			before_point.EnvPoint = toType(before_pointp)
-			temp_point.EnvPoint = new(EnvPoint)
-			temp_point\bars = newbars
-			temp_point\value = clamp(newvalue)
+			before_point\EnvPoint = toType(before_pointp)
+			temp_point\EnvPoint = new(EnvPoint)
+			temp_point.bars = newbars
+			temp_point.value = clamp(newvalue)
 			
-			addEnvelopePoint(editor\track, toInt(temp_point), before_point\index + 1)
+			addEnvelopePoint(editor.track, toInt(temp_point), before_point.index + 1)
 			
 			delete temp_point
 			delete before_point
@@ -652,11 +654,11 @@ function drawEditor(editorp, bars#)
 	// a flag used to detect when we want to lose focus
 	clicked_on_point = false
 
-	while (ind < track\count)
+	while (ind < track.count)
 		pointhover = false
 		delete_current_point = false
-		px# = editor\x + ((ipoint\bars - editor\startpos)/span) * editor\width
-		py# = editor\y + editor\height - ipoint\value * editor\height
+		px# = editor.x + ((ipoint.bars - editor.startpos)/span) * editor.width
+		py# = editor.y + editor.height - ipoint.value * editor.height
 		
 		if not thisfirst then
 			color UI_COLOR_MID
@@ -664,24 +666,24 @@ function drawEditor(editorp, bars#)
 		endif
 		
 		// we have processed all visible points
-		if px > editor\x + editor\width then
+		if px > editor.x + editor.width then
 			exit
 		endif
 		
-		if ind=editor\selectedPoint then
+		if ind=editor.selectedPoint then
 			pointhover = drawPoint(px, py, true)
 		else
 			pointhover = drawPoint(px, py, false)
 		endif
 			
 		if pointhover and mouseHit(1) then 
-			editor\selectedPoint = ind
+			editor.selectedPoint = ind
 			clicked_on_point = true
 		endif
 		
-		if mouseUp(1) then editor\selectedPoint = UNDEFINED
+		if mouseUp(1) then editor.selectedPoint = UNDEFINED
 
-		if ind=editor\selectedPoint and editor\selectedPoint <> UNDEFINED then	
+		if ind=editor.selectedPoint and editor.selectedPoint <> UNDEFINED then	
 		
 			if newvalue > 1.0 then newvalue = 1.0
 			if newvalue < 0.0 then newvalue = 0.0
@@ -690,40 +692,40 @@ function drawEditor(editorp, bars#)
 				if newbars < 0.0 then newbars = 0.0
 			else
 				// not the first one, let's inspect neighbours
-				lpointp = getEnvpoint(editor\track, ind-1)
-				lpoint.EnvPoint = toType(lpointp)
-				if newbars < lpoint\bars then newbars = lpoint\bars
+				lpointp = getEnvpoint(editor.track, ind-1)
+				lpoint\EnvPoint = toType(lpointp)
+				if newbars < lpoint.bars then newbars = lpoint.bars
 				
 				// the right neighbour
-				if ind < track\count-1 then
-					rpointp = getEnvpoint(editor\track, ind+1)
-					rpoint.EnvPoint = toType(rpointp)
-					if newbars > rpoint\bars then newbars = rpoint\bars
+				if ind < track.count-1 then
+					rpointp = getEnvpoint(editor.track, ind+1)
+					rpoint\EnvPoint = toType(rpointp)
+					if newbars > rpoint.bars then newbars = rpoint.bars
 					delete rpoint
 				endif
 				
 				delete lpoint
 			endif
 
-			oldbars# = ipoint\bars
-			oldvalue# = ipoint\value
+			oldbars# = ipoint.bars
+			oldvalue# = ipoint.value
 			// setup temporary type instance
-			ipoint\bars = newbars
-			ipoint\value = newvalue
+			ipoint.bars = newbars
+			ipoint.value = newvalue
 			
 			// actually save the value to the array
-			setEnvpoint(editor\track, toInt(ipoint), ipoint\index)
+			setEnvpoint(editor.track, toInt(ipoint), ipoint.index)
 			
 			if keyDown(cbkeylcontrol) then
-				moveAllPointsFrom(editor\track, ipoint\index+1, ipoint\bars - oldbars)
+				moveAllPointsFrom(editor.track, ipoint.index+1, ipoint.bars - oldbars)
 			endif
 			
 			color UI_COLOR_MID
-			text px + 15, py + 15, "" + ipoint\bars + ", " + ipoint\value
+			text px + 15, py + 15, "" + ipoint.bars + ", " + ipoint.value
 			
 			if keyHit(cbKeyDel) or (pointhover and mouseDown(1) and keyDown(cbKeyX)) then
-				editor\deletePoint = ipoint\index
-				editor\selectedPoint = UNDEFINED
+				editor.deletePoint = ipoint.index
+				editor.selectedPoint = UNDEFINED
 			endif
 		endif			
 		
@@ -731,35 +733,35 @@ function drawEditor(editorp, bars#)
 		lastx = px
 		lasty = py
 		
-		if ind+1 >= track\count then exit
+		if ind+1 >= track.count then exit
 		
 		delete ipoint
-		ipoint = getEnvpoint(editor\track, ind+1)
-		ind = ipoint\index
+		ipoint = getEnvpoint(editor.track, ind+1)
+		ind = ipoint.index
 	wend		
 	
 	delete ipoint
 	
 	color UI_COLOR_MID
-	text editor\x + 4, editor\y + 4, editor\startpos + " - " + editor\endpos
+	text editor.x + 4, editor.y + 4, editor.startpos + " - " + editor.endpos
 
 endFunction
 
 function drawEditorTimeline(editorp, bars#)
-	editor.EnvEditor = toType(editorp)
+	editor\EnvEditor = toType(editorp)
 	mx# = mouseX()
 	my# = mouseY()
 	mousedz# = mouseMoveZ()
 	newbars# = bars
 	
-	loop_length# = editor\loopend - editor\loopstart
+	loop_length# = editor.loopend - editor.loopstart
 	
-	span# = editor\endpos - editor\startpos
+	span# = editor.endpos - editor.startpos
 	
-	tl_x = editor\x
-	tl_y = editor\y + editor\height
-	tl_w = editor\width
-	tl_h = editor\timelineHeight
+	tl_x = editor.x
+	tl_y = editor.y + editor.height
+	tl_w = editor.width
+	tl_h = editor.timelineHeight
 	
 	hover = false
 	
@@ -767,8 +769,8 @@ function drawEditorTimeline(editorp, bars#)
 		hover = true
 	endif
 
-	if hover and mouseDown(1) and editor\selectedPoint = UNDEFINED then
-		newpos# = editor\startpos + ((mx-editor\x)/editor\width) * span
+	if hover and mouseDown(1) and editor.selectedPoint = UNDEFINED then
+		newpos# = editor.startpos + ((mx-editor.x)/editor.width) * span
 		newbars = newpos
 	endif
 	
@@ -784,22 +786,22 @@ function drawEditorTimeline(editorp, bars#)
 	
 	// marking loops with the right mouse button
 	if hover then
-		mousepos# = editor\startpos + ((float(mouseX())-editor\x)/editor\width) * span
-		text 500, 50, "pos: " + mousepos
+		mousepos# = editor.startpos + ((float(mouseX())-editor.x)/editor.width) * span
+		//text 500, 50, "pos: " + mousepos
 		
-		if snap then mousepos = snapToGrid(mousepos, editor\snapsize)
+		if snap then mousepos = snapToGrid(mousepos, editor.snapsize)
 		
-		if mouseHit(2) then editor\loopstart = mousepos
-		if mouseDown(2) then editor\loopend = mousepos
+		if mouseHit(2) then editor.loopstart = mousepos
+		if mouseDown(2) then editor.loopend = mousepos
 
 	endif
 	
 	// loop marker
 	if loop_length > 0
-		loop_start_x# 	= editor\x + ((editor\loopstart - editor\startpos)/span) * editor\width
-		loop_end_x# 	= editor\x + ((editor\loopend - editor\startpos)/span) * editor\width
+		loop_start_x# 	= editor.x + ((editor.loopstart - editor.startpos)/span) * editor.width
+		loop_end_x# 	= editor.x + ((editor.loopend - editor.startpos)/span) * editor.width
 		
-		if loop_start_x <= editor\x + editor\width and loop_end_x >= editor\x then
+		if loop_start_x <= editor.x + editor.width and loop_end_x >= editor.x then
 			color UI_COLOR_BG_RED
 			box loop_start_x, tl_y, loop_end_x-loop_start_x, tl_h
 			
@@ -814,20 +816,20 @@ function drawEditorTimeline(editorp, bars#)
 	
 	// draw the numbers
 	gridspacing# = 1.0
-	bar_width_in_px# = editor\width / span
+	bar_width_in_px# = editor.width / span
 	grid_lines = roundDown(span/gridspacing)
 	grid_size# = gridspacing * bar_width_in_px
-	grid_start_x = bar_width_in_px - (int(editor\startpos * bar_width_in_px) mod int(bar_width_in_px))
+	grid_start_x = bar_width_in_px - (int(editor.startpos * bar_width_in_px) mod int(bar_width_in_px))
 
 	
 	for i=-1 to grid_lines step 1
 		num_x = grid_start_x + i * grid_size
-		num =  roundDown(editor\startpos) + int(i*gridspacing) + 1
+		num =  roundDown(editor.startpos) + int(i*gridspacing) + 1
 		color UI_COLOR_DARK
 		text num_x, tl_y + 2, num
 		color UI_COLOR_MID
 		text num_x, tl_y + 1, num
-		//line line_x, editor\y, line_x, editor\y + editor\height
+		//line line_x, editor.y, line_x, editor.y + editor.height
 	next i	
 	
 	return newbars
@@ -860,17 +862,17 @@ function drawPoint(x,y,selected)
 endFunction
 
 function moveAllPointsFrom(trackp, index, amount#)
-	track.Synctrack = toType(trackp)
-	if index >= track\count then
+	track\Synctrack = toType(trackp)
+	if index >= track.count then
 		return false
 	endif
 	
 	ind = index
-	while (ind < track\count)
+	while (ind < track.count)
 		// setEnvpointValue(trackint, newbars#, newvalue#, index)
 		pointp = getEnvpoint(trackp, ind)
-		point.EnvPoint = toType(pointp)
-		point\bars = point\bars + amount
+		point\EnvPoint = toType(pointp)
+		point.bars = point.bars + amount
 		setEnvpoint(trackp, pointp, ind)
 		delete point
 		ind + 1
@@ -883,80 +885,80 @@ endFunction
 // index tells the place where to insert the new point
 // returns void
 function addEnvelopePoint(trackint, envint, index)
-	track.Synctrack = toType(trackint)
-	point.Envpoint = toType(envint)
+	track\Synctrack = toType(trackint)
+	point\Envpoint = toType(envint)
 	
 	offset = index * POINT_STRIDE
-	movesize = (MEMBlockSize(track\mem))-offset
+	movesize = (MEMBlockSize(track.mem))-offset
 	
-	realloc track\mem, MEMBlockSize(track\mem) + POINT_STRIDE
+	realloc track.mem, MEMBlockSize(track.mem) + POINT_STRIDE
 	
-	assert(index <= track\count)
+	assert(index <= track.count)
 	
 	if movesize > 0 then
 		// move rest of the memblock further to make room for the new var
-		memCopy track\mem, offset, track\mem, offset + POINT_STRIDE, movesize
+		memCopy track.mem, offset, track.mem, offset + POINT_STRIDE, movesize
 	endif
 
-	pokeFloat track\mem, offset		, point\bars 
-	pokeFloat track\mem, offset + 4	, point\value 
+	pokeFloat track.mem, offset		, point.bars 
+	pokeFloat track.mem, offset + 4	, point.value 
 	
-	track\count = track\count + 1
+	track.count = track.count + 1
 	//temp = allocEnvpoint(envint)
-	//memCopy temp, 0, track\mem, track\count * 8, 2*4
+	//memCopy temp, 0, track.mem, track.count * 8, 2*4
 	//free temp
 endFunction
 
 function deleteEnvpoint(trackint, index)
-	track.Synctrack = toType(trackint)
-	assert(index < track\count)
+	track\Synctrack = toType(trackint)
+	assert(index < track.count)
 	
-	if track\count = 1 then
+	if track.count = 1 then
 		return false
 	endif
 	
 	offset = index * POINT_STRIDE
-	movesize = (MEMBlockSize(track\mem))-offset
+	movesize = (MEMBlockSize(track.mem))-offset
 	if movesize > 0 then
-		memCopy track\mem, offset + POINT_STRIDE, track\mem, offset, movesize
+		memCopy track.mem, offset + POINT_STRIDE, track.mem, offset, movesize
 	endif
 	
-	realloc track\mem, MEMBlockSize(track\mem) - POINT_STRIDE
+	realloc track.mem, MEMBlockSize(track.mem) - POINT_STRIDE
 	
-	track\count = track\count - 1
+	track.count = track.count - 1
 endFunction
 
 // returns void
 function setEnvpoint(trackint, pointint, index)
-	track.Synctrack = toType(trackint)
-	assert(index < track\count)
+	track\Synctrack = toType(trackint)
+	assert(index < track.count)
 	
 	offset = index * POINT_STRIDE
-	point.Envpoint = toType(pointint)
-	pokeFloat track\mem, offset		, point\bars
-	pokeFloat track\mem, offset + 4	, point\value
+	point\Envpoint = toType(pointint)
+	pokeFloat track.mem, offset		, point.bars
+	pokeFloat track.mem, offset + 4	, point.value
 endFunction
 
 function setEnvpointValue(trackint, newbars#, newvalue#, index)
-	track.Synctrack = toType(trackint)
-	assert(index < track\count)
+	track\Synctrack = toType(trackint)
+	assert(index < track.count)
 	offset = index * POINT_STRIDE
-	pokeFloat track\mem, offset		, newbars
-	pokeFloat track\mem, offset + 4	, newvalue
+	pokeFloat track.mem, offset		, newbars
+	pokeFloat track.mem, offset + 4	, newvalue
 endFunction
 
 // clears the track, inserts one point at (0, 0)
 function clearTrack(trackp)
 	assert(trackp <> UNDEFINED)
-	track.Synctrack = toType(trackp)
+	track\Synctrack = toType(trackp)
 	
-	free track\mem
+	free track.mem
 	
-	track\mem = malloc(4*2)
-	pokeFloat track\mem, 0, 0.0
-	pokeFloat track\mem, 4, 0.0
+	track.mem = malloc(4*2)
+	pokeFloat track.mem, 0, 0.0
+	pokeFloat track.mem, 4, 0.0
 	
-	track\count = 1
+	track.count = 1
 endFunction
 
 // returns a string representation of the memory block contents
@@ -991,26 +993,26 @@ endFunction
 
 // returns an envpoint in a temporary type instance, remember to delete it
 function getEnvpoint(trackint, index)
-	track.Synctrack = toType(trackint)
-	assert(index < track\count)
+	track\Synctrack = toType(trackint)
+	assert(index < track.count)
 	assert(index >= 0)
 	
-	point.Envpoint = new(Envpoint)
-	point\bars	= peekFloat(track\mem, index*POINT_STRIDE)
-	point\value = peekFloat(track\mem, index*POINT_STRIDE + 4)
-	point\index = index
+	point\Envpoint = new(Envpoint)
+	point.bars	= peekFloat(track.mem, index*POINT_STRIDE)
+	point.value = peekFloat(track.mem, index*POINT_STRIDE + 4)
+	point.index = index
 	
 	return toInt(point)
 endFunction
 
 
 function firstPointAfter(trackint, startbar#)
-	track.Synctrack = toType(trackint)
+	track\Synctrack = toType(trackint)
 	
 	// linear search
-	for i=0 to track\count-1
-		point.Envpoint = getEnvpoint(trackint, i)
-		if point\bars >= startbar then
+	for i=0 to track.count-1
+		point\Envpoint = getEnvpoint(trackint, i)
+		if point.bars >= startbar then
 			return toInt(point)
 		endif
 		
@@ -1022,12 +1024,12 @@ endFunction
 
 
 function firstPointBefore(trackint, startbar#)
-	track.Synctrack = toType(trackint)
+	track\Synctrack = toType(trackint)
 	
 	// linear search
-	for i=track\count-1 to 0 step -1
-		point.Envpoint = getEnvpoint(trackint, i)
-		if point\bars <= startbar then
+	for i=track.count-1 to 0 step -1
+		point\Envpoint = getEnvpoint(trackint, i)
+		if point.bars <= startbar then
 			return toInt(point)
 		endif
 		
@@ -1039,51 +1041,51 @@ endFunction
 
 // returns a pointer to a created Synctrack type instance
 function createSyncTrack(name$)
-	track.Synctrack = new (Synctrack)
-	track\name = name
-	track\count = 1
-	//track\mem = allocEnvelopePoint(0.0, 0.0)
-	track\mem = malloc(4*2)
-	pokeFloat track\mem, 0, 0.0
-	pokeFloat track\mem, 4, 0.0
+	track\Synctrack = new (Synctrack)
+	track.name = name
+	track.count = 1
+	//track.mem = allocEnvelopePoint(0.0, 0.0)
+	track.mem = malloc(4*2)
+	pokeFloat track.mem, 0, 0.0
+	pokeFloat track.mem, 4, 0.0
 	
 	return toInt(track)
 endFunction
 
 function getEnvelopeValue(trackp, bars#)
-	track.Synctrack = toType(trackp)
+	track\Synctrack = toType(trackp)
 	
-	firstpoint.EnvPoint = toType(getEnvPoint(trackp, 0))
-	lastpoint.EnvPoint = toType(getEnvPoint(trackp, track\count-1))
+	firstpoint\EnvPoint = toType(getEnvPoint(trackp, 0))
+	lastpoint\EnvPoint = toType(getEnvPoint(trackp, track.count-1))
 	
-	if bars < firstpoint\bars then
-		return firstpoint\value
+	if bars < firstpoint.bars then
+		return firstpoint.value
 	endif
 	
-	if bars > lastpoint\bars then
-		return lastpoint\value
+	if bars > lastpoint.bars then
+		return lastpoint.value
 	endif
 
 	// is this redundant?
-	if track\count = 1 then
-		return firstpoint\value
+	if track.count = 1 then
+		return firstpoint.value
 	endif
 	
 	pointp = firstPointBefore(trackp, bars)
 	
 	if pointp <> UNDEFINED then
-		point.EnvPoint = toType(pointp)
+		point\EnvPoint = toType(pointp)
 
-		if point\index = track\count-1 then
-			return point\value
+		if point.index = track.count-1 then
+			return point.value
 		endif
 		
-		nextPoint.EnvPoint = toType(getEnvPoint(trackp, point\index + 1))
-		value_diff# = nextPoint\value - point\value
-		time_diff# = nextPoint\bars - point\bars
+		nextPoint\EnvPoint = toType(getEnvPoint(trackp, point.index + 1))
+		value_diff# = nextPoint.value - point.value
+		time_diff# = nextPoint.bars - point.bars
 		
-		progress# = (bars - point\bars) / time_diff#
-		return lerp(point\value, nextPoint\value, progress)
+		progress# = (bars - point.bars) / time_diff#
+		return lerp(point.value, nextPoint.value, progress)
 	endif
 	
 	return 0.0
