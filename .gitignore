@@ -6,5 +6,4 @@ test.dat
 test*.dat
 pythonlocation.txt
 
-#files for testing
-seek/zetaforce.mp3 
+*zetaforce.mp3*
