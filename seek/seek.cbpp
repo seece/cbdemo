@@ -1,0 +1,118 @@
+
+//#define STANDALONE
+
+#define UNDEFINED -1
+#define ERRORLOG(_message) addText (_message)
+#define DEBUGLOG(_message) addText (_message)
+
+#define DAEMON_URL "127.0.0.1/default/"
+#define FOOBAR_PATH "foobar\foobar2000.exe"
+
+#define playQuery "?cmd=Start&param1="
+#define toggleQuery "?cmd=PlayOrPause&param1="
+#define volumeQuery(_percent) ("?cmd=Volume&param1=" + _percent)
+#define seekQuery(_secs) ("?cmd=Seek&param1=" + _secs)
+#define stopQuery "?cmd=Stop&param1="
+
+include "cbNetwork.cb"
+
+const ERROR_NONE = 0 
+global errorcode
+errorcode = ERROR_NONE
+
+// alunperin vesq:n funktio
+function getHTTPString$(_path$)
+    nRet = HTTPGet(_path)
+    // Tuli jotain muuta kuin olisi pitänyt
+   // if nRet <> 200 then makeError("HTTPGet() FAILED!"+chr(10)+chr(13)+nRet+": "+GetNetErrorString(nRet))
+	DEBUGLOG("GET " + _path)
+	if nRet <> 200 then ERRORLOG("HTTPGet() FAILED!"+chr(10)+chr(13)+nRet+": "+GetNetErrorString(nRet))
+	//if nRet <> 200 then 
+	//	errorcode = nRet
+	//	return ""
+	//endif
+
+    HTTPLoadContent()
+    dim palautus as string
+    for i = 1 to HTTP_ContentLength
+        palautus = palautus + chr(_Net_GetByte())
+    next i
+
+	errorcode = ERROR_NONE
+    return palautus
+endFunction
+
+
+#ifdef STANDALONE
+loadToFoobar("zetaforce.mp3")
+//clearFoobarList()
+//playWithFoobar("zetaforce.mp3")
+waitUntilConnected()
+//stopMusic()
+'hideFoobar()
+
+url$ = DAEMON_URL
+response$ = getHTTPString(url + command_toggle)
+if errorcode <> ERROR_NONE then makeError "connection error: " + errorcode
+addText "response: " + response$
+
+repeat
+	if keyHit(cbKeySpace) then togglePlaying()
+	if keyHit(cbKeyA) then seekMusic(30)
+	drawScreen
+until keyHit(cbKeyReturn)
+
+killFoobar()
+#endif
+
+function waitUntilConnected()
+	print "waiting for foobar2000..."
+	repeat
+		error = HTTPGet(DAEMON_URL)
+		wait 100
+	until error = 200
+endFunction
+
+function clearFoobarList()
+	foocommand$ = FOOBAR_PATH  + " empty.fpl"
+	execute foocommand$
+endFunction
+
+function togglePlaying()
+	getHTTPString(DAEMON_URL + toggleQuery)
+endFunction
+
+
+function loadToFoobar(songpath$)
+	foocommand$ = FOOBAR_PATH  + " /add " + chr(34) + songpath$ + chr(34) + " /hide"
+	execute foocommand$
+endFunction
+
+function playWithFoobar(songpath$)
+	
+	foopath$ = "foobar\foobar2000.exe"
+	foocommand$ = foopath  + " " + chr(34) + songpath$ + chr(34) + " /hide"
+	'makeError foocommand$
+	execute foocommand$
+endFunction
+
+function killFoobar()
+	execute "cmd /c taskkill /IM foobar2000.exe"
+endFunction
+
+function hideFoobar()
+	foopath$ = "foobar\foobar2000.exe"
+	foocommand$ = foopath  + " /hide"
+	execute foocommand
+endFunction 
+
+function stopMusic()
+	getHTTPString(DAEMON_URL + stopQuery)
+endFunction
+
+function seekMusic(secs)
+	getHTTPString(DAEMON_URL + seekQuery(secs))
+endFunction
+
+
+
