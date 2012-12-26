@@ -233,7 +233,9 @@ updateHotkeys:
 return
 
 draw_editor_misc:
-	text 8, screenHeight() - 20, editor.status
+	statusstr$ = editor.status
+	if muted then statusstr = statusstr + " (muted)"
+	text 8, screenHeight() - 20, statusstr
 	text 8, screenHeight() - 32, "time (secs): " + t#
 	text 8, screenHeight() - 44, "bars: " + bars#
 	text 8, screenHeight() - 56, "FPS: " + FPS()
