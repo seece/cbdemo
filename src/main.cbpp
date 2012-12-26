@@ -1,18 +1,16 @@
 
 #pragma anticrap
+//#define RELEASE
 
 global MUSIC_PATH$
 MUSIC_PATH = "zetaforce.mp3" // music path root is currently at ../seek
 global tempo#
 tempo = 130.0
-//#define RELEASE
 
 #ifdef RELEASE
 include "inc/editor_release.cb"
 #else
 include "inc/editor_debug.cb"
-//include "../seek/cbnetwork.cb"
-//include "../seek/foobar.cb"
 #endif
 
 demoInit:

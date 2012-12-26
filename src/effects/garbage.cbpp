@@ -1,0 +1,16 @@
+SCREEN 640,480
+
+msg$ = generateGarbage(140)
+text 10, 10, msg
+drawScreen
+waitKey
+
+
+function generateGarbage(length)
+	s$ = ""
+	for i=0 to length
+		s = s + chr(rand(32, 126))
+	next i
+	
+	return s
+endFunction
