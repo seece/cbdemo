@@ -1,6 +1,8 @@
 
 #pragma anticrap
 
+global MUSIC_PATH$
+MUSIC_PATH = "zetaforce.mp3" // music path root is currently at ../seek
 global tempo#
 tempo = 130.0
 //#define RELEASE
@@ -9,18 +11,12 @@ tempo = 130.0
 include "inc/editor_release.cb"
 #else
 include "inc/editor_debug.cb"
-include "../seek/cbnetwork.cb"
-include "../seek/foobar.cb"
+//include "../seek/cbnetwork.cb"
+//include "../seek/foobar.cb"
 #endif
 
 demoInit:
 	setWindow "peisik demo"
-	
-	#ifdef RELEASE
-		// play music here
-	#else
-		
-	#endif
 return
 
 drawDemo:

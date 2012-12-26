@@ -34,6 +34,10 @@
 // #define POINT_STRIDE 8
 // #define UNDEFINED -1
 
+// #ifdef USE_EDITOR
+	include "../seek/cbnetwork.cb"
+	include "../seek/foobar.cb"
+// #endif
 include "inc/sync.cb"
 
 const SCREEN_WIDTH = 640
@@ -42,9 +46,12 @@ const SCREEN_HEIGHT = 480
 // #define PICTURE_HEIGHT int(SCREEN_WIDTH * (9.0/16.0))
 
 // #ifdef USE_EDITOR
-// #define EDITOR_WIDTH int(SCREEN_WIDTH*1.8)
-SCREEN int(SCREEN_WIDTH*1.8), SCREEN_HEIGHT + 200, 0, 1
+// 	#define EDITOR_WIDTH int(SCREEN_WIDTH*1.8)
+	SCREEN int(SCREEN_WIDTH*1.8), SCREEN_HEIGHT + 200, 0, 1
+	SAFEEXIT OFF
+	clsColor 16,16,16
 // #else
+
 
 
 frameLimit 60
@@ -75,16 +82,29 @@ gosub trackInit
 
 
 
+
+
+
+
+
 gosub main
 end
 
 timeInit:
 	tstart=timer()
 	pause_start=timer()
+	frames = 0
 	pause_offset# = 0.0
 	time_offset# = 0.0
+
+// 	#ifdef USE_EDITOR
+		playing = false
+		muted = false
+		setVolume(100)
+// 	#else
+
+
 	
-	playing = true
 	t# = 0.0
 	bars# = 0.0
 return
@@ -107,8 +127,24 @@ trackInit:
 return	
 
 main:
-	tempo# = 130.0
+	
 	gosub demoInit
+		
+
+
+
+
+	
+// 	#ifdef USE_EDITOR
+		chDir "../seek"
+		loadToFoobar(MUSIC_PATH)
+		waitUntilConnected()
+		chDir "../src"
+		
+// 	#else
+
+
+	
 	gosub timeInit
 	
 	repeat
@@ -131,7 +167,11 @@ main:
 		gosub drawBuffer
 		
 		drawScreen
-	forever
+	until keyHit(cbKeyEsc)
+	
+// 	#ifdef USE_EDITOR
+		killFoobar()
+// 	#endif
 return
 
 updateTracks:
@@ -176,6 +216,16 @@ updateHotkeys:
 		load_result = loadMultipleTracks(12)
 		editor\status = "loaded " + load_result + " tracks"
 	endif
+		
+	if keyHit(cbKeyM) then
+		if muted then
+			setVolume(100)
+			muted = false
+		else
+			setVolume(0)
+			muted = true
+		endif
+	endif
 	
 	// toggle editor with TAB
 	if keyHit(15) then flag_draw_editor = (flag_draw_editor xor 1)
@@ -183,10 +233,20 @@ updateHotkeys:
 return
 
 draw_editor_misc:
-	text 8, screenHeight() - 20, editor\status
+	statusstr$ = editor\status
+	if muted then statusstr = statusstr + " (muted)"
+	text 8, screenHeight() - 20, statusstr
 	text 8, screenHeight() - 32, "time (secs): " + t#
 	text 8, screenHeight() - 44, "bars: " + bars#
 	text 8, screenHeight() - 56, "FPS: " + FPS()
+	
+	// clear the HTTP debug text every once in a while
+	if frames mod 100 = 0 or frames < 2 then 
+		clearText 
+		locate SCREEN_WIDTH + 10, 0
+	endif
+	
+	if keyDown(cbKeyF1) then gosub drawHelp
 return
 
 // sori tästä tuli vähän sotkuinen
@@ -238,6 +298,8 @@ updateTime:
 		gosub updateTimeHotkeys
 // 	#endif	
 	
+	frames + 1
+	
 	if playing then
 	
 	else
@@ -252,6 +314,8 @@ return
 
 // #ifdef USE_EDITOR
 updateTimeHotkeys:
+	color cbSilver	// for cbNetwork error messages added with addText
+
 	if keyHit(cbKeyBackspace) then
 		time_offset = 0.0
 		pause_offset = 0.0
@@ -260,12 +324,23 @@ updateTimeHotkeys:
 		tstart = timer()
 	endif
 
+	// PANIC button
+	if keyHit(cbKeyF12) then
+		stopMusic()	
+		playing = false
+	endif
+
 	if keyHit(cbKeySpace) then 
+		seekMusic(roundDown((bars * ((60.0/ tempo)*4.0))))
+		togglePlaying()	// foobar command
+		
 		if playing then
 			playing = false
 			pause_start = timer()
 		else
 			time_offset = time_offset + pause_offset
+			// snap to a full second
+			time_offset = time_offset - ((bars * ((60.0/ tempo)*4.0))-roundDown((bars * ((60.0/ tempo)*4.0))))
 			pause_offset = 0.0
 			playing = true
 		endif
@@ -289,6 +364,33 @@ function saveMultipleTracks(until_track)
 	
 	return saved_tracks
 endFunction
+
+drawHelp:
+	'cls
+	clearText 
+	color cbWhite
+	locate 10,10
+	addText "help"
+	addText ""
+	addText "SPACE play/pause"
+	addText ""
+	addText "F6 save all tracks"
+	addText "F9 load all tracks"
+	addText "WASD move ON the timeline"
+	addText "    hold LSHIFT to move faster"
+	addText "left and right arrow keys to skip in time"
+	addText ""
+	addText "M mute audio"
+	addText "F12 stop audio"
+	addText ""
+	addText "RMB to add point"
+	addText "LMB to drag points around"
+	addText "    hold LCTRL to move all points to the right"
+	addText "    hold LALT to disable snap to grid"
+	addText "hold x and click to delete points"
+	addText "    or press DEL when point is selected"
+
+return
 // #endif
 
 // loads all track ID's between 0 and until_track-1

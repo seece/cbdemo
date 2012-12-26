@@ -34,6 +34,10 @@
 // #define POINT_STRIDE 8
 // #define UNDEFINED -1
 
+
+
+
+
 include "inc/sync.cb"
 
 const SCREEN_WIDTH = 640
@@ -45,8 +49,11 @@ const SCREEN_HEIGHT = 480
 
 
 
-SCREEN SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1
+
+
+	SCREEN SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1
 // #endif
+
 frameLimit 60
 
 buffer=makeImage(SCREEN_WIDTH, int(SCREEN_WIDTH * (9.0/16.0))) // kuvasuhde 16:9
@@ -75,16 +82,29 @@ gosub trackInit
 // #endif
 
 
+
+
+
+
+
 gosub main
 end
 
 timeInit:
 	tstart=timer()
 	pause_start=timer()
+	frames = 0
 	pause_offset# = 0.0
 	time_offset# = 0.0
+
+
+
+
+
+
+		playing = true
+// 	#endif
 	
-	playing = true
 	t# = 0.0
 	bars# = 0.0
 return
@@ -107,8 +127,24 @@ trackInit:
 return	
 
 main:
-	tempo# = 130.0
+	
 	gosub demoInit
+		
+
+
+
+
+	
+
+
+
+
+
+
+
+		playSound MUSIC_PATH
+// 	#endif
+	
 	gosub timeInit
 	
 	repeat
@@ -131,7 +167,11 @@ main:
 		gosub drawBuffer
 		
 		drawScreen
-	forever
+	until keyHit(cbKeyEsc)
+	
+
+
+
 return
 
 updateTracks:
@@ -233,10 +273,32 @@ return
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 updateTime:
 
 
 
+	
+	frames + 1
 	
 	if playing then
 	
@@ -249,6 +311,46 @@ updateTime:
 	beats# = (t/60.0)*(tempo)
 	bars# = beats/4.0 
 return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

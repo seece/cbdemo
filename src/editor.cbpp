@@ -389,6 +389,11 @@ drawHelp:
 	addText "    hold LALT to disable snap to grid"
 	addText "hold x and click to delete points"
 	addText "    or press DEL when point is selected"
+	addText ""
+	addText "timeline"
+	addText "skip with LMB"
+	addText "hold RMB and drag from left to right to loop a section"
+	addText "    click with RMB to deselect loop"
 
 return
 #endif
