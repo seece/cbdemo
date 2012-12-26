@@ -1,16 +1,26 @@
 
 #pragma anticrap
 
+global tempo#
+tempo = 130.0
 //#define RELEASE
 
 #ifdef RELEASE
 include "inc/editor_release.cb"
 #else
 include "inc/editor_debug.cb"
+include "../seek/cbnetwork.cb"
+include "../seek/foobar.cb"
 #endif
 
 demoInit:
 	setWindow "peisik demo"
+	
+	#ifdef RELEASE
+		// play music here
+	#else
+		
+	#endif
 return
 
 drawDemo:

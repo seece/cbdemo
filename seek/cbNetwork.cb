@@ -1,4 +1,4 @@
-Const NET_DLL_FILE$  = "cbNetwork.dll"
+const NET_DLL_FILE$  = "cbNetwork.dll"
 
 //vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 // Muistipalojen käsittely.
@@ -119,10 +119,11 @@ Global gNetDllVersion#
 gNetDllVersion = Net_DLL_Version()
 If gNetDllVersion = 0 Then
     MakeError "File cbNetwork.dll not be found!"
-EndIf
-If gNetDllVersion <> 1.0 Then
-    MakeError "Incorrect library version (cbNetwork.dll)!"
-EndIf
+endif
+//if gNetDllVersion <> 1.0 then
+if false then
+    makeError "Incorrect library version (cbNetwork.dll)!"
+endif
 
 Function Net_DLL_Version#()
     _Net_InitMemBlock(4)

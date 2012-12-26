@@ -159,12 +159,18 @@ pause_offset# = 0.0
 time_offset# = 0.0
 bar_offset# = 0.0
 
-playing = true
+#ifdef USE_EDITOR_COMPONENTS
+	playing = false
+#else
+	playing = true
+#endif
+
 old_t# = 0.0
 t# = 0.0
 bars# = 0.0
 
 selected_track = 0
+
 
 repeat
 	gosub update_time

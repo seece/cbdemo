@@ -14,7 +14,7 @@
 // #define seekQuery(_secs) ("?cmd=Seek&param1=" + _secs)
 // #define stopQuery "?cmd=Stop&param1="
 
-include "cbNetwork.cb"
+// include "cbNetwork.cb"
 
 const ERROR_NONE = 0 
 global errorcode
