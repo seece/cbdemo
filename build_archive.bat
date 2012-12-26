@@ -7,6 +7,7 @@ set tempdir=release\temp
 set infodir=release\nfo
 set archivedir=release\archives
 set assetdir=src\assets
+set syncdir=src\sync
 set sourcedir=src
 set binarypath=src\cbRun.exe
 REM the final binary name
@@ -19,6 +20,7 @@ mkdir %tempdir%
 mkdir %tempdir%\assets
 xcopy %infodir% %tempdir% /Y /E
 xcopy %assetdir% %tempdir%\assets /Y /E
+xcopy %syncdir% %tempdir%\sync\* /Y /E
 copy %binarypath% %tempdir%\%binaryname%
 
 del %sourcearchive%
