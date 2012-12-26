@@ -4,7 +4,7 @@
 #define USE_EDITOR
 #define USE_TEST_EFFECTS
 
-#define EDITOR_HEIGHT 200
+#define EDITOR_HEIGHT 150
 #define SEEK_SPEED 0.4
 #define TRACK_AMOUNT 12
 
@@ -46,8 +46,8 @@ const SCREEN_HEIGHT = 480
 #define PICTURE_HEIGHT int(SCREEN_WIDTH * (9.0/16.0))
 
 #ifdef USE_EDITOR
-	#define EDITOR_WIDTH int(SCREEN_WIDTH*1.8)
-	SCREEN EDITOR_WIDTH, SCREEN_HEIGHT + EDITOR_HEIGHT, 0, 1
+	#define EDITOR_WIDTH int(min(1024, int(SCREEN_WIDTH*1.5)))
+	SCREEN EDITOR_WIDTH, 570, 0, 1
 	SAFEEXIT OFF
 	clsColor 16,16,16
 #else
@@ -234,11 +234,13 @@ return
 
 draw_editor_misc:
 	statusstr$ = editor.status
+	info_x = SCREEN_WIDTH + 10
+	info_y = SCREEN_HEIGHT - 150
 	if muted then statusstr = statusstr + " (muted)"
-	text 8, screenHeight() - 20, statusstr
-	text 8, screenHeight() - 32, "time (secs): " + t#
-	text 8, screenHeight() - 44, "bars: " + bars#
-	text 8, screenHeight() - 56, "FPS: " + FPS()
+	text info_x, info_y - 20, statusstr
+	text info_x, info_y - 32, "time (secs): " + t#
+	text info_x, info_y - 44, "bars: " + bars#
+	text info_x, info_y - 56, "FPS: " + FPS()
 	
 	// clear the HTTP debug text every once in a while
 	if frames mod 100 = 0 or frames < 2 then 
