@@ -1,11 +1,54 @@
-SCREEN 640,480
+SCREEN 640,360
 
-msg$ = generateGarbage(140)
-text 10, 10, msg
-drawScreen
+const FONT_CONSOLE = 0
+dim fonts(0)
+
+
+fonts(FONT_CONSOLE) = loadFont("consolas", 12)
+drawToWorld OFF, OFF, OFF
+garbage = makeGarbageImage(640,360*2)
+
+
+repeat
+	// scroll the text
+	ypos = timer() * 0.1 
+	drawImage garbage, 0, ypos mod imageHeight(garbage)
+	drawImage garbage, 0, ypos mod imageHeight(garbage) - imageHeight(garbage)
+
+	drawScreen
+forever
 waitKey
 
+function makeGarbageImage(width, height)
+	fontw# = 6.2
+	fonth = 11
+	
+	rows = roundDown(height/fonth)
+	maxlength = roundDown(width/fontw)-1
+	
+	rowimg = makeImage(width, 20)
+	img = makeImage(width, height)
+	setFont fonts(FONT_CONSOLE)
+	
+	drawToImage rowimg
+	for i=0 to rows-1
+		
+		msg$ = generateGarbage(rand(0, maxlength))
+		color 0,0,0
+		box 0,0,imageWidth(rowimg), imageHeight(rowimg),true
+		color 255, 255, 255
+		text 2 , 2, msg
+		// fucking "my y-axis is flipped" bug
+		copyBox 0,0, imageWidth(rowimg), imageHeight(rowimg), 0, i*fonth,image(rowimg),image(img)
+		//addText "i: " + i
+	next i
+	
+	drawToScreen
+	
+	return img
+endFunction
 
+// TODO add proper markov chain here
 function generateGarbage(length)
 	s$ = ""
 	for i=0 to length
