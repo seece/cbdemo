@@ -114,5 +114,9 @@ function seekMusic(secs)
 	getHTTPString("127.0.0.1/default/" + ("?cmd=Seek&param1=" + secs))
 endFunction
 
+function setVolume(percent)
+	getHTTPString("127.0.0.1/default/" + ("?cmd=Volume&param1=" + percent))
+endFunction 
+
 
 

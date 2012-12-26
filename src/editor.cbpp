@@ -49,9 +49,11 @@ const SCREEN_HEIGHT = 480
 	#define EDITOR_WIDTH int(SCREEN_WIDTH*1.8)
 	SCREEN EDITOR_WIDTH, SCREEN_HEIGHT + EDITOR_HEIGHT, 0, 1
 	SAFEEXIT OFF
+	clsColor 16,16,16
 #else
 	SCREEN SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1
 #endif
+
 frameLimit 60
 
 buffer=makeImage(PICTURE_WIDTH, PICTURE_HEIGHT) // kuvasuhde 16:9
@@ -91,11 +93,14 @@ end
 timeInit:
 	tstart=timer()
 	pause_start=timer()
+	frames = 0
 	pause_offset# = 0.0
 	time_offset# = 0.0
 
 	#ifdef USE_EDITOR
 		playing = false
+		muted = false
+		setVolume(100)
 	#else
 		playing = true
 	#endif
@@ -211,6 +216,16 @@ updateHotkeys:
 		load_result = loadMultipleTracks(TRACK_AMOUNT)
 		editor.status = "loaded " + load_result + " tracks"
 	endif
+		
+	if keyHit(cbKeyM) then
+		if muted then
+			setVolume(100)
+			muted = false
+		else
+			setVolume(0)
+			muted = true
+		endif
+	endif
 	
 	// toggle editor with TAB
 	if keyHit(15) then flag_draw_editor = toggle(flag_draw_editor)
@@ -222,6 +237,14 @@ draw_editor_misc:
 	text 8, screenHeight() - 32, "time (secs): " + t#
 	text 8, screenHeight() - 44, "bars: " + bars#
 	text 8, screenHeight() - 56, "FPS: " + FPS()
+	
+	// clear the HTTP debug text every once in a while
+	if frames mod 100 = 0 or frames < 2 then 
+		clearText 
+		locate SCREEN_WIDTH + 10, 0
+	endif
+	
+	if keyDown(cbKeyF1) then gosub drawHelp
 return
 
 // sori tästä tuli vähän sotkuinen
@@ -273,6 +296,8 @@ updateTime:
 		gosub updateTimeHotkeys
 	#endif	
 	
+	frames + 1
+	
 	if playing then
 	
 	else
@@ -287,6 +312,8 @@ return
 
 #ifdef USE_EDITOR
 updateTimeHotkeys:
+	color cbSilver	// for cbNetwork error messages added with addText
+
 	if keyHit(cbKeyBackspace) then
 		time_offset = 0.0
 		pause_offset = 0.0
@@ -310,7 +337,7 @@ updateTimeHotkeys:
 			pause_start = timer()
 		else
 			time_offset = time_offset + pause_offset
-			// snap to nearest second
+			// snap to a full second
 			time_offset = time_offset - frac(barsToSecs(bars, tempo))
 			pause_offset = 0.0
 			playing = true
@@ -335,6 +362,33 @@ function saveMultipleTracks(until_track)
 	
 	return saved_tracks
 endFunction
+
+drawHelp:
+	'cls
+	clearText 
+	color cbWhite
+	locate 10,10
+	addText "help"
+	addText ""
+	addText "SPACE play/pause"
+	addText ""
+	addText "F6 save all tracks"
+	addText "F9 load all tracks"
+	addText "WASD move ON the timeline"
+	addText "    hold LSHIFT to move faster"
+	addText "left and right arrow keys to skip in time"
+	addText ""
+	addText "M mute audio"
+	addText "F12 stop audio"
+	addText ""
+	addText "RMB to add point"
+	addText "LMB to drag points around"
+	addText "    hold LCTRL to move all points to the right"
+	addText "    hold LALT to disable snap to grid"
+	addText "hold x and click to delete points"
+	addText "    or press DEL when point is selected"
+
+return
 #endif
 
 // loads all track ID's between 0 and until_track-1

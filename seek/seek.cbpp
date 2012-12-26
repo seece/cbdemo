@@ -1,5 +1,5 @@
 
-//#define STANDALONE
+#define STANDALONE
 
 #define UNDEFINED -1
 #define ERRORLOG(_message) addText (_message)
@@ -113,6 +113,10 @@ endFunction
 function seekMusic(secs)
 	getHTTPString(DAEMON_URL + seekQuery(secs))
 endFunction
+
+function setVolume(percent)
+	getHTTPString(DAEMON_URL + volumeQuery(percent))
+endFunction 
 
 
 
