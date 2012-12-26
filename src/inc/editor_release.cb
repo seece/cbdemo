@@ -4,7 +4,7 @@
 //#define USE_EDITOR
 //#define USE_TEST_EFFECTS
 
-// #define EDITOR_HEIGHT 200
+// #define EDITOR_HEIGHT 150
 // #define SEEK_SPEED 0.4
 // #define TRACK_AMOUNT 12
 
@@ -293,6 +293,8 @@ return
 
 
 
+
+
 updateTime:
 
 
@@ -311,6 +313,11 @@ updateTime:
 	beats# = (t/60.0)*(tempo)
 	bars# = beats/4.0 
 return
+
+
+
+
+
 
 
 

@@ -1,8 +1,8 @@
 // precompiler options
 #pragma anticrap
 
-#define USE_EDITOR
-#define USE_TEST_EFFECTS
+//#define USE_EDITOR
+//#define USE_TEST_EFFECTS
 
 #define EDITOR_HEIGHT 150
 #define SEEK_SPEED 0.4
@@ -63,8 +63,8 @@ dim track_values(TRACK_AMOUNT) as float
 gosub trackInit
 
 #ifdef USE_EDITOR
-	font = loadFont("tahoma", 14)
-	setFont font
+	editorfont = loadFont("tahoma", 14)
+	setFont editorfont
 
 	editorp = createEnvEditor(0, PICTURE_HEIGHT, EDITOR_WIDTH, EDITOR_HEIGHT-24, 0.0, 10.0)
 	editor\EnvEditor = toType(editorp)
@@ -152,6 +152,7 @@ main:
 		gosub updateTime
 		
 		#ifdef USE_EDITOR
+			setFont editorfont
 			gosub updateEditor
 			gosub updateHotkeys
 			gosub draw_action_buttons
