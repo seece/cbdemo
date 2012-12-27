@@ -4,8 +4,9 @@
 temp/
 test.dat
 test*.dat
-pythonlocation.txt
+pythonlocation
 7ziplocation
+cblocation
 
 *zetaforce.mp3*
 *seek/foobar/playlists/*
