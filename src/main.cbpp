@@ -3,16 +3,22 @@
 //#define RELEASE
 
 global MUSIC_PATH$
-MUSIC_PATH = "assets/zetaforce.mp3" // music path is at src/
+MUSIC_PATH = "assets/musa.mp3" // music path is at src/
 global tempo#
 tempo = 130.0
 TRACK_AMOUNT = 19
+
+const FONT_CONSOLE = 0
+dim fonts(0)
+fonts(FONT_CONSOLE) = loadFont("consolas", 12)
 
 #ifdef RELEASE
 include "inc/editor_release.cb"
 #else
 include "inc/editor_debug.cb"
 #endif
+
+include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 
 demoInit:
 	setWindow "peisik demo"
