@@ -19,6 +19,10 @@ demoInit:
 	gTrackNames = "ou|jee|toimiiko|taeae"
 return
 
+scaleBuffer:
+	// tee 2x skaalaus t‰‰ll‰ kuvalle gBuffer
+return
+
 drawDemo:
 	color 255, 0, 0
 	box 0,0,640,480,1

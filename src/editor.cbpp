@@ -79,7 +79,8 @@ const SCREEN_HEIGHT = 480
 
 frameLimit 60
 
-buffer=makeImage(PICTURE_WIDTH, PICTURE_HEIGHT) // kuvasuhde 16:9
+global gBuffer
+gBuffer=makeImage(PICTURE_WIDTH, PICTURE_HEIGHT) // kuvasuhde 16:9
 
 dim tracks(TRACK_AMOUNT)	// an array of track pointers
 dim track_values(TRACK_AMOUNT) as float
@@ -184,10 +185,11 @@ main:
 		
 		gosub updateTracks
 		
-		drawToImage buffer
+		drawToImage gBuffer
 		gosub drawDemo
 		drawToScreen
 		
+		gosub scaleBuffer
 		gosub drawBuffer
 		
 		drawScreen
@@ -438,9 +440,9 @@ endFunction
 
 drawBuffer:
 	#ifdef USE_EDITOR
-		drawImage buffer, 0, 0
+		drawImage gBuffer, 0, 0
 	#else
-		drawImage buffer, 0, (screenHeight()-PICTURE_HEIGHT)/2
+		drawImage gBuffer, 0, (screenHeight()-PICTURE_HEIGHT)/2
 	#endif
 	
 return
@@ -448,6 +450,10 @@ return
 #ifdef STANDALONE
 demoInit:
 	// nothing here!
+return
+
+scaleBuffer:
+	// no scaling
 return
 
 drawDemo:
