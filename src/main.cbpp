@@ -17,10 +17,18 @@ include "inc/editor_debug.cb"
 demoInit:
 	setWindow "peisik demo"
 	gTrackNames = "ou|jee|toimiiko|taeae"
+    
 return
 
 scaleBuffer:
-	// tee 2x skaalaus t‰‰ll‰ kuvalle gBuffer
+    for i=180 to 0 step -1
+        copyBox 0, i,320,1,0, i*2,image(gBuffer),image(gBuffer)
+        copyBox 0, i,320,1,0, i*2+1,image(gBuffer),image(gBuffer)
+    next i
+    for i=320 to 0 step -1
+        copyBox i,0,1,360,i*2,0,image(gBuffer),image(gBuffer)
+        copyBox i,0,1,360,i*2+1,0,image(gBuffer),image(gBuffer)
+    next i
 return
 
 drawDemo:
@@ -52,7 +60,7 @@ atominEffu:
             pz#=z-8
             
             px2#=px
-            py2#=py+2
+            py2#=py+2.2
             pz2#=pz
             
             gosub a_line
@@ -120,6 +128,4 @@ a_kamera2: //should be identical to a_kamera, except for variable names
     px2=cos(a_a+a_camerar)*a_d
     pz2=sin(a_a+a_camerar)*a_d
 return
-
-
 
