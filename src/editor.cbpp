@@ -161,7 +161,7 @@ main:
 	#ifdef USE_EDITOR
 		selector.trackNames = gTrackNames
 		chDir "../seek"
-		loadToFoobar(MUSIC_PATH)
+		loadToFoobar("../src/" + MUSIC_PATH)
 		waitUntilConnected()
 		chDir "../src"
 		
