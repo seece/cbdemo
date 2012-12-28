@@ -16,15 +16,17 @@ if (%pythonpath%) == () goto error_no_python
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_RELEASE src\editor.cbpp %sourcedir%\inc\editor_release.cb
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_DEBUG src\editor.cbpp %sourcedir%\inc\editor_debug.cb
 @echo off
-
+pause
 exit /b
 
 :error_no_cb
 echo Please save your CoolBasic editor location to file cblocation
+pause
 exit /b
 
 :error_no_python
 echo Please save your Python interpreter  location to file pythonlocation
+pause
 exit /b
 
 EndLocal
