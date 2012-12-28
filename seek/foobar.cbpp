@@ -1,5 +1,7 @@
 
+#ifndef BUILD_AS_LIB
 #define STANDALONE
+#endif
 
 #define UNDEFINED -1
 #define ERRORLOG(_message) addText (_message)
@@ -14,7 +16,9 @@
 #define seekQuery(_secs) ("?cmd=Seek&param1=" + _secs)
 #define stopQuery "?cmd=Stop&param1="
 
+#ifdef STANDALONE
 include "cbNetwork.cb"
+#endif
 
 const ERROR_NONE = 0 
 global errorcode
