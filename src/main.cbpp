@@ -5,7 +5,7 @@
 global MUSIC_PATH$
 MUSIC_PATH = "assets/musa.mp3" // music path is at src/
 global tempo#
-tempo = 130.0
+tempo = 122.0
 TRACK_AMOUNT = 19
 
 const FONT_CONSOLE = 0

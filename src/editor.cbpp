@@ -108,7 +108,7 @@ gosub trackInit
 
 #ifdef STANDALONE
 	global tempo#
-	tempo = 130.0
+	tempo = 122.0
 #endif
 
 
