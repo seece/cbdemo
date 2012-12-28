@@ -140,12 +140,12 @@ trackInit:
 		
 		track\SyncTrack = toType(tracks(i))
 		
-		point\Envpoint = new (Envpoint)	// only a temporary var
-		point.bars = 0.0
-		point.value = 0.0
-		addEnvelopePoint(tracks(i), toInt(point), track.count)
+		//point\Envpoint = new (Envpoint)	// only a temporary var
+		//point.bars = 0.0
+		//point.value = 0.0
+		//addEnvelopePoint(tracks(i), toInt(point), track.count)
 		//addEnvelopePoint(tracks(i), toInt(point), track\count)
-		delete point
+		//delete point
 	next i
 	
 	selected_track = 0

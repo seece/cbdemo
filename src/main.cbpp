@@ -23,6 +23,9 @@ include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 demoInit:
 	setWindow "peisik demo"
 	gTrackNames = "cDist|cAng|cRot"
+	#ifndef RELEASE
+		gResetFoobar = true
+	#endif
     
 return
 
