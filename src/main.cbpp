@@ -16,7 +16,7 @@ include "inc/editor_debug.cb"
 
 demoInit:
 	setWindow "peisik demo"
-	gTrackNames = "ou|jee|toimiiko|taeae"
+	gTrackNames = "cDist|cAng|cRot"
     
 return
 
@@ -32,14 +32,8 @@ scaleBuffer:
 return
 
 drawDemo:
-	color 255, 0, 0
+	color 20, 20, 20
 	box 0,0,640,480,1
-	
-	c = 200 * track_values(2)
-	color c,c,c
-	x_pos = 100 + track_values(0) * 300
-	y_pos = 100 + track_values(1) * 200
-	//box x_pos, y_pos, 100, 100, true
     
     gosub atominEffu
    
@@ -48,10 +42,10 @@ return
 
 atominEffu:
     //kamera pyörii jonkun jännän jutskan ympärillä. linejä. bucketointi lopuksi jos tarvii
-    
-    a_camerad#=track_values(3)*20//15+sin(bars*360)*10
-    a_cameraa#=track_values(4)*700//bars*90
-    a_camerar#=track_values(5)*700
+    color 200,0,0
+    a_camerad#=track_values(0)*20//15+sin(bars*360)*10
+    a_cameraa#=track_values(1)*700//bars*90
+    a_camerar#=track_values(2)*700
     
     lock image(gBuffer)
     
@@ -87,7 +81,7 @@ return
 a_dot:
 
     gosub a_kamera
-    if pz<0.1 then dot px/pz*180.0+140,py/pz*180.0+90
+    if pz<0.1 then dot px/pz*180.0+160,py/pz*180.0+90
 
 return
 
@@ -96,7 +90,7 @@ a_line:
     gosub a_dist
     gosub a_kamera2
     gosub a_dist2
-    if pz<0.1 and pz2<0.1 then line px/pd#*180.0+140,py/pd#*180.0+90,px2/pd2#*180.0+140,py2/pd2#*180.0+90
+    if pz<0.1 and pz2<0.1 then line px/pd#*180.0+160,py/pd#*180.0+90,px2/pd2#*180.0+160,py2/pd2#*180.0+90
 return
 
 //kalansilmädistancet
