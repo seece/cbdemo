@@ -53,31 +53,41 @@ atominEffu:
     a_cameraa#=track_values(4)*700//bars*90
     a_camerar#=track_values(5)*700
     
+    lock image(gBuffer)
+    
     for x=0 to 16
         for z=0 to 16
             px#=x-8
-            py#=-2
+            py#=-1
             pz#=z-8
             
             px2#=px
-            py2#=py+2.2
+            py2#=py+1.2
             pz2#=pz
             
             gosub a_line
+
+            px#=x-8
+            py#=-1
+            pz#=z-8
+            
+            px2#=px
+            py2#=py-1
+            pz2#=pz
+            gosub a_line
             //gosub a_dot
             
-            
-            //print x+z
         next z
     next x
     
+    unlock
     
 return
 
 a_dot:
 
     gosub a_kamera
-    if pz<0.1 then dot px/pz*40.0+140,py/pz*40.0+90
+    if pz<0.1 then dot px/pz*180.0+140,py/pz*180.0+90
 
 return
 
@@ -86,7 +96,7 @@ a_line:
     gosub a_dist
     gosub a_kamera2
     gosub a_dist2
-    if pz<0.1 and pz2<0.1 then line px/pd#*80.0+140,py/pd#*80.0+90,px2/pd2#*80.0+140,py2/pd2#*80.0+90
+    if pz<0.1 and pz2<0.1 then line px/pd#*180.0+140,py/pd#*180.0+90,px2/pd2#*180.0+140,py2/pd2#*180.0+90
 return
 
 //kalansilmädistancet
