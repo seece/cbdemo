@@ -1,66 +1,128 @@
+#define malloc(size) makeMEMBlock(size)
+#define free deleteMEMBlock
+
+#ifndef BUILD_AS_LIB
 SCREEN 640,360
 
 const FONT_CONSOLE = 0
 dim fonts(0)
-
-
 fonts(FONT_CONSOLE) = loadFont("consolas", 12)
-drawToWorld OFF, OFF, OFF
-garbage = makeGarbageImage(640,360*4)
+#endif
 
+
+prob = malloc(128*128*4)
+#ifdef BUILD_AS_LIB
+loadProbTable("assets/table.dat", prob)
+#else
+loadProbTable("../assets/table.dat", prob)
+#endif
+
+#ifndef BUILD_AS_LIB
+drawToWorld OFF, OFF, OFF
+garbage = makeGarbageImage(640,360*4, prob)
 
 repeat
-	// scroll the text
-	ypos = timer() * 0.1 
+
+	ypos = timer() * 0.05
 	drawImage garbage, 0, ypos mod imageHeight(garbage)
 	drawImage garbage, 0, ypos mod imageHeight(garbage) - imageHeight(garbage)
 
 	drawScreen
 forever
 waitKey
+free prob
+#endif BUILD_AS_LIB
 
-function makeGarbageImage(width, height)
+function makeGarbageImage(width, height, probtable)
 	fontw# = 6.2
 	fonth = 11
-	
+
 	rows = roundDown(height/fonth)
 	maxlength = roundDown(width/fontw)-1
-	
+
 	rowimg = makeImage(width, 20)
 	img = makeImage(width, height)
 	setFont fonts(FONT_CONSOLE)
 	indent = 0
-	
+
 	drawToImage rowimg
 	for i=0 to rows-1
 		r = rand(-10,10)
 		if r < -6 or r = 1 then	// a small chance to change indentation level
 			indent = max(0, indent + max(-1, r))
 		endif
-		
+
 		indent_spaces = indent * 4
-		
-		msg$ = string(" ", indent_spaces) + generateGarbage(rand(0, maxlength - indent_spaces))
+
+		msg$ = string(" ", indent_spaces) + generateGarbage(max(0,rand(-10, maxlength - indent_spaces)), probtable)
 		color 0,0,0
 		box 0,0,imageWidth(rowimg), imageHeight(rowimg),true
 		color 255, 255, 255
 		text 2 , 2, msg
-		// fucking "my y-axis is flipped" bug
+
 		copyBox 0,0, imageWidth(rowimg), imageHeight(rowimg), 0, i*fonth,image(rowimg),image(img)
-		//addText "i: " + i
+
 	next i
-	
+
 	drawToScreen
-	
+
 	return img
 endFunction
 
-// TODO add proper markov chain here
-function generateGarbage(length)
-	s$ = ""
-	for i=0 to length
-		s = s + chr(rand(32, 126))
-	next i
-	
-	return s
+
+function loadProbTable(path$, probtable)
+	if not fileExists(path) then makeError "can't find " + path
+
+    for i=0 to (128*128-1) step 4
+        pokeFloat probtable, i, 0
+    next i
+
+    f=openToRead(path)
+        while not EOF(f)
+            all$ = readLine(f)
+            from = int(getWord(all, 1))
+            too = int(getWord(all, 2))
+            p# = getWord(all, 3)
+
+            if (from >= 128 or too >= 128) then
+                makeError "invalid probtable values: " + from + ", " + too
+            endif
+
+				pokeFloat probtable, (128*from+too)*4, p
+        wend 
+    closeFile(f)
+endFunction
+
+function generateGarbage(chars, table) 
+    output$ = ""
+    lastchar$="n"
+
+    for i=1 to chars
+        ofs = 128 * asc(lastchar)
+        pick# = rnd(0, 1)
+        partial_sum# = 0.0
+        nextasc = 120
+
+		//evaluate:
+        for u=0 to 127
+            p# = peekFloat(table, (ofs + u) * 4)
+
+            if p > 0.0 then
+				'addText partial_sum + " / " + pick
+                partial_sum = partial_sum + p
+                
+                if partial_sum >= pick then
+					'addText asc(lastchar) + " -> " + u + ": " + p
+                    nextasc = u
+					if lastchar=" " and chr(nextasc) = " " then nextasc = rand(97,122)
+                    exit
+                endif   
+            endif
+        next u
+
+        output = output + chr(nextasc)
+		lastchar = chr(nextasc)
+    next i
+
+    return output
 endFunction

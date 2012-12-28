@@ -13,7 +13,8 @@
 #define playQuery "?cmd=Start&param1="
 #define toggleQuery "?cmd=PlayOrPause&param1="
 #define volumeQuery(_percent) ("?cmd=Volume&param1=" + _percent)
-#define seekQuery(_secs) ("?cmd=Seek&param1=" + _secs)
+#define seekQuery(_percent) ("?cmd=Seek&param1=" + _percent)
+#define seekDeltaQuery(_secs) ("?cmd=SeekDelta&param1=" + _secs)
 #define stopQuery "?cmd=Stop&param1="
 
 #ifdef STANDALONE
@@ -48,7 +49,7 @@ endFunction
 
 
 #ifdef STANDALONE
-loadToFoobar("zetaforce.mp3")
+loadToFoobar("../src/assets/musa.mp3")
 //clearFoobarList()
 //playWithFoobar("zetaforce.mp3")
 waitUntilConnected()
@@ -114,8 +115,13 @@ function stopMusic()
 	getHTTPString(DAEMON_URL + stopQuery)
 endFunction
 
-function seekMusic(secs)
-	getHTTPString(DAEMON_URL + seekQuery(secs))
+function seekMusic(percent)
+	getHTTPString(DAEMON_URL + seekQuery(percent))
+endFunction
+
+function seekMusicSecs(secs)
+	seekMusic(0)
+	getHTTPString(DAEMON_URL + seekDeltaQuery(secs))
 endFunction
 
 function setVolume(percent)

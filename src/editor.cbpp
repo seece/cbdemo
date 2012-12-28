@@ -2,8 +2,8 @@
 #pragma anticrap
 
 #ifndef BUILD_AS_LIB
-//#define USE_EDITOR
-//#define STANDALONE
+#define USE_EDITOR
+#define STANDALONE
 #endif
 
 #ifdef BUILD_AS_LIB
@@ -15,6 +15,8 @@
 #define EDITOR_HEIGHT 150
 #define SEEK_SPEED 0.4
 //#define TRACK_AMOUNT 12
+global gResetFoobar
+gResetFoobar = true
 global TRACK_AMOUNT
 #ifdef STANDALONE
 TRACK_AMOUNT = 12
@@ -138,12 +140,12 @@ trackInit:
 		
 		track\SyncTrack = toType(tracks(i))
 		
-		point\Envpoint = new (Envpoint)	// only a temporary var
-		point.bars = 0.0
-		point.value = 0.0
-		addEnvelopePoint(tracks(i), toInt(point), track.count)
+		//point\Envpoint = new (Envpoint)	// only a temporary var
+		//point.bars = 0.0
+		//point.value = 0.0
+		//addEnvelopePoint(tracks(i), toInt(point), track.count)
 		//addEnvelopePoint(tracks(i), toInt(point), track\count)
-		delete point
+		//delete point
 	next i
 	
 	selected_track = 0
@@ -196,7 +198,7 @@ main:
 	until keyHit(cbKeyEsc)
 	
 	#ifdef USE_EDITOR
-		killFoobar()
+		if gResetFoobar then killFoobar()
 	#endif
 return
 
@@ -359,7 +361,7 @@ updateTimeHotkeys:
 	endif
 
 	if keyHit(cbKeySpace) then 
-		seekMusic(roundDown(barsToSecs(bars, tempo)))
+		seekMusicSecs(roundDown(barsToSecs(bars, tempo)))
 		togglePlaying()	// foobar command
 		
 		if playing then

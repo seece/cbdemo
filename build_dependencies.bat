@@ -15,6 +15,7 @@ if (%pythonpath%) == () goto error_no_python
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB seek\foobar.cbpp %sourcedir%\inc\foobar.cb
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_RELEASE src\editor.cbpp %sourcedir%\inc\editor_release.cb
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_DEBUG src\editor.cbpp %sourcedir%\inc\editor_debug.cb
+%pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_RELEASE src\effects\garbage.cbpp %sourcedir%\inc\garbage.cb
 @echo off
 pause
 exit /b

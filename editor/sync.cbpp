@@ -1102,5 +1102,5 @@ function getEnvelopeValue(trackp, bars#)
 endFunction
 
 function getTrackFilename(id)
-	return "sync\testtrack"+id+".dat"
+	return "sync\synctrack"+id+".dat"
 endFunction
