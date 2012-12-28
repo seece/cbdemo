@@ -96,7 +96,6 @@ gosub trackInit
 	
 	selector\TrackSelector = UNDEFINED
 	selector = toType(createTrackSelector(editor.x, editor.y + editor.height + editor.timelineHeight, editor.width - UI_BUTTONSTRIP_WIDTH, 30, TRACK_AMOUNT))
-	selector.trackNames = "x-axis|y-axis|shade"
 	
 	flag_draw_editor = true
 #else
@@ -159,6 +158,7 @@ main:
 	#endif
 	
 	#ifdef USE_EDITOR
+		selector.trackNames = gTrackNames
 		chDir "../seek"
 		loadToFoobar(MUSIC_PATH)
 		waitUntilConnected()

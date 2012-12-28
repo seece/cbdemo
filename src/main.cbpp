@@ -16,6 +16,7 @@ include "inc/editor_debug.cb"
 
 demoInit:
 	setWindow "peisik demo"
+	gTrackNames = "ou|jee|toimiiko|taeae"
 return
 
 drawDemo:

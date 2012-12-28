@@ -108,9 +108,12 @@ endType
 
 #endif
 
+global gTrackNames$
+
 #ifdef STANDALONE_EDITOR
 
 const TRACK_AMOUNT = 5
+gTrackNames = "eka|toka|kolmas|ja|nii"
 
 dim tracks(TRACK_AMOUNT)
 
@@ -153,7 +156,7 @@ editor.status = "ready"
 
 selector\TrackSelector = UNDEFINED
 selector = toType(createTrackSelector(editor.x, editor.y + editor.height + editor.timelineHeight, editor.width - UI_BUTTONSTRIP_WIDTH, 30, TRACK_AMOUNT))
-selector.trackNames = "eka|toka|kolmas|ja|nii"
+selector.trackNames = gTrackNames
 
 tempo# = 130.0
 tstart=timer()
