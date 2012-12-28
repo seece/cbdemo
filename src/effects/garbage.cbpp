@@ -6,7 +6,7 @@ dim fonts(0)
 
 fonts(FONT_CONSOLE) = loadFont("consolas", 12)
 drawToWorld OFF, OFF, OFF
-garbage = makeGarbageImage(640,360*2)
+garbage = makeGarbageImage(640,360*4)
 
 
 repeat
@@ -29,11 +29,18 @@ function makeGarbageImage(width, height)
 	rowimg = makeImage(width, 20)
 	img = makeImage(width, height)
 	setFont fonts(FONT_CONSOLE)
+	indent = 0
 	
 	drawToImage rowimg
 	for i=0 to rows-1
+		r = rand(-10,10)
+		if r < -6 or r = 1 then	// a small chance to change indentation level
+			indent = max(0, indent + max(-1, r))
+		endif
 		
-		msg$ = generateGarbage(rand(0, maxlength))
+		indent_spaces = indent * 4
+		
+		msg$ = string(" ", indent_spaces) + generateGarbage(rand(0, maxlength - indent_spaces))
 		color 0,0,0
 		box 0,0,imageWidth(rowimg), imageHeight(rowimg),true
 		color 255, 255, 255

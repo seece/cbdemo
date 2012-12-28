@@ -6,6 +6,7 @@ global MUSIC_PATH$
 MUSIC_PATH = "zetaforce.mp3" // music path root is currently at ../seek
 global tempo#
 tempo = 130.0
+TRACK_AMOUNT = 19
 
 #ifdef RELEASE
 include "inc/editor_release.cb"

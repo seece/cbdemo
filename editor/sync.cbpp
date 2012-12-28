@@ -10,15 +10,18 @@
 //			W and S		zoom in and out	(hold shift for speed boost)
 //
 //			RMB + DRAG	on timeline to select loop region
+//			BACKSPACE	reset time
 
 // precompiler settings
 #pragma anticrap
 
 
 // config
-
+#ifndef BUILD_AS_LIB
 #define STANDALONE_EDITOR		// compile with main loop etc\
 #define USE_EDITOR_COMPONENTS	// if this is disabled, only compiles the parts needed for playing back data
+#endif
+
 #define UI_BUTTONSTRIP_WIDTH 150	// oikean laidan toimintonappulat
 
 // macros
@@ -887,34 +890,6 @@ function moveAllPointsFrom(trackp, index, amount#)
 	return true
 endFunction
 
-
-// index tells the place where to insert the new point
-// returns void
-function addEnvelopePoint(trackint, envint, index)
-	track\Synctrack = toType(trackint)
-	point\Envpoint = toType(envint)
-	
-	offset = index * POINT_STRIDE
-	movesize = (MEMBlockSize(track.mem))-offset
-	
-	realloc track.mem, MEMBlockSize(track.mem) + POINT_STRIDE
-	
-	assert(index <= track.count)
-	
-	if movesize > 0 then
-		// move rest of the memblock further to make room for the new var
-		memCopy track.mem, offset, track.mem, offset + POINT_STRIDE, movesize
-	endif
-
-	pokeFloat track.mem, offset		, point.bars 
-	pokeFloat track.mem, offset + 4	, point.value 
-	
-	track.count = track.count + 1
-	//temp = allocEnvpoint(envint)
-	//memCopy temp, 0, track.mem, track.count * 8, 2*4
-	//free temp
-endFunction
-
 function deleteEnvpoint(trackint, index)
 	track\Synctrack = toType(trackint)
 	assert(index < track.count)
@@ -1011,6 +986,32 @@ function getEnvpoint(trackint, index)
 	return toInt(point)
 endFunction
 
+// index tells the place where to insert the new point
+// returns void
+function addEnvelopePoint(trackint, envint, index)
+	track\Synctrack = toType(trackint)
+	point\Envpoint = toType(envint)
+	
+	offset = index * POINT_STRIDE
+	movesize = (MEMBlockSize(track.mem))-offset
+	
+	realloc track.mem, MEMBlockSize(track.mem) + POINT_STRIDE
+	
+	assert(index <= track.count)
+	
+	if movesize > 0 then
+		// move rest of the memblock further to make room for the new var
+		memCopy track.mem, offset, track.mem, offset + POINT_STRIDE, movesize
+	endif
+
+	pokeFloat track.mem, offset		, point.bars 
+	pokeFloat track.mem, offset + 4	, point.value 
+	
+	track.count = track.count + 1
+	//temp = allocEnvpoint(envint)
+	//memCopy temp, 0, track.mem, track.count * 8, 2*4
+	//free temp
+endFunction
 
 function firstPointAfter(trackint, startbar#)
 	track\Synctrack = toType(trackint)
