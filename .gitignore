@@ -12,3 +12,10 @@ cblocation
 *seek/foobar/playlists/*
 release/archives/
 release/temp/
+
+#temporary source files
+src/inc/editor_debug.cb
+src/inc/editor_release.cb
+src/inc/foobar.cb
+src/inc/sync_debug.cb
+src/inc/sync_release.cb
