@@ -22,7 +22,7 @@ include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 
 demoInit:
 	setWindow "peisik demo"
-	gTrackNames = "cDist|cAng|cRot|cAlt"
+	gTrackNames = "cDist|cAng|cRot|cAlt|cPitch|cRoll"
 	#ifndef RELEASE
 		gResetFoobar = true
 	#endif
@@ -56,9 +56,12 @@ atominEffu:
     //kamera pyörii jonkun jännän jutskan ympärillä. linejä. bucketointi lopuksi jos tarvii
     //y pienenee ylöspäin ja z kasvaa eteenpäin x kasvaa oikealle, kai
     color 200,0,0
-    a_camerad#=track_values(0)*20//15+sin(bars*360)*10
-    a_cameraa#=track_values(1)*700//bars*90
-    a_camerar#=track_values(2)*700
+    a_cDist#=-track_values(0)*20//15+sin(bars*360)*10
+    a_cAng#=track_values(1)*700//bars*90
+    a_cRot#=track_values(2)*700
+    a_cAlt#=track_values(3)*10
+    a_cPitch#=track_values(4)*700
+    a_cRoll#=track_values(5)*700
     
     lock image(gBuffer)
     a_r=200
@@ -125,31 +128,53 @@ return
 
 a_kamera:
     //rotate around origin and translate back
-    px=px+cos(a_cameraa-90)*a_camerad
-    pz=pz+sin(a_cameraa-90)*a_camerad
+    px=px+cos(a_cAng-90)*a_cDist
+    pz=pz-sin(a_cAng-90)*a_cDist
+    py=py+a_cAlt
     a_a#=getAngle(0,0,px,pz)
     a_d#=distance(0,0,px,pz)
-    px=cos(a_a+a_cameraa)*a_d
-    pz=sin(a_a+a_cameraa)*a_d
+    px=cos(a_a+a_cAng)*a_d
+    pz=-sin(a_a+a_cAng)*a_d
     //rotate camera
     a_a#=getAngle(0,0,px,pz)
     a_d#=distance(0,0,px,pz)
-    px=cos(a_a+a_camerar)*a_d
-    pz=sin(a_a+a_camerar)*a_d
+    px=cos(a_a+a_cRot)*a_d
+    pz=-sin(a_a+a_cRot)*a_d
+    //pitch
+    a_a#=getAngle(0,0,pz,py)
+    a_d#=distance(0,0,pz,py)
+    pz=cos(a_a+a_cPitch)*a_d
+    py=-sin(a_a+a_cPitch)*a_d
+    //roll
+    a_a#=getAngle(0,0,px,py)
+    a_d#=distance(0,0,px,py)
+    px=cos(a_a+a_cRoll)*a_d
+    py=-sin(a_a+a_cRoll)*a_d
 return
 
 a_kamera2: //should be identical to a_kamera, except for variable names
     //rotate around origin and translate back
-    px2=px2+cos(a_cameraa-90)*a_camerad
-    pz2=pz2+sin(a_cameraa-90)*a_camerad
+    px2=px2+cos(a_cAng-90)*a_cDist
+    pz2=pz2-sin(a_cAng-90)*a_cDist
+    py2=py2+a_cAlt
     a_a#=getAngle(0,0,px2,pz2)
     a_d#=distance(0,0,px2,pz2)
-    px2=cos(a_a+a_cameraa)*a_d
-    pz2=sin(a_a+a_cameraa)*a_d
+    px2=cos(a_a+a_cAng)*a_d
+    pz2=-sin(a_a+a_cAng)*a_d
     //rotate camera
     a_a#=getAngle(0,0,px2,pz2)
     a_d#=distance(0,0,px2,pz2)
-    px2=cos(a_a+a_camerar)*a_d
-    pz2=sin(a_a+a_camerar)*a_d
+    px2=cos(a_a+a_cRot)*a_d
+    pz2=-sin(a_a+a_cRot)*a_d
+    //pitch
+    a_a#=getAngle(0,0,pz2,py2)
+    a_d#=distance(0,0,pz2,py2)
+    pz2=cos(a_a+a_cPitch)*a_d
+    py2=-sin(a_a+a_cPitch)*a_d
+    //roll
+    a_a#=getAngle(0,0,px2,py2)
+    a_d#=distance(0,0,px2,py2)
+    px2=cos(a_a+a_cRoll)*a_d
+    py2=-sin(a_a+a_cRoll)*a_d
 return
 
