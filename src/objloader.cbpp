@@ -1,0 +1,27 @@
+
+// macros
+
+#define malloc(_size) makeMEMBlock(_size)
+#define free deleteMEMBlock
+#define realloc resizeMEMBlock
+#define toType(integer) convertToType(integer)
+#define toInt(typevar) convertToInteger(typevar)
+#define assert(statement) If Not (statement) Then makeError __LINE__ + ": assertion failed"
+
+
+#ifndef BUILD_AS_LIB
+
+repeat
+
+	
+	drawScreen
+forever
+
+#endif
+
+function loadWavefrontObj(path$)
+	assert(fileExists(path))
+	
+	block = malloc(1)
+	return block
+endFunction 

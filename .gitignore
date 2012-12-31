@@ -21,4 +21,5 @@ src/inc/editor_release.cb
 src/inc/foobar.cb
 src/inc/sync_debug.cb
 src/inc/sync_release.cb
+src/inc/objloader.cb
 src/inc/garbage.cb
