@@ -11,6 +11,10 @@
 
 #ifndef BUILD_AS_LIB
 
+SCREEN 800, 900
+
+loadWavefrontObj("assets/obj/testscene.obj")
+
 repeat
 
 	
@@ -22,6 +26,201 @@ forever
 function loadWavefrontObj(path$)
 	assert(fileExists(path))
 	
-	block = malloc(1)
-	return block
+	vertex_amount = 0
+	current_vertex = 0
+	current_object = -1
+	current_line = 0
+	line_amount = 0
+	row = -1
+	
+	f = openToRead(path)
+	
+	objectid = 0
+	infoblock  = getModelInfo(f, objectid)
+	
+	vertex_amount = peekInt(infoblock, 0)
+	face_amount = peekInt(infoblock, 4)
+	max_line_amount = peekInt(infoblock, 8)
+	
+	addText "vertex_amount: " + vertex_amount
+	addText "faces: " + face_amount
+	addText "max_line_amount: " + max_line_amount
+	
+	seekFile f, 0
+	
+	#define POINT_START 0
+	#define POINT_END 1
+	#define COORD_X 0
+	#define COORD_Y 1
+	#define COORD_Z 2
+	
+	// a temporary array for our vertices and lines
+	dim _verts(vertex_amount-1, 2) as float
+	dim _lineverts(max_line_amount-1, 1, 2) as float
+	
+	current_object = -1
+	row = -1
+	while (not EOF(f))
+		row + 1
+		l$ = readLine(f)
+		char$ = mid(l, 1, 1)
+
+		if char = "#" then goto continue
+		
+		select char
+			case "o"
+				current_object + 1
+				
+				if current_object > objectid then exit	// we only load one object
+			case "v"
+				if current_object < 0 then makeError("vertex not inside object at row " + row + " in " + path$)
+				if current_object <> objectid then goto continue
+				
+				vx# = float(getWord(l, 2))
+				vy# = float(getWord(l, 3))
+				vz# = float(getWord(l, 4))
+				
+				_verts(current_vertex, COORD_X) = vx
+				_verts(current_vertex, COORD_Y) = vy
+				_verts(current_vertex, COORD_Z) = vz
+				
+				//pokeFloat xmem, current_vertex * 4, vx
+				//pokeFloat ymem, current_vertex * 4, vy
+				//pokeFloat zmem, current_vertex * 4, vz
+				
+				current_vertex + 1
+			case "s"
+				// we do not care about smoothing
+			
+			case "f"
+				words = countWords(l)
+				for i=2 to (words)
+					// the line endpoints
+					cur_index = int(getWord(l, i)) - 1
+					
+					// last point is connected to the first one
+					if i = words then
+						next_index = int(getWord(l, 2)) - 1
+					else
+						next_index = int(getWord(l, i + 1)) - 1
+					endif
+					
+					addText "line: " + cur_index + " -> " + next_index
+					
+					// copy the point coordinates to the line array
+					_lineverts(current_line, POINT_START, COORD_X) = _verts(cur_index, COORD_X)
+					_lineverts(current_line, POINT_START, COORD_Y) = _verts(cur_index, COORD_Y)
+					_lineverts(current_line, POINT_START, COORD_Z) = _verts(cur_index, COORD_Z)
+					
+					_lineverts(current_line, POINT_END, COORD_X) = _verts(next_index, COORD_X)
+					_lineverts(current_line, POINT_END, COORD_Y) = _verts(next_index, COORD_Y)
+					_lineverts(current_line, POINT_END, COORD_Z) = _verts(next_index, COORD_Z)
+					
+					current_line + 1
+				next i
+			
+		default
+			makeError("Unknown obj command " + char + " at row " + row + " in " + path$)
+		endSelect
+		
+		//addText "" + firstchar$
+		continue:
+	wend
+	
+	line_amount = current_line
+	
+	closeFile(f)
+	
+	for i=0 to vertex_amount-1
+		vx = _verts(i, COORD_X) 
+		vy = _verts(i, COORD_Y) 
+		vz = _verts(i, COORD_Z) 
+		
+		//addText "vertex #" + i + ": " + vx + ", " + vy + ", " + vz
+	next i
+	
+	for i=0 to line_amount-1
+		sx# = _lineverts(i, POINT_START, COORD_X)
+		sy# = _lineverts(i, POINT_START, COORD_Y)
+		sz# = _lineverts(i, POINT_START, COORD_Z)
+		
+		ex# = _lineverts(i, POINT_END, COORD_X)
+		ey# = _lineverts(i, POINT_END, COORD_Y)
+		ez# = _lineverts(i, POINT_END, COORD_Z)
+		
+		addText "line from (" +sx+", "+sy+", "+sz+ ")" + " to (" +ex+", "+ey+", "+ez+ ")"
+	next i
+	
+	// we return a model descriptor memblock that contains pointers to 
+	/*
+	modelDesc = malloc(3 * 4)	// three pointers in one memblock 
+	xmem	= malloc(line_amount * 3 * 4 * 2)	// two 32-bit floats per vertex, two vertices per line
+	ymem	= malloc(line_amount * 3 * 4 * 2)
+	zmem	= malloc(line_amount * 3 * 4 * 2)
+	
+	pokeInt modelDesc, 0, xmem
+	pokeInt modelDesc, 4, ymem
+	pokeInt modelDesc, 8, zmem
+	*/
+	
+	// free the arrays
+	// but we still leak 4 + 4 bytes of memory
+	reDim _verts(0,0)
+	reDim _lineverts(0,0,0)
+	
+	return modelDesc
+endFunction 
+
+// f			an open file handle of a .obj file
+// objectid		which object we want to load from the file (usually 0)
+//
+// returns a memblock where first int is the vertex amount, and the second int is the face amount
+// third int is the line amount
+
+function getModelInfo(f, objectid)
+	infoblock = malloc(3 * 4)
+	
+	current_object = -1
+	row = -1
+	vertex_amount = 0
+	face_amount = 0
+	line_amount = 0
+	
+	while (not EOF(f))
+		row + 1
+		l$ = readLine(f)
+		char$ = mid(l, 1, 1)
+
+		if char = "#" then goto continue
+		
+		select char
+			case "o"
+				current_object + 1
+				
+				if current_object > objectid then exit
+			case "v"
+				if current_object < 0 then makeError("vertex not inside object at row " + row)
+				if current_object = objectid then
+					vertex_amount + 1
+				endif
+			case "f"
+				if current_object < 0 then makeError("face not inside object at row " + row)
+				if current_object = objectid then
+					face_amount + 1
+					line_amount = line_amount + countWords(l)
+				endif
+			
+		default
+			//makeError("Unknown obj command " + char + " at row " + row + " in " + path$)
+		endSelect
+		
+		//addText "" + firstchar$
+		continue:
+	wend
+		
+	pokeInt infoblock, 0, vertex_amount
+	pokeInt infoblock, 4, face_amount
+	pokeInt infoblock, 8, line_amount
+	
+	return infoblock
 endFunction 

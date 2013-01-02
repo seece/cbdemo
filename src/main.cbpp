@@ -27,6 +27,8 @@ demoInit:
 	#ifndef RELEASE
 		gResetFoobar = true
 	#endif
+	
+	testobj = loadWavefrontObj("assets/obj/testscene.obj")
 return
 
 scaleBuffer:
