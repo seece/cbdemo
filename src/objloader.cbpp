@@ -194,6 +194,10 @@ function loadWavefrontObj(path$)
 		continue:
 	next i
 	
+	#ifdef DEBUG
+		addText current_line + " lines loaded"
+	#endif
+	
 	trimmed_xmem = malloc(current_line * 4 * 2)
 	trimmed_ymem = malloc(current_line * 4 * 2)
 	trimmed_zmem = malloc(current_line * 4 * 2)
@@ -201,6 +205,10 @@ function loadWavefrontObj(path$)
 	memCopy xmem, 0, trimmed_xmem, 0, (current_line * 4 * 2)
 	memCopy ymem, 0, trimmed_ymem, 0, (current_line * 4 * 2)
 	memCopy zmem, 0, trimmed_zmem, 0, (current_line * 4 * 2)
+	
+	#ifdef DEBUG
+		addText "trimmed_xmem contains " + MEMBlockSize(trimmed_xmem) + " bytes = " + (MEMBlockSize(trimmed_xmem)/8) + " lines" 
+	#endif
 	
 	free xmem
 	free ymem
