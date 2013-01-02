@@ -71,6 +71,7 @@ atominEffu:
     
     lock image(gBuffer)
     a_r=200
+
     for x=0 to 16
         for z=0 to 16
             px#=x-8
@@ -86,6 +87,25 @@ atominEffu:
 
         next z
     next x
+    
+    //test rendering an object
+    a_mx=peekInt(testobj,0)
+    a_my=peekInt(testobj,4)
+    a_mz=peekInt(testobj,8)
+    a_size=MEMBlockSize(a_mx)
+    
+
+    for i=0 to a_size-4 step 8
+        px#=peekFloat(a_mx,i)+2.3
+        py#=peekFloat(a_my,i)-2
+        pz#=peekFloat(a_mz,i)+2.3
+        i2=i+4
+        px2#=peekFloat(a_mx,i2)+2.3
+        py2#=peekFloat(a_my,i2)-2
+        pz2#=peekFloat(a_mz,i2)+2.3
+        
+        gosub a_smart_line
+    next i
     
     unlock
     
