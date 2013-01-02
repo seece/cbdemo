@@ -18,6 +18,7 @@ include "inc/editor_release.cb"
 include "inc/editor_debug.cb"
 #endif
 
+include "inc/objloader.cb"
 include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 
 
@@ -27,6 +28,8 @@ demoInit:
 	#ifndef RELEASE
 		gResetFoobar = true
 	#endif
+	
+	testobj = loadWavefrontObj("assets/obj/testscene.obj")
 return
 
 scaleBuffer:
