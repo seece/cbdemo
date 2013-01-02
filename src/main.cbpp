@@ -20,6 +20,7 @@ include "inc/editor_debug.cb"
 
 include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 
+
 demoInit:
 	setWindow "peisik demo"
 	gTrackNames = "cDist|cAng|cRot|cAlt|cPitch|cRoll"
@@ -29,14 +30,14 @@ demoInit:
 return
 
 scaleBuffer:
-    for i=180 to 0 step -1
-        copyBox 0, i,320,1,0, i*2,image(gBuffer),image(gBuffer)
-        copyBox 0, i,320,1,0, i*2+1,image(gBuffer),image(gBuffer)
-    next i
-    for i=320 to 0 step -1
-        copyBox i,0,1,360,i*2,0,image(gBuffer),image(gBuffer)
-        copyBox i,0,1,360,i*2+1,0,image(gBuffer),image(gBuffer)
-    next i
+    for sb_i=180 to 0 step -1
+        copyBox 0, sb_i,320,1,0, sb_i*2,image(gBuffer),image(gBuffer)
+        copyBox 0, sb_i,320,1,0, sb_i*2+1,image(gBuffer),image(gBuffer)
+    next sb_i
+    for sb_i=320 to 0 step -1
+        copyBox sb_i,0,1,360,sb_i*2,0,image(gBuffer),image(gBuffer)
+        copyBox sb_i,0,1,360,sb_i*2+1,0,image(gBuffer),image(gBuffer)
+    next sb_i
 return
 
 drawDemo:
@@ -46,8 +47,6 @@ drawDemo:
     gosub atominEffu
    
 return
-
-
 
 
 
@@ -141,17 +140,17 @@ a_smart_line:
         _s_px#=_px
         _s_py#=_py
         _s_pz#=_pz
-        for i=1 to _s_d-1
-            _px2#=_s_px+_dx*i
-            _py2#=_s_py+_dy*i
-            _pz2#=_s_pz+_dz*i
-            i2=i+1
+        for _s_i=1 to _s_d-1
+            _px2#=_s_px+_dx*_s_i
+            _py2#=_s_py+_dy*_s_i
+            _pz2#=_s_pz+_dz*_s_i
+            _s_i2=_s_i+1
             gosub _s_a_line_with_fog
-            _px=_s_px+_dx*i2
-            _py=_s_py+_dy*i2
-            _pz=_s_pz+_dz*i2
+            _px=_s_px+_dx*_s_i2
+            _py=_s_py+_dy*_s_i2
+            _pz=_s_pz+_dz*_s_i2
             gosub _s_a_line_with_fog
-        next i
+        next _s_i
     else
         px=_px
         py=_py
