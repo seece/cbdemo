@@ -172,6 +172,16 @@ function loadWavefrontObj(path$)
 			
 			if same_coords = 3 then hit = true
 			
+			// and the other way around
+			same_coords = 0
+			for j=0 to 2
+				if _lineverts(u, POINT_END, j) = _lineverts(i, POINT_START, j) then
+					if _lineverts(u, POINT_START, j) = _lineverts(i, POINT_END, j) then same_coords + 1
+				endif	
+			next j
+			
+			if same_coords = 3 then hit = true
+			
 			if hit then exit
 		next u
 		
