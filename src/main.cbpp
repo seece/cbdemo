@@ -83,8 +83,6 @@ atominEffu:
             pz2#=pz
 
             gosub a_smart_line
-            
-
         next z
     next x
     
@@ -95,15 +93,16 @@ atominEffu:
     a_size=MEMBlockSize(a_mx)
     
 
-    for i=0 to a_size-4 step 8
-        px#=peekFloat(a_mx,i)+2.3
+    for i=0 to a_size-8 step 8
+        px#=peekFloat(a_mx,i)+1.3
         py#=peekFloat(a_my,i)-2
-        pz#=peekFloat(a_mz,i)+2.3
+        pz#=peekFloat(a_mz,i)-1.3
         i2=i+4
-        px2#=peekFloat(a_mx,i2)+2.3
+        px2#=peekFloat(a_mx,i2)+1.3
         py2#=peekFloat(a_my,i2)-2
-        pz2#=peekFloat(a_mz,i2)+2.3
+        pz2#=peekFloat(a_mz,i2)-1.3
         
+        //gosub a_line_with_fog
         gosub a_smart_line
     next i
     
@@ -182,14 +181,14 @@ a_smart_line:
     endif
 return
 
-//takes _-prefixed input-variables instead
+
 a_kamera:
     //rotate around origin and translate back
     px=px+cos(a_cAng-90)*a_cDist
     pz=pz-sin(a_cAng-90)*a_cDist
     py=py+a_cAlt
-    a_a#=getAngle(0,0,px,pz)
-    a_d#=distance(0,0,px,pz)
+    a_a#=-getAngle(0,0,px,pz)
+    a_d#=-distance(0,0,px,pz)
     px=cos(a_a+a_cAng)*a_d
     pz=-sin(a_a+a_cAng)*a_d
     //rotate camera
@@ -209,14 +208,14 @@ a_kamera:
     py=-sin(a_a+a_cRoll)*a_d
 return
 
-//takes _-prefixed input-variables instead
+
 a_kamera2: //should be identical to a_kamera, except for variable names
     //rotate around origin and translate back
     px2=px2+cos(a_cAng-90)*a_cDist
     pz2=pz2-sin(a_cAng-90)*a_cDist
     py2=py2+a_cAlt
-    a_a#=getAngle(0,0,px2,pz2)
-    a_d#=distance(0,0,px2,pz2)
+    a_a#=-getAngle(0,0,px2,pz2)
+    a_d#=-distance(0,0,px2,pz2)
     px2=cos(a_a+a_cAng)*a_d
     pz2=-sin(a_a+a_cAng)*a_d
     //rotate camera
@@ -236,13 +235,14 @@ a_kamera2: //should be identical to a_kamera, except for variable names
     py2=-sin(a_a+a_cRoll)*a_d
 return
 
+//takes _-prefixed input-variables instead
 _s_a_kamera:
     //rotate around origin and translate back
     px=_px+cos(a_cAng-90)*a_cDist
     pz=_pz-sin(a_cAng-90)*a_cDist
     py=_py+a_cAlt
-    a_a#=getAngle(0,0,px,pz)
-    a_d#=distance(0,0,px,pz)
+    a_a#=-getAngle(0,0,px,pz)
+    a_d#=-distance(0,0,px,pz)
     px=cos(a_a+a_cAng)*a_d
     pz=-sin(a_a+a_cAng)*a_d
     //rotate camera
@@ -261,13 +261,15 @@ _s_a_kamera:
     px=cos(a_a+a_cRoll)*a_d
     py=-sin(a_a+a_cRoll)*a_d
 return
+
+//takes _-prefixed input-variables instead
 _s_a_kamera2: //should be identical to a_kamera, except for variable names
     //rotate around origin and translate back
     px2=_px2+cos(a_cAng-90)*a_cDist
     pz2=_pz2-sin(a_cAng-90)*a_cDist
     py2=_py2+a_cAlt
-    a_a#=getAngle(0,0,px2,pz2)
-    a_d#=distance(0,0,px2,pz2)
+    a_a#=-getAngle(0,0,px2,pz2)
+    a_d#=-distance(0,0,px2,pz2)
     px2=cos(a_a+a_cAng)*a_d
     pz2=-sin(a_a+a_cAng)*a_d
     //rotate camera
