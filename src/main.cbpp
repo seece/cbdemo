@@ -2,6 +2,10 @@
 #pragma anticrap
 //#define RELEASE
 
+#ifdef RELEASE
+	gWindowMode = 1	
+#endif
+
 global MUSIC_PATH$
 MUSIC_PATH = "assets/musa.mp3" // music path is at src/
 global tempo#
@@ -288,7 +292,6 @@ _s_a_kamera2: //should be identical to a_kamera, except for variable names
     px2=cos(a_a+a_cRoll)*a_d
     py2=-sin(a_a+a_cRoll)*a_d
 return
-
 
 
 

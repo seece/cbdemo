@@ -2,7 +2,7 @@
 #define free deleteMEMBlock
 
 #ifndef BUILD_AS_LIB
-SCREEN 640,360
+SCREEN 320,200
 
 const FONT_CONSOLE = 0
 dim fonts(0)
@@ -19,7 +19,7 @@ loadProbTable("../assets/table.dat", prob)
 
 #ifndef BUILD_AS_LIB
 drawToWorld OFF, OFF, OFF
-garbage = makeGarbageImage(640,360*4, prob)
+garbage = makeGarbageImage(320,360*4, prob)
 
 repeat
 
@@ -35,7 +35,7 @@ free prob
 
 function makeGarbageImage(width, height, probtable)
 	fontw# = 6.2
-	fonth = 11
+	fonth = 10
 
 	rows = roundDown(height/fonth)
 	maxlength = roundDown(width/fontw)-1
