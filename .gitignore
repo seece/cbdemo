@@ -14,6 +14,7 @@ cblocation
 seek/foobar/theme.fth
 release/archives/
 release/temp/
+src/output/
 
 #temporary source files
 src/inc/editor_debug.cb
