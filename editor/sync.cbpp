@@ -1016,18 +1016,38 @@ function addEnvelopePoint(trackint, envint, index)
 	//free temp
 endFunction
 
-function firstPointAfter(trackint, startbar#)
-	track\Synctrack = toType(trackint)
+function firstPointAfter(trackp, startbar#)
+	track\Synctrack = toType(trackp)
+	low = 0
+	high = (track.count)/2
 	
+	while true
+		if high-low <= 4 then
+			exit
+		endif
+	
+		middle = low + (high-low)/2
+		mpointp = getEnvPoint(trackp, middle)
+		mpoint\EnvPoint = toType(mpointp)
+		
+		if mpoint.bars >= startbar then
+			high = middle
+		else
+			low = middle
+		endif
+	wend
+	
+
 	// linear search
-	for i=0 to track.count-1
-		point\Envpoint = getEnvpoint(trackint, i)
+	for i=low to high
+		point\Envpoint = getEnvpoint(trackp, i)
 		if point.bars >= startbar then
 			return toInt(point)
 		endif
 		
 		delete point
 	next i
+	
 	
 	return UNDEFINED
 endFunction
