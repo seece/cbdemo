@@ -1019,7 +1019,7 @@ endFunction
 function firstPointAfter(trackp, startbar#)
 	track\Synctrack = toType(trackp)
 	low = 0
-	high = (track.count)/2
+	high = track.count-1
 	
 	while true
 		if high-low <= 4 then
@@ -1036,18 +1036,16 @@ function firstPointAfter(trackp, startbar#)
 			low = middle
 		endif
 	wend
-	
 
 	// linear search
 	for i=low to high
-		point\Envpoint = getEnvpoint(trackp, i)
+		point\Envpoint = toType(getEnvpoint(trackp, i))
 		if point.bars >= startbar then
 			return toInt(point)
 		endif
 		
 		delete point
 	next i
-	
 	
 	return UNDEFINED
 endFunction
