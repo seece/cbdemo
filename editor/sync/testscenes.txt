@@ -1,0 +1,4 @@
+eka 4.0
+toka 8.0
+kolmas_fade 9.5
+kolmas 10.0

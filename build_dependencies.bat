@@ -1,15 +1,17 @@
 @echo off
+REM Usage: build_dependencies.bat [precompiler_flags]
 SetLocal
 set /p cbpath= <cblocation
 set /p pythonpath= <pythonlocation
 set cbpp_path=%cbpath%\IDE\cbpp\cbpp.py
-set compile_flags=
+set compile_flags=%*
 set sourcedir=src
 
 if (%cbpath%) == () goto error_no_cb
 if (%pythonpath%) == () goto error_no_python
 
 @echo on
+%pythonpath% %cbpp_path% %compile_flags% --flags=_RELEASE src\main.cbpp %sourcedir%\main.cb
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;USE_EDITOR_COMPONENTS editor\sync.cbpp %sourcedir%\inc\sync_debug.cb
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB editor\sync.cbpp %sourcedir%\inc\sync_release.cb
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB seek\foobar.cbpp %sourcedir%\inc\foobar.cb
@@ -18,7 +20,7 @@ if (%pythonpath%) == () goto error_no_python
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_RELEASE src\objloader.cbpp %sourcedir%\inc\objloader.cb
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_RELEASE src\effects\garbage.cbpp %sourcedir%\inc\garbage.cb
 @echo off
-pause
+REM do not use pause here, use the --wait-on-error flag instead
 exit /b
 
 :error_no_cb

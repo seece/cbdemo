@@ -2,6 +2,11 @@
 #pragma anticrap
 //#define RELEASE
 
+// _RELEASE is a flag set by the precompiler
+#ifdef _RELEASE
+	#define RELEASE
+#endif
+
 #ifdef RELEASE
 	gWindowMode = 1	
 #endif
