@@ -1,5 +1,8 @@
 intro 0.0
-eka 4.0
-toka 8.0
-kolmas_fade 9.5
-kolmas 10.0
+eka 8.0
+invert 14.0
+juna 16.0
+move_out 20.0
+katko 36
+kitarat 60
+outro 76

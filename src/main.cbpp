@@ -30,7 +30,7 @@ scenelistpath$ = "sync/scenes.txt"
 gSceneAmount = countFileRows(scenelistpath)
 assert(gSceneAmount > 0)
 dim scene_names(gSceneAmount-1) as string
-dim scene_start(gSceneAmount-1)
+dim scene_start(gSceneAmount-1) as float
 loadScenes(scenelistpath)
 
 

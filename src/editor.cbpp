@@ -119,12 +119,12 @@ gosub trackInit
 	// SCENE LOADING
 	global gSceneAmount
 	//global gCurrentScene$	// "extern" the global var
-	
-	scenelistpath$ = "sync/scenes.txt" 
+	global scenelistpath$
+	scenelistpath = "sync/scenes.txt" 
 	gSceneAmount = countFileRows(scenelistpath)
 	assert(gSceneAmount > 0)
 	dim scene_names(gSceneAmount-1) as string
-	dim scene_start(gSceneAmount-1)
+	dim scene_start(gSceneAmount-1) as float
 	loadScenes(scenelistpath)
 #endif
 
@@ -261,6 +261,15 @@ updateHotkeys:
 		load_result = loadMultipleTracks(TRACK_AMOUNT)
 		editor.status = "loaded " + load_result + " tracks"
 	endif
+	
+	if keyHit(cbKeyF11) then
+		gSceneAmount = countFileRows(scenelistpath)
+		assert(gSceneAmount > 0)
+		reDim scene_names(gSceneAmount-1) as string
+		reDim scene_start(gSceneAmount-1)
+		loadScenes(scenelistpath)
+		editor.status = "loaded " + gSceneAmount + " scenes"
+	endif
 		
 	if keyHit(cbKeyM) then
 		if muted then
@@ -285,7 +294,7 @@ draw_editor_misc:
 	info_x = SCREEN_WIDTH + 10
 	info_y = SCREEN_HEIGHT - 150
 	if muted then statusstr = statusstr + " (muted)"
-	text info_x, info_y - 20, statusstr
+	text info_x, info_y - 20, "status: " + statusstr
 	text info_x, info_y - 32, "time (secs): " + t#
 	text info_x, info_y - 44, "bars: " + bars#
 	text info_x, info_y - 56, "FPS: " + FPS()

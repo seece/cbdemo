@@ -131,7 +131,7 @@ scenelistpath$ = "sync/testscenes.txt"
 gSceneAmount = countFileRows(scenelistpath)
 dim tracks(TRACK_AMOUNT)
 dim scene_names(gSceneAmount-1) as string
-dim scene_start(gSceneAmount-1)
+dim scene_start(gSceneAmount-1) as float
 loadScenes(scenelistpath)
 
 SCREEN 800, 600
@@ -786,7 +786,7 @@ function drawSceneMarkers(editorp, bars#)
 	
 	color UI_COLOR_RIM_YELLOW
 	
-	for i=start+1 to gSceneAmount 
+	for i=start to gSceneAmount-1
 		pos# = scene_start(i)
 		
 		if pos > editor.endpos then exit
