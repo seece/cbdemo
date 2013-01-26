@@ -30,7 +30,7 @@ scenelistpath$ = "sync/scenes.txt"
 gSceneAmount = countFileRows(scenelistpath)
 If not (gSceneAmount > 0) Then makeError 31 + ": assertion failed"
 dim scene_names(gSceneAmount-1) as string
-dim scene_start(gSceneAmount-1)
+dim scene_start(gSceneAmount-1) as float
 loadScenes(scenelistpath)
 
 
@@ -69,10 +69,7 @@ drawDemo:
 	box 0,0,640,480,1
     
     gosub atominEffu
-   
 return
-
-
 
 //clamppi väreille niin että musta on 20
 // #define a_clampc(_cval) (max(20,min(255, _cval))) 

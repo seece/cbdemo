@@ -431,12 +431,11 @@ drawHelp:
 	clearText 
 	color cbWhite
 	locate 10,10
-	addText "help"
-	addText ""
 	addText "SPACE play/pause"
 	addText ""
 	addText "F6 save all tracks"
 	addText "F9 load all tracks"
+	addText "F11 reload scene markers"
 	addText "WASD move ON the timeline"
 	addText "    hold LSHIFT to move faster"
 	addText "left and right arrow keys to skip in time"

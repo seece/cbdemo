@@ -68,11 +68,16 @@ drawDemo:
 	color 20, 20, 20
 	box 0,0,640,480,1
     
-    gosub atominEffu
-   
+	if gCurrentScene = "move_out" then
+		gosub toinenEffu
+	else 
+		gosub atominEffu
+	endif
 return
 
+toinenEffu:
 
+return
 
 //clamppi väreille niin että musta on 20
 #define a_clampc(_cval) (max(20,min(255, _cval))) 
