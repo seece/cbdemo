@@ -278,6 +278,9 @@ updateHotkeys:
 return
 
 draw_editor_misc:
+	drawSceneMarkers(toInt(editor), bars)
+	color cbwhite
+
 	statusstr$ = editor.status
 	info_x = SCREEN_WIDTH + 10
 	info_y = SCREEN_HEIGHT - 150

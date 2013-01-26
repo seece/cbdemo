@@ -55,6 +55,7 @@
 #define UI_COLOR_DIM 80,80,80
 #define UI_COLOR_BG_FOCUS 64,64,70
 #define UI_COLOR_RIM 128,128,128
+#define UI_COLOR_RIM_YELLOW 140,96,96
 #define UI_COLOR_LIGHT 255, 255, 255
 #define UI_COLOR_HILIGHT 240, 230, 210
 #define UI_COLOR_MID 140, 130, 128
@@ -212,6 +213,8 @@ repeat
 	drawEditor(toInt(editor), bars)
 	drawTrackSelector(toInt(selector))
 	gosub draw_action_buttons
+	
+	drawSceneMarkers(toInt(editor), bars)
 	
 	selected_track = selector.selectedTrack
 	value# = getEnvelopeValue(tracks(selected_track), bars)
@@ -775,6 +778,28 @@ function drawEditor(editorp, bars#)
 
 endFunction
 
+function drawSceneMarkers(editorp, bars#)
+	editor\EnvEditor = toType(editorp)
+	start = getCurrentSceneID(editor.startpos, gSceneAmount)
+	
+	span# = editor.endpos - editor.startpos
+	
+	color UI_COLOR_RIM_YELLOW
+	
+	for i=start+1 to gSceneAmount 
+		pos# = scene_start(i)
+		
+		if pos > editor.endpos then exit
+		
+		xx# = editor.x + ((pos - editor.startpos)/span) * editor.width
+		yy# = editor.y
+		
+		line xx, yy, xx, yy + 16
+		
+		if span < 65 then  text xx + 3, yy + 1, scene_names(i)
+	next i
+endFunction
+
 function drawEditorTimeline(editorp, bars#)
 	editor\EnvEditor = toType(editorp)
 	mx# = mouseX()
@@ -1209,4 +1234,16 @@ function getCurrentScene(bars#, amount)
 	next i
 	
 	return scene_names(amount-1)
+endFunction
+
+function getCurrentSceneID(bars#, amount)
+	for i = 0 to amount-2
+		if scene_start(i) <= bars then 
+			if scene_start(i+1) > bars then
+				return i
+			endif
+		endif
+	next i
+	
+	return amount-1
 endFunction
