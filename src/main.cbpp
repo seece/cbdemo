@@ -2,6 +2,8 @@
 #pragma anticrap
 //#define RELEASE
 
+#define assert(statement) If not (statement) Then makeError __LINE__ + ": assertion failed"
+
 // _RELEASE is a flag set by the precompiler
 #ifdef _RELEASE
 	#define RELEASE
@@ -12,7 +14,7 @@
 #endif
 
 global MUSIC_PATH$
-MUSIC_PATH = "assets/musa.mp3" // music path is at src/
+MUSIC_PATH = "assets/musa.mp3"
 global tempo#
 tempo = 122.0
 TRACK_AMOUNT = 19
@@ -20,6 +22,17 @@ TRACK_AMOUNT = 19
 const FONT_CONSOLE = 0
 dim fonts(0)
 fonts(FONT_CONSOLE) = loadFont("consolas", 12)
+
+// SCENE LOADING
+global gSceneAmount
+
+scenelistpath$ = "sync/scenes.txt" 
+gSceneAmount = countFileRows(scenelistpath)
+assert(gSceneAmount > 0)
+dim scene_names(gSceneAmount-1) as string
+dim scene_start(gSceneAmount-1)
+loadScenes(scenelistpath)
+
 
 #ifdef RELEASE
 include "inc/editor_release.cb"
@@ -29,7 +42,6 @@ include "inc/editor_debug.cb"
 
 include "inc/objloader.cb"
 include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
-
 
 demoInit:
 	setWindow "peisik demo"

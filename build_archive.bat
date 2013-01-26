@@ -1,5 +1,7 @@
 @echo on
 
+call build_dependencies.bat
+
 set /p archiverpath=<7ziplocation
 
 set archivename=cbdemo.zip

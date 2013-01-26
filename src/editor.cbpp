@@ -27,13 +27,19 @@ gWindowMode = 1
 	 #define UI_BUTTONSTRIP_WIDTH 150	// oikean laidan toimintonappulat
 #endif
 
+#ifdef _DEBUG
+	#define assert(statement) if not (statement) then makeError __LINE__ + ": assertion failed"
+#else
+	#define assert(statement) 
+#endif
+
 // macros
 #define malloc(size) makeMEMBlock(size)
 #define free deleteMEMBlock
 #define realloc resizeMEMBlock
 #define toType(integer) convertToType(integer)
 #define toInt(typevar) convertToInteger(typevar)
-#define assert(statement) If Not (statement) Then makeError __LINE__ + ": assertion failed"
+
 
 #define frac(_var) (_var-roundDown(_var))
 #define round(_val) ()
@@ -41,7 +47,6 @@ gWindowMode = 1
 #define barsToSecs(_bars, _tempo) (_bars * ((60.0/_tempo)*4.0))
 #define snapToGrid(_value, _size) (int(_value/_size)*_size)
 #define clamp(_val) (max(0.0,min(1.0, _val)))
-
 #define mouseOverlap(_x,_y,_w,_h) (mouseX() >= (_x) and mouseX() <= ((_x) + (_w)) and mouseY() >= (_y) and mouseY() <= ((_y) + (_h)))
 #define toggle(x) (x xor 1)
 #define confirmDialog(_message) dialog(mouseX(), mouseY() - 100, _message)	// shows a dialog above mouse position
@@ -110,6 +115,17 @@ gosub trackInit
 #ifdef STANDALONE
 	global tempo#
 	tempo = 122.0
+	
+	// SCENE LOADING
+	global gSceneAmount
+	//global gCurrentScene$	// "extern" the global var
+	
+	scenelistpath$ = "sync/scenes.txt" 
+	gSceneAmount = countFileRows(scenelistpath)
+	assert(gSceneAmount > 0)
+	dim scene_names(gSceneAmount-1) as string
+	dim scene_start(gSceneAmount-1)
+	loadScenes(scenelistpath)
 #endif
 
 
@@ -270,6 +286,7 @@ draw_editor_misc:
 	text info_x, info_y - 32, "time (secs): " + t#
 	text info_x, info_y - 44, "bars: " + bars#
 	text info_x, info_y - 56, "FPS: " + FPS()
+	text info_x, info_y - 68, "scene: " + gCurrentScene$
 	
 	// clear the HTTP debug text every once in a while
 	if frames mod 100 = 0 or frames < 2 then 
@@ -341,6 +358,7 @@ updateTime:
 	
 	beats# = (t/60.0)*(tempo)
 	bars# = beats/4.0 
+	gCurrentScene = getCurrentScene(bars, gSceneAmount)
 return
 
 #ifdef USE_EDITOR

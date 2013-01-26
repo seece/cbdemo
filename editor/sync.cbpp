@@ -24,6 +24,12 @@
 
 #define UI_BUTTONSTRIP_WIDTH 150	// oikean laidan toimintonappulat
 
+#ifdef _DEBUG
+	#define assert(statement) if not (statement) then makeError __LINE__ + ": assertion failed"
+#else
+	#define assert(statement) 
+#endif
+
 // macros
 
 #define malloc(size) makeMEMBlock(size)
@@ -31,7 +37,6 @@
 #define realloc resizeMEMBlock
 #define toType(integer) convertToType(integer)
 #define toInt(typevar) convertToInteger(typevar)
-#define assert(statement) If Not (statement) Then makeError __LINE__ + ": assertion failed"
 
 #define frac(_var) (_var-roundDown(_var))
 #define round(_val) ()
@@ -109,13 +114,24 @@ endType
 #endif
 
 global gTrackNames$
+global gSceneAmount
 
 #ifdef STANDALONE_EDITOR
 
+#define outp(_arg) makeError "" + _arg
+
 const TRACK_AMOUNT = 5
 gTrackNames = "eka|toka|kolmas|ja|nii"
+global gCurrentScene$	// updated by the main loop
+gCurrentScene$ = "undefined"
 
+// SCENE LOADING
+scenelistpath$ = "sync/testscenes.txt" 
+gSceneAmount = countFileRows(scenelistpath)
 dim tracks(TRACK_AMOUNT)
+dim scene_names(gSceneAmount-1) as string
+dim scene_start(gSceneAmount-1)
+loadScenes(scenelistpath)
 
 SCREEN 800, 600
 frameLimit 60
@@ -218,11 +234,11 @@ repeat
 	addText "bars: " + bars + " bar offset " + bar_offset
 	addText "playing: " + playing
 	addText "value: " + value
+	addText "scene: " + getCurrentScene(bars, gSceneAmount)
 	
 	drawScreen
 	clearText
 forever
-
 
 update_time:
 	if keyHit(cbKeyBackspace) then
@@ -1140,4 +1156,57 @@ endFunction
 
 function getTrackFilename(id)
 	return "sync\synctrack"+id+".dat"
+endFunction
+
+/*
+function getSceneListFilename()
+	return "sync\testscenes.txt"
+endFunction
+*/
+
+function countFileRows(path$)
+	if not fileExists(path) then return -1
+
+	rows = 0
+	
+	f = openToRead(path)
+	
+	while not EOF(f)
+		a$ = readLine(f)
+		rows+1
+	wend
+	closeFile(f)
+	
+	return rows
+endFunction
+
+function loadScenes(scenelistpath$)
+	rows = 0
+	f = openToRead(scenelistpath)
+	for i = 0 to gSceneAmount-1
+		assert(not EOF(f))
+		row$ = readLine(f)
+		
+		assert(countWords(row) = 2)
+
+		scenename$ = getWord(row, 1)
+		scenestart# = float(getWord(row, 2))
+		
+		scene_names(rows) = scenename
+		scene_start(rows) = scenestart
+		rows+1
+	next i
+closeFile(f)
+endFunction
+
+function getCurrentScene(bars#, amount)
+	for i = 0 to amount-2
+		if scene_start(i) <= bars then 
+			if scene_start(i+1) > bars then
+				return scene_names(i)
+			endif
+		endif
+	next i
+	
+	return scene_names(amount-1)
 endFunction
