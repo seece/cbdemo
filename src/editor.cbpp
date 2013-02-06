@@ -15,6 +15,8 @@
 #define EDITOR_HEIGHT 150
 #define SEEK_SPEED 0.4
 //#define TRACK_AMOUNT 12
+global tt#
+global tb#
 global gResetFoobar
 gResetFoobar = true
 global TRACK_AMOUNT
@@ -39,7 +41,6 @@ gWindowMode = 1
 #define realloc resizeMEMBlock
 #define toType(integer) convertToType(integer)
 #define toInt(typevar) convertToInteger(typevar)
-
 
 #define frac(_var) (_var-roundDown(_var))
 #define round(_val) ()
@@ -371,6 +372,8 @@ updateTime:
 	beats# = (t/60.0)*(tempo)
 	bars# = beats/4.0 
 	gCurrentScene = getCurrentScene(bars, gSceneAmount)
+	tt = t
+	tb = bars
 return
 
 #ifdef USE_EDITOR

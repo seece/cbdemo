@@ -3,6 +3,7 @@
 
 #ifndef BUILD_AS_LIB
 SCREEN 320,200
+frameLimit 60
 
 const FONT_CONSOLE = 0
 dim fonts(0)
@@ -10,16 +11,17 @@ fonts(FONT_CONSOLE) = loadFont("consolas", 12)
 #endif
 
 
-prob = malloc(128*128*4)
 #ifdef BUILD_AS_LIB
-loadProbTable("assets/table.dat", prob)
+//loadProbTable("assets/table.dat", trhProbTable)
 #else
-loadProbTable("../assets/table.dat", prob)
+global trhProbTable
+trhProbTable = malloc(128*128*4)
+loadProbTable("../assets/table.dat", trhProbTable)
 #endif
 
 #ifndef BUILD_AS_LIB
 drawToWorld OFF, OFF, OFF
-garbage = makeGarbageImage(320,360*4, prob)
+garbage = makeGarbageImage(320,360*4, trhProbTable, fonts(FONT_CONSOLE))
 
 repeat
 
@@ -30,10 +32,10 @@ repeat
 	drawScreen
 forever
 waitKey
-free prob
+free trhProbTable
 #endif BUILD_AS_LIB
 
-function makeGarbageImage(width, height, probtable)
+function makeGarbageImage(width, height, probtable, font)
 	fontw# = 6.2
 	fonth = 10
 
@@ -42,7 +44,7 @@ function makeGarbageImage(width, height, probtable)
 
 	rowimg = makeImage(width, 20)
 	img = makeImage(width, height)
-	setFont fonts(FONT_CONSOLE)
+	setFont font
 	indent = 0
 
 	drawToImage rowimg

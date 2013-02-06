@@ -3,6 +3,8 @@
 //#define RELEASE
 
 // #define assert(statement) If not (statement) Then makeError __LINE__ + ": assertion failed"
+// #define malloc(size) makeMEMBlock(size)
+// #define free deleteMEMBlock
 
 // _RELEASE is a flag set by the precompiler
 // #ifdef _RELEASE
@@ -28,10 +30,12 @@ global gSceneAmount
 
 scenelistpath$ = "sync/scenes.txt" 
 gSceneAmount = countFileRows(scenelistpath)
-If not (gSceneAmount > 0) Then makeError 31 + ": assertion failed"
+If not (gSceneAmount > 0) Then makeError 33 + ": assertion failed"
 dim scene_names(gSceneAmount-1) as string
 dim scene_start(gSceneAmount-1) as float
 loadScenes(scenelistpath)
+
+global imgGarbage
 
 
 // #ifdef RELEASE
@@ -51,6 +55,12 @@ demoInit:
 
 	
 	testobj = loadWavefrontObj("assets/obj/testscene.obj")
+	
+	trhProbTable = makeMEMBlock(128*128*4)
+	loadProbTable("assets/table.dat", trhProbTable)
+	drawToWorld OFF, OFF, OFF
+	imgGarbage = makeGarbageImage(320,360*4, trhProbTable, fonts(FONT_CONSOLE))
+	deleteMEMBlock trhProbTable
 return
 
 scaleBuffer:
@@ -68,7 +78,17 @@ drawDemo:
 	color 20, 20, 20
 	box 0,0,640,480,1
     
-    gosub atominEffu
+	if gCurrentScene = "move_out" then
+		gosub toinenEffu
+	else 
+		gosub atominEffu
+	endif
+return
+
+toinenEffu:
+	ypos# = bars * 0.05
+	drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage)
+	drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage) - imageHeight(imgGarbage)
 return
 
 //clamppi väreille niin että musta on 20

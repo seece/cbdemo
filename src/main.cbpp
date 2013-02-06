@@ -3,6 +3,8 @@
 //#define RELEASE
 
 #define assert(statement) If not (statement) Then makeError __LINE__ + ": assertion failed"
+#define malloc(size) makeMEMBlock(size)
+#define free deleteMEMBlock
 
 // _RELEASE is a flag set by the precompiler
 #ifdef _RELEASE
@@ -33,6 +35,8 @@ dim scene_names(gSceneAmount-1) as string
 dim scene_start(gSceneAmount-1) as float
 loadScenes(scenelistpath)
 
+global imgGarbage
+
 
 #ifdef RELEASE
 include "inc/editor_release.cb"
@@ -51,6 +55,12 @@ demoInit:
 	#endif
 	
 	testobj = loadWavefrontObj("assets/obj/testscene.obj")
+	
+	trhProbTable = malloc(128*128*4)
+	loadProbTable("assets/table.dat", trhProbTable)
+	drawToWorld OFF, OFF, OFF
+	//imgGarbage = makeGarbageImage(320,360*4, trhProbTable, fonts(FONT_CONSOLE))
+	free trhProbTable
 return
 
 scaleBuffer:
@@ -76,7 +86,9 @@ drawDemo:
 return
 
 toinenEffu:
-
+	//ypos# = tb
+	//drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage)
+	//drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage) - imageHeight(imgGarbage)
 return
 
 //clamppi väreille niin että musta on 20
