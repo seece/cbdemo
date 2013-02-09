@@ -1,5 +1,5 @@
 intro 0.0
-eka 8.0
+kiito 8.0
 invert 14.0
 juna 16.0
 move_out 20.0

@@ -3,6 +3,7 @@
 //#define RELEASE
 
 #include "stdlib.cbpp"
+#define drawToBuffer drawToImage gBuffer
 
 // _RELEASE is a flag set by the precompiler
 #ifdef _RELEASE
@@ -50,6 +51,9 @@ demoInit:
 	
 	testobj = loadWavefrontObj("assets/obj/shup.obj")
 	
+	imgSmallLogo = loadImage("assets/gfx/logo1.png")
+	imgSmallLogoMask = makeImage(imageWidth(imgSmallLogo), imageHeight(imgSmallLogo))
+	
 	trhProbTable = malloc(128*128*4)
 	loadProbTable("assets/table.dat", trhProbTable)
 	drawToWorld OFF, OFF, OFF
@@ -80,9 +84,29 @@ drawDemo:
     
 	if gCurrentScene = "move_out" then
 		gosub toinenEffu
+	elseIf gCurrentScene = "kiito" then
+		gosub kiitoEffu
 	else 
 		gosub atominEffu
 	endif
+return
+
+
+
+kiitoEffu:
+	maskImage imgSmallLogo, 255, 255, 255
+	//maskImage imgSmallLogoMask, 255, 255, 255
+	drawToImage imgSmallLogoMask
+	c = 127+sin(bars*360)*127
+	color c,c,c
+	box 1,1,imageWidth(imgSmallLogo)-1, imageHeight(imgSmallLogo)-1
+	drawImage imgSmallLogo, 1, 1
+	//drawImage imgSmallLogo, 15,122
+	drawToBuffer
+	maskImage imgSmallLogo, 0, 0, 0
+	//maskImage imgSmallLogoMask, 0, 0, 0
+	drawImage imgSmallLogoMask, 15, 122
+	drawImage imgSmallLogo, 15, 22
 return
 
 toinenEffu:
