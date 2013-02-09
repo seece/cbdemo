@@ -59,8 +59,10 @@ demoInit:
 
 	consolefont =  loadFont("consolas", 12)
 	setFont consolefont
+	randomize 77
 	makeGarbageImage(imgGarbage, trhProbTable, 0)
-	//free trhProbTable
+	randomize timer()
+	free trhProbTable
 return
 
 scaleBuffer:
@@ -86,7 +88,7 @@ drawDemo:
 return
 
 toinenEffu:
-	ypos# = -tb*100.0
+	ypos# = -bars*100.0
 	drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage)
 	drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage) + imageHeight(imgGarbage)
 return
@@ -145,7 +147,6 @@ atominEffu:
     next i
     
     unlock
-    
 return
 
 a_dot:

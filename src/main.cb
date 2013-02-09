@@ -21,16 +21,12 @@ global tempo#
 tempo = 122.0
 TRACK_AMOUNT = 19
 
-const FONT_CONSOLE = 0
-dim fonts(0)
-fonts(FONT_CONSOLE) = loadFont("consolas", 12)
-
 // SCENE LOADING
 global gSceneAmount
 
 scenelistpath$ = "sync/scenes.txt" 
 gSceneAmount = countFileRows(scenelistpath)
-If not (gSceneAmount > 0) Then makeError 33 + ": assertion failed"
+If not (gSceneAmount > 0) Then makeError 29 + ": assertion failed"
 dim scene_names(gSceneAmount-1) as string
 dim scene_start(gSceneAmount-1) as float
 loadScenes(scenelistpath)
@@ -59,8 +55,12 @@ demoInit:
 	trhProbTable = makeMEMBlock(128*128*4)
 	loadProbTable("assets/table.dat", trhProbTable)
 	drawToWorld OFF, OFF, OFF
-	imgGarbage = makeGarbageImage(320,360*4, trhProbTable, fonts(FONT_CONSOLE))
-	deleteMEMBlock trhProbTable
+	imgGarbage = makeImage(320,360*4)
+
+	consolefont =  loadFont("consolas", 12)
+	setFont consolefont
+	makeGarbageImage(imgGarbage, trhProbTable, 0)
+	//free trhProbTable
 return
 
 scaleBuffer:
@@ -86,9 +86,9 @@ drawDemo:
 return
 
 toinenEffu:
-	ypos# = bars * 0.05
+	ypos# = -tb*100.0
 	drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage)
-	drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage) - imageHeight(imgGarbage)
+	drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage) + imageHeight(imgGarbage)
 return
 
 //clamppi väreille niin että musta on 20
