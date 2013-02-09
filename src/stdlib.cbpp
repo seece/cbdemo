@@ -1,0 +1,7 @@
+#define malloc(_size) makeMEMBlock(_size)
+#define free deleteMEMBlock
+#define realloc resizeMEMBlock
+#define toType(integer) convertToType(integer)
+#define toInt(typevar) convertToInteger(typevar)
+#define assert(statement) If Not (statement) Then makeError __LINE__ + ": assertion failed"
+makeError "use #include with stdlib.cbpp"

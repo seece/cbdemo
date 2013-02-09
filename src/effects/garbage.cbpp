@@ -56,7 +56,6 @@ function makeGarbageImage(img, probtable, font)
 	//drawToImage rowimg
 	
 	for i=0 to rows-1
-		clearText
 		//drawScreen OFF
 		r = rand(-10,10)
 		if r < -6 or r = 1 then	// a small chance to change indentation level
