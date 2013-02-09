@@ -43,7 +43,7 @@ include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 
 demoInit:
 	setWindow "peisik demo"
-	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist"
+	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ"
 	#ifndef RELEASE
 		gResetFoobar = true
 	#endif
@@ -106,10 +106,13 @@ atominEffu:
     a_cAlt#=track_values(3)*10-5
     a_cPitch#=track_values(4)*700
     a_cRoll#=track_values(5)*700
-    a_cX#=track_values(6)*100
-    a_cY#=track_values(7)*100
-    a_cZ#=track_values(8)*100
+    a_cX#=track_values(6)*50
+    a_cY#=track_values(7)*50
+    a_cZ#=track_values(8)*50
     a_cFog#=track_values(9)+0.1
+    a_shipX#=track_values(10)*50
+    a_shipY#=track_values(11)*50
+    a_shipZ#=track_values(12)*50
     
     lock image(gBuffer)
     a_r=200
@@ -136,6 +139,9 @@ atominEffu:
     a_mz=peekInt(testobj,8)
     a_size=MEMBlockSize(a_mx)
     
+    a_cX+a_shipX
+    a_cY+a_shipY
+    a_cZ+a_shipZ
 
     for i=0 to a_size-8 step 8
 		
