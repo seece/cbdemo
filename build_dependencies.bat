@@ -13,8 +13,8 @@ if (%pythonpath%) == () goto error_no_python
 
 @echo on
 %pythonpath% %cbpp_path% %compile_flags% --flags=_RELEASE src\main.cbpp %sourcedir%\main.cb -d %current%src\
-%pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;USE_EDITOR_COMPONENTS editor\sync.cbpp %sourcedir%\inc\sync_debug.cb -d %current%editor
-%pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB editor\sync.cbpp %sourcedir%\inc\sync_release.cb -d %current%editor
+%pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;USE_EDITOR_COMPONENTS sync\sync.cbpp %sourcedir%\inc\sync_debug.cb -d %current%editor
+%pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB sync\sync.cbpp %sourcedir%\inc\sync_release.cb -d %current%editor
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB seek\foobar.cbpp %sourcedir%\inc\foobar.cb -d %current%seek\
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_RELEASE src\editor.cbpp %sourcedir%\inc\editor_release.cb -d %current%src\
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_DEBUG src\editor.cbpp %sourcedir%\inc\editor_debug.cb -d %current%src\

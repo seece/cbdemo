@@ -117,6 +117,8 @@ endType
 global gTrackNames$
 global gSceneAmount
 
+
+
 #ifdef STANDALONE_EDITOR
 
 #define outp(_arg) makeError "" + _arg
@@ -124,7 +126,7 @@ global gSceneAmount
 const TRACK_AMOUNT = 5
 gTrackNames = "eka|toka|kolmas|ja|nii"
 global gCurrentScene$	// updated by the main loop
-gCurrentScene$ = "undefined"
+gCurrentScene = "undefined"
 
 // SCENE LOADING
 scenelistpath$ = "sync/testscenes.txt" 

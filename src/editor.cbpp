@@ -299,7 +299,7 @@ draw_editor_misc:
 	text info_x, info_y - 32, "time (secs): " + t#
 	text info_x, info_y - 44, "bars: " + bars#
 	text info_x, info_y - 56, "FPS: " + FPS()
-	text info_x, info_y - 68, "scene: " + gCurrentScene$
+	text info_x, info_y - 68, "scene: " + gCurrentScene
 	
 	// clear the HTTP debug text every once in a while
 	if frames mod 100 = 0 or frames < 2 then 
