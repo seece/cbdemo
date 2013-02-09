@@ -1,0 +1,6 @@
+#define olkoon dim
+#define liukuluku float
+#define kokonaisluku int
+#define jos if
+
+makeError "dont include me!"
