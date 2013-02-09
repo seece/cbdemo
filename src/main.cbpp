@@ -95,6 +95,8 @@ drawDemo:
 return
 
 kiitoEffu:
+	gosub atominEffu
+	
 	maskImage imgSmallLogo, 255, 255, 255
 	drawToImage imgSmallLogoMask
 	c = a_clampc(track_values(TRACK_FADE)*255)
@@ -103,7 +105,9 @@ kiitoEffu:
 	drawImage imgSmallLogo, 1, 1
 	drawToBuffer
 	maskImage imgSmallLogo, 0, 0, 0
-	drawImage imgSmallLogoMask, 15, 122
+	// don't draw the image if it's the same color as background
+	if c>20 then drawImage imgSmallLogoMask, 15, 122
+	
 return
 
 toinenEffu:
