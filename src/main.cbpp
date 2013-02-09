@@ -21,10 +21,6 @@ global tempo#
 tempo = 122.0
 TRACK_AMOUNT = 19
 
-const FONT_CONSOLE = 0
-dim fonts(0)
-fonts(FONT_CONSOLE) = loadFont("consolas", 12)
-
 // SCENE LOADING
 global gSceneAmount
 
@@ -59,8 +55,12 @@ demoInit:
 	trhProbTable = malloc(128*128*4)
 	loadProbTable("assets/table.dat", trhProbTable)
 	drawToWorld OFF, OFF, OFF
-	//imgGarbage = makeGarbageImage(320,360*4, trhProbTable, fonts(FONT_CONSOLE))
-	free trhProbTable
+	imgGarbage = makeImage(320,360*4)
+
+	consolefont =  loadFont("consolas", 12)
+	setFont consolefont
+	makeGarbageImage(imgGarbage, trhProbTable, 0)
+	//free trhProbTable
 return
 
 scaleBuffer:
@@ -86,9 +86,9 @@ drawDemo:
 return
 
 toinenEffu:
-	//ypos# = tb
-	//drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage)
-	//drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage) - imageHeight(imgGarbage)
+	ypos# = -tb*100.0
+	drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage)
+	drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage) + imageHeight(imgGarbage)
 return
 
 //clamppi väreille niin että musta on 20

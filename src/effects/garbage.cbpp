@@ -21,7 +21,8 @@ loadProbTable("../assets/table.dat", trhProbTable)
 
 #ifndef BUILD_AS_LIB
 drawToWorld OFF, OFF, OFF
-garbage = makeGarbageImage(320,360*4, trhProbTable, fonts(FONT_CONSOLE))
+garbage = makeImage(320,360*4)
+makeGarbageImage(garbage, trhProbTable, fonts(FONT_CONSOLE))
 
 repeat
 
@@ -35,40 +36,56 @@ waitKey
 free trhProbTable
 #endif BUILD_AS_LIB
 
-function makeGarbageImage(width, height, probtable, font)
+//#define wind(_msg) setWindow _msg
+
+function makeGarbageImage(img, probtable, font)
+	//wind("alkul")
 	fontw# = 6.2
 	fonth = 10
-
+	width = imageWidth(img)
+	height = imageHeight(img)
 	rows = roundDown(height/fonth)
 	maxlength = roundDown(width/fontw)-1
 
-	rowimg = makeImage(width, 20)
-	img = makeImage(width, height)
-	setFont font
+	rowh = 22
+	//	rowimg = makeImage(width, 20)
+	//img = makeImage(width, height)
+	//setFont font
 	indent = 0
-
-	drawToImage rowimg
+	//setWindow "jatkuu"
+	//drawToImage rowimg
+	
 	for i=0 to rows-1
+		clearText
+		//drawScreen OFF
 		r = rand(-10,10)
 		if r < -6 or r = 1 then	// a small chance to change indentation level
 			indent = max(0, indent + max(-1, r))
 		endif
 
 		indent_spaces = indent * 4
-
+		//wind("generate")
+		
 		msg$ = string(" ", indent_spaces) + generateGarbage(max(0,rand(-10, maxlength - indent_spaces)), probtable)
+		//wind("box")
 		color 0,0,0
-		box 0,0,imageWidth(rowimg), imageHeight(rowimg),true
+		box 0,0,width, rowh,true
+		//wind("text")
 		color 255, 255, 255
-		text 2 , 2, msg
-
-		copyBox 0,0, imageWidth(rowimg), imageHeight(rowimg), 0, i*fonth,image(rowimg),image(img)
-
+		//wind("text")
+		//setWindow "msg" + msg
+		//text 2 , 2, msg
+		text 0 , 0, msg
+		//addText "poo"
+		
+		//wind("copyBox")
+		//copyBox 0,0, imageWidth(rowimg), imageHeight(rowimg), 0, i*fonth,image(rowimg),image(img)
+		copyBox 0,0, width, rowh, 0, i*fonth,SCREEN(),image(img)
 	next i
-
-	drawToScreen
-
-	return img
+	
+	//drawToScreen
+	//wind("return")
+	return 0
 endFunction
 
 
@@ -99,16 +116,22 @@ function generateGarbage(chars, table)
     output$ = ""
     lastchar$="n"
 
+	//wind("generation")
+
     for i=1 to chars
         ofs = 128 * asc(lastchar)
         pick# = rnd(0, 1)
         partial_sum# = 0.0
         nextasc = 120
 
+		//setWindow "gen i: " + i
+
 		//evaluate:
         for u=0 to 127
+			//setWindow "eval: u:" + u + ", i:" + i
             p# = peekFloat(table, (ofs + u) * 4)
-
+		
+			//setWindow "peek done"
             if p > 0.0 then
 				'addText partial_sum + " / " + pick
                 partial_sum = partial_sum + p
@@ -116,14 +139,19 @@ function generateGarbage(chars, table)
                 if partial_sum >= pick then
 					'addText asc(lastchar) + " -> " + u + ": " + p
                     nextasc = u
+					//setWindow "picked! " + u
 					if lastchar=" " and chr(nextasc) = " " then nextasc = rand(97,122)
                     exit
                 endif   
             endif
         next u
 
+		//setWindow "adding " + chr(nextasc) + " to str"
+
         output = output + chr(nextasc)
+		//setWindow "added " + chr(nextasc) + " = " + nextasc
 		lastchar = chr(nextasc)
+		//setWindow "done!"
     next i
 
     return output
