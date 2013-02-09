@@ -32,7 +32,7 @@ dim scene_names(gSceneAmount-1) as string
 dim scene_start(gSceneAmount-1) as float
 loadScenes(scenelistpath)
 
-global imgGarbage
+global imgGarbage	
 
 
 #ifdef RELEASE
@@ -113,6 +113,8 @@ kiitoEffu:
 		if c>20 then drawImage imgFadeMask, 15, 122
 	endif
 	
+	color cbWhite
+	text 100, 100, track_values(TRACK_FADE)
 return
 
 toinenEffu:
