@@ -3,6 +3,9 @@
 //#define RELEASE
 
 #include "stdlib.cbpp"
+#define drawToBuffer drawToImage gBuffer
+//clamppi väreille niin että musta on 20
+#define a_clampc(_cval) (max(20,min(255, _cval))) 
 
 // _RELEASE is a flag set by the precompiler
 #ifdef _RELEASE
@@ -43,12 +46,17 @@ include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 
 demoInit:
 	setWindow "peisik demo"
-	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ|gRoug"
+
+	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ|gRoug|14|15|16|17|fade"
+	#define TRACK_FADE 18
 	#ifndef RELEASE
 		gResetFoobar = true
 	#endif
 	
 	testobj = loadWavefrontObj("assets/obj/shup.obj")
+	
+	imgSmallLogo = loadImage("assets/gfx/logo1.png")
+	imgSmallLogoMask = makeImage(imageWidth(imgSmallLogo), imageHeight(imgSmallLogo))
 	
 	trhProbTable = malloc(128*128*4)
 	loadProbTable("assets/table.dat", trhProbTable)
@@ -80,9 +88,27 @@ drawDemo:
     
 	if gCurrentScene = "move_out" then
 		gosub toinenEffu
+	elseIf gCurrentScene = "kiito" then
+		gosub kiitoEffu
 	else 
 		gosub atominEffu
 	endif
+return
+
+kiitoEffu:
+	gosub atominEffu
+	
+	maskImage imgSmallLogo, 255, 255, 255
+	drawToImage imgSmallLogoMask
+	c = a_clampc(track_values(TRACK_FADE)*255)
+	color c,c,c
+	box 1,1,imageWidth(imgSmallLogo)-1, imageHeight(imgSmallLogo)-1
+	drawImage imgSmallLogo, 1, 1
+	drawToBuffer
+	maskImage imgSmallLogo, 0, 0, 0
+	// don't draw the image if it's the same color as background
+	if c>20 then drawImage imgSmallLogoMask, 15, 122
+	
 return
 
 toinenEffu:
@@ -91,8 +117,7 @@ toinenEffu:
 	drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage) + imageHeight(imgGarbage)
 return
 
-//clamppi väreille niin että musta on 20
-#define a_clampc(_cval) (max(20,min(255, _cval))) 
+
 // fisheyee distance
 #define a_dist(_px,_py,_pz) (sqrt((_px)^2+(_py)^2+(_pz)^2))
 
