@@ -4,6 +4,8 @@
 
 #include "stdlib.cbpp"
 #define drawToBuffer drawToImage gBuffer
+//clamppi väreille niin että musta on 20
+#define a_clampc(_cval) (max(20,min(255, _cval))) 
 
 // _RELEASE is a flag set by the precompiler
 #ifdef _RELEASE
@@ -44,7 +46,8 @@ include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 
 demoInit:
 	setWindow "peisik demo"
-	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ"
+	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ|13|14|15|16|17|fade"
+	#define TRACK_FADE 18
 	#ifndef RELEASE
 		gResetFoobar = true
 	#endif
@@ -91,22 +94,16 @@ drawDemo:
 	endif
 return
 
-
-
 kiitoEffu:
 	maskImage imgSmallLogo, 255, 255, 255
-	//maskImage imgSmallLogoMask, 255, 255, 255
 	drawToImage imgSmallLogoMask
-	c = 127+sin(bars*360)*127
+	c = a_clampc(track_values(TRACK_FADE)*255)
 	color c,c,c
 	box 1,1,imageWidth(imgSmallLogo)-1, imageHeight(imgSmallLogo)-1
 	drawImage imgSmallLogo, 1, 1
-	//drawImage imgSmallLogo, 15,122
 	drawToBuffer
 	maskImage imgSmallLogo, 0, 0, 0
-	//maskImage imgSmallLogoMask, 0, 0, 0
 	drawImage imgSmallLogoMask, 15, 122
-	drawImage imgSmallLogo, 15, 22
 return
 
 toinenEffu:
@@ -115,8 +112,7 @@ toinenEffu:
 	drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage) + imageHeight(imgGarbage)
 return
 
-//clamppi väreille niin että musta on 20
-#define a_clampc(_cval) (max(20,min(255, _cval))) 
+
 // fisheyee distance
 #define a_dist(_px,_py,_pz) (sqrt((_px)^2+(_py)^2+(_pz)^2))
 
