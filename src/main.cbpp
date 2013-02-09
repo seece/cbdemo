@@ -117,21 +117,32 @@ atominEffu:
     lock image(gBuffer)
     a_r=200
 
-	/*
-    for x=0 to 16
-        for z=0 to 16
-            px#=x-8
-            py#=0.2
-            pz#=z-8
+	gridscale=2
+    for x=-8 to 8
+        for z=-8 to 8
+            px#=(x+1)*gridscale
+            py#=0
+            pz#=z*gridscale
             
-            px2#=px
-            py2#=py-1.5
+            px2#=px-gridscale
+            py2#=py
             pz2#=pz
 
             gosub a_smart_line
+
+            px#=x*gridscale
+            py#=0
+            pz#=(z+1)*gridscale
+            
+            px2#=px
+            py2#=py
+            pz2#=pz-gridscale
+
+            gosub a_smart_line
+
         next z
     next x
-	*/
+	
 
     //test rendering an object
     a_mx=peekInt(testobj,0)
