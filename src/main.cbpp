@@ -45,7 +45,7 @@ include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 
 demoInit:
 	setWindow "peisik demo"
-	gTrackNames = "cDist|cAng|cRot|cAlt|cPitch|cRoll"
+	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist"
 	#ifndef RELEASE
 		gResetFoobar = true
 	#endif
@@ -108,6 +108,10 @@ atominEffu:
     a_cAlt#=track_values(3)*10
     a_cPitch#=track_values(4)*700
     a_cRoll#=track_values(5)*700
+    a_cX#=track_values(6)*100
+    a_cY#=track_values(7)*100
+    a_cZ#=track_values(8)*100
+    a_cFog#=track_values(9)+0.1
     
     lock image(gBuffer)
     a_r=200
@@ -168,8 +172,8 @@ a_line_with_fog:
     gosub a_kamera2
     pd#=a_dist(px,py,pz)
     pd2#=a_dist(px2,py2,pz2)
-    _d#=pd+pd2
-    color a_clampc(a_r/_d*4-_d*2),a_clampc(a_g/_d*4-_d*2),a_clampc(a_b/_d*4-_d*2)
+    _d#=(pd+pd2)*2*a_cFog
+    color a_clampc(a_r/_d*2-_d),a_clampc(a_g/_d*2-_d),a_clampc(a_b/_d*2-_d)
     if pz<0.2 and pz2<0.2 then line px/pd#*180.0+160,py/pd#*180.0+90,px2/pd2#*180.0+160,py2/pd2#*180.0+90
 return
 
@@ -178,8 +182,8 @@ _s_a_line_with_fog: //takes _-prefixed input-variables instead
     gosub _s_a_kamera2
     pd#=a_dist(px,py,pz)
     pd2#=a_dist(px2,py2,pz2)
-    _d#=pd+pd2
-    color a_clampc(a_r/_d*4-_d*2),a_clampc(a_g/_d*4-_d*2),a_clampc(a_b/_d*4-_d*2)
+    _d#=(pd+pd2)*2*a_cFog
+    color a_clampc(a_r/_d*2-_d),a_clampc(a_g/_d*2-_d),a_clampc(a_b/_d*2-_d)
     if pz<0.2 and pz2<0.2 then line px/pd#*180.0+160,py/pd#*180.0+90,px2/pd2#*180.0+160,py2/pd2#*180.0+90
 return
 
@@ -223,9 +227,9 @@ return
 
 a_kamera:
     //rotate around origin and translate back
-    px=px+cos(a_cAng-90)*a_cDist
-    pz=pz-sin(a_cAng-90)*a_cDist
-    py=py+a_cAlt
+    px=px+cos(a_cAng-90)*a_cDist+a_cX
+    pz=pz-sin(a_cAng-90)*a_cDist+a_cZ
+    py=py+a_cAlt+a_cY
     a_a#=-getAngle(0,0,px,pz)
     a_d#=-distance(0,0,px,pz)
     px=cos(a_a+a_cAng)*a_d
@@ -250,9 +254,9 @@ return
 
 a_kamera2: //should be identical to a_kamera, except for variable names
     //rotate around origin and translate back
-    px2=px2+cos(a_cAng-90)*a_cDist
-    pz2=pz2-sin(a_cAng-90)*a_cDist
-    py2=py2+a_cAlt
+    px2=px2+cos(a_cAng-90)*a_cDist+a_cX
+    pz2=pz2-sin(a_cAng-90)*a_cDist+a_cZ
+    py2=py2+a_cAlt+a_cY
     a_a#=-getAngle(0,0,px2,pz2)
     a_d#=-distance(0,0,px2,pz2)
     px2=cos(a_a+a_cAng)*a_d
@@ -277,9 +281,9 @@ return
 //takes _-prefixed input-variables instead
 _s_a_kamera:
     //rotate around origin and translate back
-    px=_px+cos(a_cAng-90)*a_cDist
-    pz=_pz-sin(a_cAng-90)*a_cDist
-    py=_py+a_cAlt
+    px=_px+cos(a_cAng-90)*a_cDist+a_cX
+    pz=_pz-sin(a_cAng-90)*a_cDist+a_cZ
+    py=_py+a_cAlt+a_cY
     a_a#=-getAngle(0,0,px,pz)
     a_d#=-distance(0,0,px,pz)
     px=cos(a_a+a_cAng)*a_d
@@ -304,9 +308,9 @@ return
 //takes _-prefixed input-variables instead
 _s_a_kamera2: //should be identical to a_kamera, except for variable names
     //rotate around origin and translate back
-    px2=_px2+cos(a_cAng-90)*a_cDist
-    pz2=_pz2-sin(a_cAng-90)*a_cDist
-    py2=_py2+a_cAlt
+    px2=_px2+cos(a_cAng-90)*a_cDist+a_cX
+    pz2=_pz2-sin(a_cAng-90)*a_cDist+a_cZ
+    py2=_py2+a_cAlt+a_cY
     a_a#=-getAngle(0,0,px2,pz2)
     a_d#=-distance(0,0,px2,pz2)
     px2=cos(a_a+a_cAng)*a_d
