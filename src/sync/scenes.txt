@@ -1,8 +1,10 @@
 intro 0.0
 kiito 8.0
-invert 14.0
-juna 16.0
-move_out 20.0
-katko 36
-kitarat 60
+demoname 14.0
+baabaa 20.0
+ufo 24.00
+xfiles 40
+weather 56
+beat 60
+mafia 68
 outro 76

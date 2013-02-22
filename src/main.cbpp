@@ -91,7 +91,7 @@ drawDemo:
     
 	if gCurrentScene = "move_out" then
 		gosub toinenEffu
-	elseIf gCurrentScene = "kiito" or gCurrentScene="invert" then
+	elseIf gCurrentScene = "kiito" or gCurrentScene="demoname" then
 		gosub kiitoEffu
 	else 
 		gosub atominEffu
@@ -111,7 +111,7 @@ kiitoEffu:
 	// fuckings to zerppa for "INVERTED-Y-AXIS-WHEN-DRAWING-text-to-image-SHIT!"
 	text 5, -100, track_values(TRACK_FADE)
 	
-	if gCurrentScene = "invert" then
+	if gCurrentScene = "demoname" then
 		FADEIMAGE(imgDemoLogo, c, c, c)
 		if c>20 then drawImage imgFadeMask, 160-imageWidth(imgDemoLogo)/2, 50
 	else
