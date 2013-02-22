@@ -1,0 +1,3 @@
+#define SET_CAMERA_VARS(_prefix) _prefix ## cDist#=-track_values(0)*20 :  _prefix ## cAng#=track_values(1)*700 : _prefix ## cRot#=track_values(2)*700 :  _prefix ## cAlt#=track_values(3)*10-5 :   _prefix ## cPitch#=track_values(4)*700 :  _prefix ## cRoll#=track_values(5)*700 : _prefix ## cX#=track_values(6)*50 :  _prefix ## cY#=track_values(7)*50 : _prefix ## cZ#=track_values(8)*-50 :  _prefix ## cFog#=track_values(9)+0.1 :  _prefix ## shipX#=track_values(10)*50 :  _prefix ## shipY#=track_values(11)*50 :  _prefix ## shipZ#=track_values(12)*50 :  _prefix ## gRough#=track_values(13)*0.5
+makeerror "include camera.cbpp with #include"
+    
