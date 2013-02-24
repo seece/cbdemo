@@ -4,4 +4,5 @@
 #define toType(integer) convertToType(integer)
 #define toInt(typevar) convertToInteger(typevar)
 #define assert(statement) If Not (statement) Then makeError __LINE__ + ": assertion failed"
+#define saturate(_a) max(0.0, min(1.0, _a))
 makeError "use #include with stdlib.cbpp"

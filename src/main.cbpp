@@ -75,6 +75,45 @@ demoInit:
 	makeGarbageImage(imgGarbage, trhProbTable, 0)
 	randomize timer()
 	free trhProbTable
+	
+	#define FEEDBACK_WIDTH 320
+	#define FEEDBACK_HEIGHT 180
+	
+	gosub initFeedback
+return
+
+initFeedback:
+		
+	defaultMask 1, 255, 0, 255
+	ping = makeImage(FEEDBACK_WIDTH,FEEDBACK_HEIGHT)
+	pong = makeImage(FEEDBACK_WIDTH,FEEDBACK_HEIGHT)
+	pang = makeImage(FEEDBACK_WIDTH,FEEDBACK_HEIGHT)
+	pung = makeImage(FEEDBACK_WIDTH,FEEDBACK_HEIGHT)
+	ptmp = makeImage(FEEDBACK_WIDTH,FEEDBACK_HEIGHT)
+	defaultMask 1, 0,0,0
+	grid = makeImage(FEEDBACK_WIDTH+1,FEEDBACK_HEIGHT+1)
+	
+	color 255, 0, 255
+	drawToImage grid
+	for i = 0 to 160
+		line i*2, 0, i*2, 241
+		if i<121 then line 0, i*2, 321, i*2
+	next i
+	drawToBuffer
+	
+	dim fpos(719,3)
+	
+	for i = 0 to 19
+		for j = 0 to 35
+			fpos(j+i*36,0) = 110+cos(j*10  )*(6.0*(i+.5))-6
+			fpos(j+i*36,1) = 120+sin(j*10  )*(6.0*(i+.5))-6
+			fpos(j+i*36,2) = 110+cos(j*10+2)*(6.0*(i+.62))-6
+			fpos(j+i*36,3) = 120+sin(j*10+2)*(6.0*(i+.62))-6
+		next j
+	next i
+	
+	positionCamera FEEDBACK_WIDTH, -FEEDBACK_HEIGHT
+
 return
 
 scaleBuffer:
@@ -197,8 +236,92 @@ sotkuEffu:
 	if gCurrentScene = "ufo" then 
 		drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage)
 		drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage) + imageHeight(imgGarbage)
+	elseIf gCurrentScene = "ufo2" then
+		gosub feedbackEffu
 	endif
+	
+	
 return
+
+feedbackEffu:
+	t = timer()
+	ft2 = t
+	
+	lock image(pang)
+	drawToImage pang
+		color cbred
+		SET_CAMERA_VARS(a_)
+    
+		a_r=200
+	
+		RENDER_OBJECT(shipobj,a_,a_smart_line)
+	
+	unlock
+	drawToBuffer
+
+	fy_ofs = -50
+	
+    if t<timer()
+        k = k + 1
+        If k>3 Then k = 0
+        Select k
+            Case 0
+                For i = 0 To 179
+                    copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+                Next i
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
+                DrawToImage ptmp
+                DrawImage grid, -1, -1
+                drawToImage pang
+                DrawImage ptmp,0,0
+                drawToBuffer
+            Case 1
+                For i = 180 To 359
+                    CopyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+                Next i
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
+                DrawToImage ptmp
+                DrawImage grid, 0, 0
+                DrawToImage pang
+                DrawImage ptmp,0,0
+                drawToBuffer
+            Case 2
+                For i = 360 To 539
+                    CopyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+                Next i
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
+                DrawToImage ptmp
+                DrawImage grid, 0, -1
+                DrawToImage pang
+                DrawImage ptmp,0,0
+                drawToBuffer
+            Case 3
+                For i = 540 To 179
+                    CopyBox fpos(i,0)+rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+                Next i
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
+                DrawToImage ptmp
+                DrawImage grid, -1, 0
+                DrawToImage pang
+                DrawImage ptmp,0,0
+                drawToBuffer
+                tmp = ping
+                ping = pong
+                pong = tmp
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pong),Image(pang)
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(ping),Image(pung)
+        endSelect
+    endif
+    //color max(0,127.5+127.5*Sin(bars*.015)-Max(0,bars-10000)-.01*Max(0,bars-10000)), Max(0,127.5+127.5*Sin(ft2*.02)-.01*Max(0,ft2-10000)), Max(0,127.5+127.5*Sin(ft2*.01)-.01*Max(0,ft2-10000))
+	fphase# =sin(bars*360*0.5)
+	//smokecolor = saturate(1.0+)*64+70
+	fb = max(0.15, saturate(1.0/(fphase)))
+	color saturate(fphase)*254,saturate(fphase)*200,saturate(fphase)*210
+	drawToImage ping
+    Circle 105+10*Sin(ft*.1), 115+10*cos(ft*.12), 10
+    drawToBuffer
+    DrawImage pang, 0, 0
+return 
 
 
 // fisheyee distance

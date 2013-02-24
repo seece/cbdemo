@@ -1,0 +1,113 @@
+SCREEN 640, 480
+#define drawToBuffer drawToScreen
+#define FEEDBACK_WIDTH 320
+#define FEEDBACK_HEIGHT 180
+
+Randomize 0
+
+defaultMask 1, 255, 0, 255
+ping = makeImage(FEEDBACK_WIDTH,FEEDBACK_HEIGHT)
+pong = MakeImage(FEEDBACK_WIDTH,FEEDBACK_HEIGHT)
+pang = MakeImage(FEEDBACK_WIDTH,FEEDBACK_HEIGHT)
+pung = MakeImage(FEEDBACK_WIDTH,FEEDBACK_HEIGHT)
+ptmp = MakeImage(FEEDBACK_WIDTH,FEEDBACK_HEIGHT)
+DefaultMask 1, 0,0,0
+grid = MakeImage(FEEDBACK_WIDTH+1,FEEDBACK_HEIGHT+1)
+
+Color 255, 0, 255
+DrawToImage grid
+For i = 0 To 160
+    Line i*2, 0, i*2, 241
+    If i<121 Then Line 0, i*2, 321, i*2
+Next i
+drawToBuffer
+
+Dim fpos(719,3)
+
+For i = 0 To 19
+    For j = 0 To 35
+        fpos(j+i*36,0) = 110+Cos(j*10  )*(6.0*(i+.5))-6
+        fpos(j+i*36,1) = 120+Sin(j*10  )*(6.0*(i+.5))-6
+        fpos(j+i*36,2) = 110+Cos(j*10+2)*(6.0*(i+.62))-6
+        fpos(j+i*36,3) = 120+Sin(j*10+2)*(6.0*(i+.62))-6
+    Next j
+Next i
+
+fpositionCamera FEEDBACK_WIDTH, -FEEDBACK_HEIGHT
+
+t = Timer()
+t2 = 0
+
+Repeat
+    If t<Timer()
+        k = k + 1
+        If k>3 Then k = 0
+        Select k
+            Case 0
+                For i = 0 To 179
+                    CopyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+                Next i
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
+                DrawToImage ptmp
+                DrawImage grid, -1, -1
+                DrawToImage pang
+                DrawImage ptmp,0,0
+                drawToBuffer
+            Case 1
+                For i = 180 To 359
+                    CopyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+                Next i
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
+                DrawToImage ptmp
+                DrawImage grid, 0, 0
+                DrawToImage pang
+                DrawImage ptmp,0,0
+                drawToBuffer
+            Case 2
+                For i = 360 To 539
+                    CopyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+                Next i
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
+                DrawToImage ptmp
+                DrawImage grid, 0, -1
+                DrawToImage pang
+                DrawImage ptmp,0,0
+                drawToBuffer
+            Case 3
+                For i = 540 To 179
+                    CopyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+                Next i
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
+                DrawToImage ptmp
+                DrawImage grid, -1, 0
+                DrawToImage pang
+                DrawImage ptmp,0,0
+                drawToBuffer
+                tmp = ping
+                ping = pong
+                pong = tmp
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pong),Image(pang)
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(ping),Image(pung)
+        endSelect
+        t = t + 20
+        t2 = t2 + 20
+    EndIf
+    Color max(0,127.5+127.5*Sin(t2*.015)-Max(0,t2-10000)-.01*Max(0,t2-10000)), Max(0,127.5+127.5*Sin(t2*.02)-.01*Max(0,t2-10000)), Max(0,127.5+127.5*Sin(t2*.01)-.01*Max(0,t2-10000))
+    DrawToImage ping
+    Circle 105+10*Sin(t2*.1), 115+10*Cos(t2*.12), 10
+    drawToBuffer
+    DrawImage pang, 0, 0
+    //drawImage ping, 0, 0
+
+	/*
+    For i = FEEDBACK_HEIGHT To 0 Step -1
+        CopyBox 0, i, FEEDBACK_WIDTH, 2, 0, i*2
+    Next i
+    For i = FEEDBACK_WIDTH To 0 Step -1
+        CopyBox i,0,2,480,i*2,0
+    Next i
+	*/
+    Color 255, 255, 255
+    Text 20, 20, str(FPS())
+    DrawScreen
+forever
