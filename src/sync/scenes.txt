@@ -3,6 +3,7 @@ kiito 8.0
 demoname 14.0
 jatkuu 16.0
 ufo 24.00
+ufo2 28.00
 xfiles 40
 weather 56
 beat 60
