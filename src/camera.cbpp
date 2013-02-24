@@ -1,3 +1,6 @@
 #define SET_CAMERA_VARS(_prefix) _prefix ## cDist#=-track_values(0)*20 :  _prefix ## cAng#=track_values(1)*700 : _prefix ## cRot#=track_values(2)*700 :  _prefix ## cAlt#=track_values(3)*10-5 :   _prefix ## cPitch#=track_values(4)*700 :  _prefix ## cRoll#=track_values(5)*700 : _prefix ## cX#=track_values(6)*50 :  _prefix ## cY#=track_values(7)*50 : _prefix ## cZ#=track_values(8)*-50 :  _prefix ## cFog#=track_values(9)+0.1 :  _prefix ## shipX#=track_values(10)*50 :  _prefix ## shipY#=track_values(11)*50 :  _prefix ## shipZ#=track_values(12)*50 :  _prefix ## gRough#=track_values(13)*0.5
-makeerror "include camera.cbpp with #include"
-    
+
+#define RENDER_OBJECT(_obj, _prefix, _rendersub) _prefix ## mx=peekInt(_obj,0) : _prefix ## my=peekInt(_obj,4) : _prefix ## mz=peekInt(_obj,8) : _prefix ## size=MEMBlockSize(_prefix ## mx) : _prefix ## cX+ _prefix ## shipX : _prefix ## cY+ _prefix ## shipY : _prefix ## cZ+ _prefix ## shipZ : for i=0 to _prefix ## size-8 step 8 : 	px#=peekFloat(_prefix ## mx,i) : 	py#=peekFloat(_prefix ## my,i) : 	pz#=peekFloat(_prefix ## mz,i) : 	i2=i+4 : 	px2#=peekFloat(_prefix ## mx,i2) : 	py2#=peekFloat(_prefix ## my,i2) : 	pz2#=peekFloat(_prefix ## mz,i2) : 	gosub _rendersub : next i 
+
+makeError "include camera.cbpp with #include"
+   

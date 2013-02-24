@@ -96,6 +96,8 @@ drawDemo:
 		gosub toinenEffu
 	elseIf gCurrentScene = "kiito" or gCurrentScene="demoname" then
 		gosub kiitoEffu
+	elseIf gCurrentScene = "jatkuu" then
+		gosub aavikkoEffu
 	elseIf gCurrentScene = "mafia"
 		gosub templeEffu
 	else 
@@ -107,7 +109,7 @@ return
 // result is saved to imgFadeMask
 #define FADEIMAGE(_img, _r, _g, _b) maskImage imgFadeMask, 255, 255, 255 : maskImage _img, 255, 255, 255 : drawToImage imgFadeMask : color 0,0,0  : box 1,1,imageWidth(imgFadeMask)-1, imageHeight(imgFadeMask)-1  : color _r,_g,_b  : box 1,1,imageWidth(_img)-1, imageHeight(_img)-1 : drawImage _img, 1, 1 : drawToBuffer : maskImage _img, 0, 0, 0 : maskImage imgFadeMask, 0, 0, 0
 
-templeEffu:
+aavikkoEffu:
 	SET_CAMERA_VARS(a_)
     
     lock image(gBuffer)
@@ -115,27 +117,18 @@ templeEffu:
 	
 	renderobj = templeobj
 
-    a_mx=peekInt(renderobj,0)
-    a_my=peekInt(renderobj,4)
-    a_mz=peekInt(renderobj,8)
-    a_size=MEMBlockSize(a_mx)
+    RENDER_OBJECT(templeobj,a_,a_smart_line)
     
-    a_cX+a_shipX
-    a_cY+a_shipY
-    a_cZ+a_shipZ
+    unlock
+return
 
-    for i=0 to a_size-8 step 8
-        px#=peekFloat(a_mx,i)
-        py#=peekFloat(a_my,i)
-        pz#=peekFloat(a_mz,i)
-        i2=i+4
-        px2#=peekFloat(a_mx,i2)
-        py2#=peekFloat(a_my,i2)
-        pz2#=peekFloat(a_mz,i2)
-        
-        //gosub a_line_with_fog
-        gosub a_smart_line
-    next i
+templeEffu:
+	SET_CAMERA_VARS(a_)
+    
+    lock image(gBuffer)
+    a_r=200
+	
+	RENDER_OBJECT(templeobj,a_,a_smart_line)
     
     unlock
 return

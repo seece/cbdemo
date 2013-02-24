@@ -12,7 +12,7 @@
 	#endif
 #endif
 
-#define EDITOR_HEIGHT 150
+#define EDITOR_HEIGHT 170
 #define SEEK_SPEED 0.4
 //#define TRACK_AMOUNT 12
 global tt#
