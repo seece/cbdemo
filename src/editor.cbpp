@@ -93,6 +93,7 @@ gBuffer=makeImage(PICTURE_WIDTH, PICTURE_HEIGHT) // kuvasuhde 16:9
 
 dim tracks(TRACK_AMOUNT)	// an array of track pointers
 dim track_values(TRACK_AMOUNT) as float
+dim track_values_smooth(TRACK_AMOUNT) as float
 gosub trackInit
 
 #ifdef USE_EDITOR
@@ -223,7 +224,8 @@ return
 
 updateTracks:
 	for i=0 to TRACK_AMOUNT
-		track_values(i) = getEnvelopeValue(tracks(i), bars)
+		track_values(i) = getEnvelopeValue(tracks(i), bars, false)
+		track_values_smooth(i) = getEnvelopeValue(tracks(i), bars, true)
 	next i
 return
 

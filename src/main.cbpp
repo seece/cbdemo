@@ -51,8 +51,11 @@ include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 demoInit:
 	setWindow "peisik demo"
 
-	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ|gRoug|14|15|16|17|fade"
+	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ|gRoug|14|15|ovrX|ovrY|fade"
+	#define TRACK_OVERLAY_X 16
+	#define TRACK_OVERLAY_Y 17	
 	#define TRACK_FADE 18
+
 	#ifndef RELEASE
 		gResetFoobar = true
 	#endif
@@ -61,6 +64,8 @@ demoInit:
 	templeobj = loadWavefrontObj("assets/obj/temple.obj")
 	
 	imgSmallLogo = loadImage("assets/gfx/logo1.png")
+	imgRealtime = loadImage("assets/gfx/text_realtime.png")
+	imgSimulation = loadImage("assets/gfx/text_simulation.png")
 	imgDemoLogo = loadImage("assets/gfx/demoname.png")
 	imgFadeMask = makeImage(320, 240)
 	
@@ -150,6 +155,7 @@ return
 
 aavikkoEffu:
 	SET_CAMERA_VARS(a_)
+	a_cZ = track_values(8)*-50	// don't smooth the z-axis camera movement
     
     lock image(gBuffer)
     a_r=200
@@ -203,8 +209,6 @@ sotkuEffu:
 	elseIf gCurrentScene = "ufo2" then
 		gosub feedbackEffu
 	endif
-	
-	
 return
 
 feedbackEffu:
@@ -233,7 +237,7 @@ feedbackEffu:
                 For i = 0 To 179
                     copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
                 Next i
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),Image(ptmp)
                 DrawToImage ptmp
                 DrawImage grid, -1, -1
                 drawToImage pang
@@ -253,7 +257,7 @@ feedbackEffu:
                 For i = 360 To 539
                     CopyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
                 Next i
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
+                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),Image(ptmp)
                 DrawToImage ptmp
                 DrawImage grid, 0, -1
                 DrawToImage pang
@@ -285,6 +289,10 @@ feedbackEffu:
     Circle 105+10*Sin(ft*.1), 115+10*cos(ft*.12), 10
     drawToBuffer
     DrawImage pang, 0, 0
+
+	// overlay
+	drawImage imgRealtime, 10, -imageHeight(imgRealtime) + track_values_smooth(TRACK_OVERLAY_X) * 180
+	drawImage imgSimulation, 320- track_values_smooth(TRACK_OVERLAY_Y) * 320, 180-imageHeight(imgRealtime)-2
 return 
 
 
