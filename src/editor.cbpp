@@ -108,6 +108,7 @@ gosub trackInit
 	selector = toType(createTrackSelector(editor.x, editor.y + editor.height + editor.timelineHeight, editor.width - UI_BUTTONSTRIP_WIDTH, 30, TRACK_AMOUNT))
 	
 	flag_draw_editor = true
+	loadMultipleTracks(TRACK_AMOUNT)
 #else
 	// in the finished demo we want to load all saved tracks automatically
 	loadMultipleTracks(TRACK_AMOUNT)

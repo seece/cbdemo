@@ -144,7 +144,7 @@ drawDemo:
 	endif
 return
 
-// colors the white parts of the given image to the given color
+// paints the white parts of the given image to the given color
 // result is saved to imgFadeMask
 #define FADEIMAGE(_img, _r, _g, _b) maskImage imgFadeMask, 255, 255, 255 : maskImage _img, 255, 255, 255 : drawToImage imgFadeMask : color 0,0,0  : box 1,1,imageWidth(imgFadeMask)-1, imageHeight(imgFadeMask)-1  : color _r,_g,_b  : box 1,1,imageWidth(_img)-1, imageHeight(_img)-1 : drawImage _img, 1, 1 : drawToBuffer : maskImage _img, 0, 0, 0 : maskImage imgFadeMask, 0, 0, 0
 
@@ -217,8 +217,6 @@ kiitoEffu:
 	c = a_clampc(track_values(TRACK_FADE)*255)
 	
 	color cbWhite
-	// fuckings to zerppa for "INVERTED-Y-AXIS-WHEN-DRAWING-text-to-image-SHIT!"
-	text 5, -100, track_values(TRACK_FADE)
 	
 	if gCurrentScene = "demoname" then
 		FADEIMAGE(imgDemoLogo, c, c, c)
