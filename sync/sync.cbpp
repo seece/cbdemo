@@ -41,6 +41,7 @@
 #define frac(_var) (_var-roundDown(_var))
 #define round(_val) ()
 #define lerp(_val1, _val2, _amount) (_val1 + (_val2 - _val1) * _amount)
+
 #define barsToSecs(_bars, _tempo) (_bars * ((60.0/_tempo)*4.0))
 #define snapToGrid(_value, _size) (int(_value/_size)*_size)
 #define clamp(_val) (max(0.0,min(1.0, _val)))
@@ -219,7 +220,7 @@ repeat
 	drawSceneMarkers(toInt(editor), bars)
 	
 	selected_track = selector.selectedTrack
-	value# = getEnvelopeValue(tracks(selected_track), bars)
+	value# = getEnvelopeValue(tracks(selected_track), bars, false)
 	
 	if keyHit(cbKeyF6) then
 		save_result = saveMultipleTracks(TRACK_AMOUNT)
@@ -1142,7 +1143,7 @@ function createSyncTrack(name$)
 	return toInt(track)
 endFunction
 
-function getEnvelopeValue(trackp, bars#)
+function getEnvelopeValue(trackp, bars#, smooth)
 	track\Synctrack = toType(trackp)
 	
 	firstpoint\EnvPoint = toType(getEnvPoint(trackp, 0))
@@ -1175,7 +1176,13 @@ function getEnvelopeValue(trackp, bars#)
 		time_diff# = nextPoint.bars - point.bars
 		
 		progress# = (bars - point.bars) / time_diff#
-		return lerp(point.value, nextPoint.value, progress)
+		
+		if smooth
+			st# = clamp(progress)
+			return lerp(point.value, nextPoint.value, st*st*(3.0-2.0*st))
+		else
+			return lerp(point.value, nextPoint.value, progress)
+		endif
 	endif
 	
 	return 0.0
