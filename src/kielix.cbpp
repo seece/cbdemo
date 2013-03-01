@@ -2,15 +2,23 @@
 #define liukuluku float
 #define jokin as
 #define jotai as
-#define kokonaisluku int
+#define kokonaisluku integer
 #define tekstii string
 
 #define jos if
-#define tajusitko endif
+#define tajusiks endif
 #define mutku elseIf
 #define nii then
 #define tai or
 #define ja and
+#define o =
+
+#define funktio function
+#define luuppaa for
+#define viiva to
+#define niinku ,
+
+#define venaa waitKey
 
 makeError "dont include me!"
 // esim
