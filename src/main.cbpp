@@ -249,7 +249,7 @@ feedbackEffu:
             Case 0
                 For i = 0 To 179
                     copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
-                Next i
+                next i
                 CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),Image(ptmp)
                 DrawToImage ptmp
                 DrawImage grid, -1, -1
@@ -279,7 +279,7 @@ feedbackEffu:
             Case 3
                 For i = 540 To 179
                     CopyBox fpos(i,0)+rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
-                Next i
+                next i
                 CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
                 DrawToImage ptmp
                 DrawImage grid, -1, 0
