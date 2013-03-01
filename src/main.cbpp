@@ -154,45 +154,11 @@ aavikkoEffu:
     lock image(gBuffer)
     a_r=200
 
-	gridscale#=2
-
 	a_shipX = a_shipX + sin(bars*360.0*0.1)*3.0
 	a_shipZ = a_shipZ * 3.0
 	a_cZ = a_cZ*3.0
-
-    a_gMovedX=a_cX/gridscale
-    a_gMovedZ=(a_cZ/gridscale)
-
-	#define gridsize 8
-
-    for x=-gridsize-a_gMovedX to gridsize-a_gMovedX   
-        a_gRough2#=min(1,(x*0.2)^2)*a_gRough
-            for z=-gridsize-a_gMovedZ to gridsize-a_gMovedZ
-
-            px#=(x+1)*gridscale
-            pz#=z*gridscale
-            py#=(sin(px*100)+sin(pz*100))*a_gRough2
-            
-            px2#=px-gridscale
-            pz2#=pz
-            py2#=(sin(px2*100)+sin(pz2*100))*a_gRough2
-
-            gosub a_smart_line
-
-            px#=x*gridscale
-            pz#=(z+1)*gridscale
-            py#=(sin(px*100)+sin(pz*100))*a_gRough2
-            
-            px2#=px
-            pz2#=pz-gridscale
-            py2#=(sin(px2*100)+sin(pz2*100))*a_gRough2
-
-            gosub a_smart_line
-
-        next z
-    next x
-
-	#undef gridsize
+    
+    gosub a_ground
 
 	RENDER_OBJECT(shipobj,a_,a_smart_line)
 	
@@ -351,38 +317,7 @@ atominEffu:
     lock image(gBuffer)
     a_r=200
 
-	gridscale#=2
-
-    a_gMovedX=a_cX/gridscale
-    a_gMovedZ=a_cZ/gridscale
-
-    for x=-8-a_gMovedX to 8-a_gMovedX   
-        a_gRough2#=min(1,(x*0.2)^2)*a_gRough
-            for z=-8-a_gMovedZ to 8-a_gMovedZ
-
-            px#=(x+1)*gridscale
-            pz#=z*gridscale
-            py#=(sin(px*100)+sin(pz*100))*a_gRough2
-            
-            px2#=px-gridscale
-            pz2#=pz
-            py2#=(sin(px2*100)+sin(pz2*100))*a_gRough2
-
-            gosub a_smart_line
-
-            px#=x*gridscale
-            pz#=(z+1)*gridscale
-            py#=(sin(px*100)+sin(pz*100))*a_gRough2
-            
-            px2#=px
-            pz2#=pz-gridscale
-            py2#=(sin(px2*100)+sin(pz2*100))*a_gRough2
-
-            gosub a_smart_line
-
-        next z
-    next x
-	
+    gosub a_ground
 
     //test rendering an object
     a_mx=peekInt(shipobj,0)
@@ -410,6 +345,49 @@ atominEffu:
     
     unlock
 return
+
+a_ground:
+    
+    #define gridscale 2.0
+    #define gridsize 10
+
+    //camera coordinates in ground tiles
+    a_gMovedX=a_cX/gridscale
+    a_gMovedZ=(a_cZ/gridscale)
+
+    for x=-gridsize-a_gMovedX to gridsize-a_gMovedX   
+        a_gRough2#=min(1,(x*0.2)^2)*a_gRough
+        a_gRough3#=min(1,((x+1)*0.2)^2)*a_gRough
+        for z=-gridsize-a_gMovedZ to gridsize-a_gMovedZ
+
+            px#=(x+1.0)*gridscale
+            pz#=z*gridscale
+            py#=(sin(px*100)+sin(pz*100))*a_gRough3
+            
+            px2#=x*gridscale
+            pz2#=pz
+            py2#=(sin(px2*100)+sin(pz2*100))*a_gRough2
+
+            gosub a_smart_line
+
+            px#=x*gridscale
+            pz#=(z+1)*gridscale
+            py#=(sin(px*100)+sin(pz*100))*a_gRough2
+            
+            px2#=px
+            pz2#=pz-gridscale
+            py2#=(sin(px2*100)+sin(pz2*100))*a_gRough2
+
+            gosub a_smart_line
+
+        next z
+    next x
+
+	#undef gridsize
+    #undef gridscale
+
+return
+
 
 a_dot:
     gosub a_kamera
