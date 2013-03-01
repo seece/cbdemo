@@ -35,11 +35,11 @@ Next i
 
 fpositionCamera FEEDBACK_WIDTH, -FEEDBACK_HEIGHT
 
-t = Timer()
-t2 = 0
+t = timer()
+ft2 = bars*2.0
 
-Repeat
-    If t<Timer()
+repeat
+    if t<timer()
         k = k + 1
         If k>3 Then k = 0
         Select k
@@ -75,7 +75,7 @@ Repeat
                 drawToBuffer
             Case 3
                 For i = 540 To 179
-                    CopyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+                    CopyBox fpos(i,0)+rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
                 Next i
                 CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
                 DrawToImage ptmp
@@ -89,12 +89,11 @@ Repeat
                 CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pong),Image(pang)
                 CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(ping),Image(pung)
         endSelect
-        t = t + 20
-        t2 = t2 + 20
-    EndIf
-    Color max(0,127.5+127.5*Sin(t2*.015)-Max(0,t2-10000)-.01*Max(0,t2-10000)), Max(0,127.5+127.5*Sin(t2*.02)-.01*Max(0,t2-10000)), Max(0,127.5+127.5*Sin(t2*.01)-.01*Max(0,t2-10000))
-    DrawToImage ping
-    Circle 105+10*Sin(t2*.1), 115+10*Cos(t2*.12), 10
+    endif
+    //color max(0,127.5+127.5*Sin(bars*.015)-Max(0,bars-10000)-.01*Max(0,bars-10000)), Max(0,127.5+127.5*Sin(ft2*.02)-.01*Max(0,ft2-10000)), Max(0,127.5+127.5*Sin(ft2*.01)-.01*Max(0,ft2-10000))
+    color cbSilver
+	drawToImage ping
+    Circle 105+10*Sin(ft*.1), 115+10*cos(ft*.12), 10
     drawToBuffer
     DrawImage pang, 0, 0
     //drawImage ping, 0, 0
@@ -109,5 +108,5 @@ Repeat
 	*/
     Color 255, 255, 255
     Text 20, 20, str(FPS())
-    DrawScreen
+    drawScreen
 forever
