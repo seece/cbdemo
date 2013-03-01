@@ -51,8 +51,11 @@ include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 demoInit:
 	setWindow "peisik demo"
 
-	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ|gRoug|14|15|16|17|fade"
+	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ|gRoug|14|15|ovrX|ovrY|fade"
+	#define TRACK_OVERLAY_X 16
+	#define TRACK_OVERLAY_Y 17	
 	#define TRACK_FADE 18
+
 	#ifndef RELEASE
 		gResetFoobar = true
 	#endif
@@ -61,6 +64,8 @@ demoInit:
 	templeobj = loadWavefrontObj("assets/obj/temple.obj")
 	
 	imgSmallLogo = loadImage("assets/gfx/logo1.png")
+	imgRealtime = loadImage("assets/gfx/text_realtime.png")
+	imgSimulation = loadImage("assets/gfx/text_simulation.png")
 	imgDemoLogo = loadImage("assets/gfx/demoname.png")
 	imgFadeMask = makeImage(320, 240)
 	
@@ -106,9 +111,9 @@ initFeedback:
 	for i = 0 to 19
 		for j = 0 to 35
 			fpos(j+i*36,0) = 110+cos(j*10  )*(6.0*(i+.5))-6
-			fpos(j+i*36,1) = 90+sin(j*10  )*(6.0*(i+.5))-6
+			fpos(j+i*36,1) = 120+sin(j*10  )*(6.0*(i+.5))-6
 			fpos(j+i*36,2) = 110+cos(j*10+2)*(6.0*(i+.62))-6
-			fpos(j+i*36,3) = 90+sin(j*10+2)*(6.0*(i+.62))-6
+			fpos(j+i*36,3) = 120+sin(j*10+2)*(6.0*(i+.62))-6
 		next j
 	next i
 	
@@ -150,6 +155,7 @@ return
 
 aavikkoEffu:
 	SET_CAMERA_VARS(a_)
+	a_cZ = track_values(8)*-50	// don't smooth the z-axis camera movement
     
     lock image(gBuffer)
     a_r=200
@@ -314,9 +320,13 @@ feedbackEffu:
 	fb = max(0.15, saturate(1.0/(fphase)))
 	color saturate(fphase)*254,saturate(fphase)*200,saturate(fphase)*210
 	drawToImage ping
-    Circle 105+10*Sin(ft2*.1), 85+10*cos(ft2*.12), 10
+    Circle 105+10*Sin(ft*.1), 115+10*cos(ft*.12), 10
     drawToBuffer
     DrawImage pang, 0, 0
+
+	// overlay
+	drawImage imgRealtime, 10, -imageHeight(imgRealtime) + track_values_smooth(TRACK_OVERLAY_X) * 180
+	drawImage imgSimulation, 320- track_values_smooth(TRACK_OVERLAY_Y) * 320, 180-imageHeight(imgRealtime)-2
 return 
 
 
