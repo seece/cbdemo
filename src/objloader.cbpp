@@ -118,7 +118,8 @@ function loadWavefrontObj(path$)
 				next i
 			
 		default
-			makeError("Unknown obj command " + char + " at row " + row + " in " + path$)
+			print "Unknown obj command " + char + " at row " + row + " in " + path$
+			//makeError("Unknown obj command " + char + " at row " + row + " in " + path$)
 		endSelect
 		
 		//addText "" + firstchar$

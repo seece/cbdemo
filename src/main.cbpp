@@ -62,6 +62,7 @@ demoInit:
 	
 	shipobj = loadWavefrontObj("assets/obj/shup.obj")
 	templeobj = loadWavefrontObj("assets/obj/temple.obj")
+	house1obj = loadWavefrontObj("assets/obj/hus1_1.obj")
 	
 	imgSmallLogo = loadImage("assets/gfx/logo1.png")
 	imgRealtime = loadImage("assets/gfx/text_realtime.png")
@@ -88,7 +89,6 @@ demoInit:
 return
 
 initFeedback:
-		
 	defaultMask 1, 255, 0, 255
 	ping = makeImage(FEEDBACK_WIDTH,FEEDBACK_HEIGHT)
 	pong = makeImage(FEEDBACK_WIDTH,FEEDBACK_HEIGHT)
@@ -142,6 +142,8 @@ drawDemo:
 		gosub aavikkoEffu
 	elseIf gCurrentScene = "ufo" or gCurrentScene = "ufo2" then
 		gosub sotkuEffu
+	elseIf gCurrentScene = "xfiles" then
+		gosub taajamaEffu
 	elseIf gCurrentScene = "mafia"
 		gosub templeEffu
 	else 
@@ -152,6 +154,16 @@ return
 // paints the white parts of the given image to the given color
 // result is saved to imgFadeMask
 #define FADEIMAGE(_img, _r, _g, _b) maskImage imgFadeMask, 255, 255, 255 : maskImage _img, 255, 255, 255 : drawToImage imgFadeMask : color 0,0,0  : box 1,1,imageWidth(imgFadeMask)-1, imageHeight(imgFadeMask)-1  : color _r,_g,_b  : box 1,1,imageWidth(_img)-1, imageHeight(_img)-1 : drawImage _img, 1, 1 : drawToBuffer : maskImage _img, 0, 0, 0 : maskImage imgFadeMask, 0, 0, 0
+
+taajamaEffu:
+	
+	for i=0 to 5
+		SET_CAMERA_VARS(a_)
+		a_r=200
+		a_cZ = a_cZ + i*1.0
+		RENDER_OBJECT(house1obj,a_,a_smart_line)
+	next i
+return
 
 aavikkoEffu:
 	SET_CAMERA_VARS(a_)
@@ -357,7 +369,7 @@ return
 a_ground:
     
     #define gridscale 2.0
-    #define gridsize 10
+    #define gridsize 9
 
     //camera coordinates in ground tiles
     a_gMovedX=a_cX/gridscale
