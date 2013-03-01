@@ -157,13 +157,28 @@ return
 #define FADEIMAGE(_img, _r, _g, _b) maskImage imgFadeMask, 255, 255, 255 : maskImage _img, 255, 255, 255 : drawToImage imgFadeMask : color 0,0,0  : box 1,1,imageWidth(imgFadeMask)-1, imageHeight(imgFadeMask)-1  : color _r,_g,_b  : box 1,1,imageWidth(_img)-1, imageHeight(_img)-1 : drawImage _img, 1, 1 : drawToBuffer : maskImage _img, 0, 0, 0 : maskImage imgFadeMask, 0, 0, 0
 
 taajamaEffu:
+	#define house_margin 1.5
+	#define house_amount 8
+	#define house_dist 4.0
+	#define house_levels 3
+
 	scaley# = track_values_smooth(TRACK_SCALE_Y)
-	for i=0 to 5
+	for i=0 to 20
 		SET_CAMERA_VARS(a_)
+		a_cX = track_values(6)*-200
+		cAlt=track_values_smooth(3)*30-15
 		a_r=200
-		a_cZ = a_cZ + i*1.0
+		a_cZ = a_cZ + (i mod house_levels)*-house_dist + house_dist*house_levels + sin(i * -29.0)*3.0
+		a_cX = a_cX + (i*house_margin) + sin(i * 31.0)
+		//a_cX + (i*house_margin)  mod (house_margin*8) +house_margin*2
+		
 		RENDER_OBJECT(house1obj,a_,a_smart_line)
 	next i
+	
+	#undef house_levels
+	#undef house_amount
+	#undef house_dist
+	#undef house_margin
 return
 
 aavikkoEffu:
@@ -299,7 +314,7 @@ feedbackEffu:
 	fb = max(0.15, saturate(1.0/(fphase)))
 	color saturate(fphase)*254,saturate(fphase)*200,saturate(fphase)*210
 	drawToImage ping
-    Circle 105+10*Sin(ft*.1), 85+10*cos(ft*.12), 10
+    Circle 105+10*Sin(ft2*.1), 85+10*cos(ft2*.12), 10
     drawToBuffer
     DrawImage pang, 0, 0
 

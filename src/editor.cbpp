@@ -100,7 +100,7 @@ gosub trackInit
 	editorfont = loadFont("tahoma", 14)
 	setFont editorfont
 
-	editorp = createEnvEditor(0, PICTURE_HEIGHT, EDITOR_WIDTH, EDITOR_HEIGHT-24, 0.0, 10.0)
+	editorp = createEnvEditor(0, PICTURE_HEIGHT, EDITOR_WIDTH, EDITOR_HEIGHT-24, 0.0, 40.0)
 	editor\EnvEditor = toType(editorp)
 	editor.track = tracks(selected_track)
 	editor.status = "ready"
