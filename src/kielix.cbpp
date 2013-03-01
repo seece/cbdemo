@@ -1,6 +1,16 @@
 #define olkoon dim
 #define liukuluku float
+#define jokin as
+#define jotai as
 #define kokonaisluku int
+#define tekstii string
+
 #define jos if
+#define tajusitko endif
+#define mutku elseIf
+#define nii then
+#define tai or
+#define ja and
 
 makeError "dont include me!"
+// esim
