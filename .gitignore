@@ -17,6 +17,7 @@ release/temp/
 src/output/
 
 #temporary source files
+main.cb
 src/main.cb 
 src/inc/editor_debug.cb
 src/inc/editor_release.cb
