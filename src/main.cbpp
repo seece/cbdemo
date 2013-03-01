@@ -51,7 +51,8 @@ include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 demoInit:
 	setWindow "peisik demo"
 
-	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ|gRoug|14|15|ovrX|ovrY|fade"
+	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ|gRoug|14|sclY|ovrX|ovrY|fade"
+	#define TRACK_SCALE_Y 15
 	#define TRACK_OVERLAY_X 16
 	#define TRACK_OVERLAY_Y 17	
 	#define TRACK_FADE 18
@@ -111,9 +112,9 @@ initFeedback:
 	for i = 0 to 19
 		for j = 0 to 35
 			fpos(j+i*36,0) = 110+cos(j*10  )*(6.0*(i+.5))-6
-			fpos(j+i*36,1) = 120+sin(j*10  )*(6.0*(i+.5))-6
+			fpos(j+i*36,1) = 90+sin(j*10  )*(6.0*(i+.5))-6
 			fpos(j+i*36,2) = 110+cos(j*10+2)*(6.0*(i+.62))-6
-			fpos(j+i*36,3) = 120+sin(j*10+2)*(6.0*(i+.62))-6
+			fpos(j+i*36,3) = 90+sin(j*10+2)*(6.0*(i+.62))-6
 		next j
 	next i
 	
@@ -156,7 +157,7 @@ return
 #define FADEIMAGE(_img, _r, _g, _b) maskImage imgFadeMask, 255, 255, 255 : maskImage _img, 255, 255, 255 : drawToImage imgFadeMask : color 0,0,0  : box 1,1,imageWidth(imgFadeMask)-1, imageHeight(imgFadeMask)-1  : color _r,_g,_b  : box 1,1,imageWidth(_img)-1, imageHeight(_img)-1 : drawImage _img, 1, 1 : drawToBuffer : maskImage _img, 0, 0, 0 : maskImage imgFadeMask, 0, 0, 0
 
 taajamaEffu:
-	
+	scaley# = track_values_smooth(TRACK_SCALE_Y)
 	for i=0 to 5
 		SET_CAMERA_VARS(a_)
 		a_r=200
@@ -298,7 +299,7 @@ feedbackEffu:
 	fb = max(0.15, saturate(1.0/(fphase)))
 	color saturate(fphase)*254,saturate(fphase)*200,saturate(fphase)*210
 	drawToImage ping
-    Circle 105+10*Sin(ft*.1), 115+10*cos(ft*.12), 10
+    Circle 105+10*Sin(ft*.1), 85+10*cos(ft*.12), 10
     drawToBuffer
     DrawImage pang, 0, 0
 
@@ -368,8 +369,8 @@ return
 
 a_ground:
     
-    #define gridscale 2.0
-    #define gridsize 9
+    #define gridscale 2.5
+    #define gridsize 8
 
     //camera coordinates in ground tiles
     a_gMovedX=a_cX/gridscale
