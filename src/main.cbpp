@@ -16,7 +16,7 @@
 #endif
 
 #ifdef RELEASE
-	gWindowMode = 1	
+	gWindowMode = 1
 #endif
 
 global MUSIC_PATH$
@@ -267,66 +267,64 @@ feedbackEffu:
 
 	fy_ofs = -50
 	
-    if t<timer()
-        k = k + 1
-        If k>3 Then k = 0
-        Select k
-            Case 0
-                For i = 0 To 179
-                    copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
-                next i
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),Image(ptmp)
-                DrawToImage ptmp
-                DrawImage grid, -1, -1
-                drawToImage pang
-                DrawImage ptmp,0,0
-                drawToBuffer
-            Case 1
-                For i = 180 To 359
-                    CopyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
-                Next i
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
-                DrawToImage ptmp
-                DrawImage grid, 0, 0
-                DrawToImage pang
-                DrawImage ptmp,0,0
-                drawToBuffer
-            Case 2
-                For i = 360 To 539
-                    CopyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
-                Next i
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),Image(ptmp)
-                DrawToImage ptmp
-                DrawImage grid, 0, -1
-                DrawToImage pang
-                DrawImage ptmp,0,0
-                drawToBuffer
-            Case 3
-                For i = 540 To 179
-                    CopyBox fpos(i,0)+rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
-                next i
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
-                DrawToImage ptmp
-                DrawImage grid, -1, 0
-                DrawToImage pang
-                DrawImage ptmp,0,0
-                drawToBuffer
-                tmp = ping
-                ping = pong
-                pong = tmp
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pong),Image(pang)
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(ping),Image(pung)
-        endSelect
-    endif
+    feedbackk = feedbackk + 1
+    if feedbackk>3 then feedbackk = 0
+    select feedbackk
+        case 0
+            for i = 0 To 179
+                copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+            next i
+            copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),Image(ptmp)
+            drawToImage ptmp
+            drawImage grid, -1, -1
+            drawToImage pang
+            drawImage ptmp,0,0
+            drawToBuffer
+        case 1
+            for i = 180 To 359
+                copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),image(ping),image(pong)
+            next i
+            copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),image(ptmp)
+            drawToImage ptmp
+            drawImage grid, 0, 0
+            drawToImage pang
+            drawImage ptmp,0,0
+            drawToBuffer
+        case 2
+            for i = 360 To 539
+                copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+            next i
+            copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),image(ptmp)
+            drawToImage ptmp
+            drawImage grid, 0, -1
+            drawToImage pang
+            drawImage ptmp,0,0
+            drawToBuffer
+        case 3
+            for i = 540 To 179
+                copyBox fpos(i,0)+rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),image(ping),image(pong)
+            next i
+            copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),image(ptmp)
+            drawToImage ptmp
+            drawImage grid, -1, 0
+            drawToImage pang
+            drawImage ptmp,0,0
+            drawToBuffer
+            tmp = ping
+            ping = pong
+            pong = tmp
+            copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pong),image(pang)
+            copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(ping),image(pung)
+    endSelect
     //color max(0,127.5+127.5*Sin(bars*.015)-Max(0,bars-10000)-.01*Max(0,bars-10000)), Max(0,127.5+127.5*Sin(ft2*.02)-.01*Max(0,ft2-10000)), Max(0,127.5+127.5*Sin(ft2*.01)-.01*Max(0,ft2-10000))
 	fphase# =sin(bars*360*0.5)
 	//smokecolor = saturate(1.0+)*64+70
 	fb = max(0.15, saturate(1.0/(fphase)))
 	color saturate(fphase)*254,saturate(fphase)*200,saturate(fphase)*210
 	drawToImage ping
-    Circle 105+10*Sin(ft2*.1), 85+10*cos(ft2*.12), 10
+    circle 105+10*sin(ft2*.1), 85+10*cos(ft2*.12), 10
     drawToBuffer
-    DrawImage pang, 0, 0
+    drawImage pang, 0, 0
 
 	// overlay
 	drawImage imgRealtime, 10, -imageHeight(imgRealtime) + track_values_smooth(TRACK_OVERLAY_X) * 180
