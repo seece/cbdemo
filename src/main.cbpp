@@ -168,12 +168,12 @@ taajamaEffu:
 	scaley# = track_values_smooth(TRACK_SCALE_Y)
 	for i=0 to 20
 		SET_CAMERA_VARS(a_)
-		a_cX = track_values(6)*-200
-		cAlt=track_values_smooth(3)*30-15
-		a_r=200
-		a_cZ = a_cZ + (i mod house_levels)*-house_dist + house_dist*house_levels + sin(i * -29.0)*3.0
-		a_cX = a_cX + (i*house_margin) + sin(i * 31.0)
-		a_cX = a_cX + shake
+		a_cX# = track_values(6)*-200
+		cAlt#=track_values_smooth(3)*30-15
+		a_r#=200
+		a_cZ# = a_cZ + (i mod house_levels)*-house_dist + house_dist*house_levels + sin(i * -29.0)*3.0
+		a_cX# = a_cX + (i*house_margin) + sin(i * 31.0)
+		a_cX# = a_cX + shake
 		//a_cX + (i*house_margin)  mod (house_margin*8) +house_margin*2
 		if i mod 4 = 0 then
 			modelobj = house2obj
@@ -200,7 +200,7 @@ aavikkoEffu:
 
 	a_shipX = a_shipX + sin(bars*360.0*0.1)*3.0
 	a_shipZ = a_shipZ * 3.0
-	a_cZ = a_cZ*3.0
+	a_cZ# = a_cZ*3.0
     
     gosub a_ground
 
@@ -275,47 +275,47 @@ feedbackEffu:
                 For i = 0 To 179
                     copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
                 next i
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),Image(ptmp)
-                DrawToImage ptmp
-                DrawImage grid, -1, -1
+                copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),Image(ptmp)
+                drawToImage ptmp
+                drawImage grid, -1, -1
                 drawToImage pang
-                DrawImage ptmp,0,0
+                drawImage ptmp,0,0
                 drawToBuffer
             Case 1
                 For i = 180 To 359
-                    CopyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
-                Next i
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
-                DrawToImage ptmp
-                DrawImage grid, 0, 0
-                DrawToImage pang
-                DrawImage ptmp,0,0
+                    copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+                next i
+                copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
+                drawToImage ptmp
+                drawImage grid, 0, 0
+                drawToImage pang
+                drawImage ptmp,0,0
                 drawToBuffer
             Case 2
                 For i = 360 To 539
-                    CopyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
-                Next i
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),Image(ptmp)
-                DrawToImage ptmp
-                DrawImage grid, 0, -1
-                DrawToImage pang
-                DrawImage ptmp,0,0
+                    copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+                next i
+                copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),Image(ptmp)
+                drawToImage ptmp
+                drawImage grid, 0, -1
+                drawToImage pang
+                drawImage ptmp,0,0
                 drawToBuffer
             Case 3
                 For i = 540 To 179
-                    CopyBox fpos(i,0)+rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+                    copyBox fpos(i,0)+rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
                 next i
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
-                DrawToImage ptmp
-                DrawImage grid, -1, 0
-                DrawToImage pang
-                DrawImage ptmp,0,0
+                copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
+                drawToImage ptmp
+                drawImage grid, -1, 0
+                drawToImage pang
+                drawImage ptmp,0,0
                 drawToBuffer
                 tmp = ping
                 ping = pong
                 pong = tmp
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pong),Image(pang)
-                CopyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(ping),Image(pung)
+                copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pong),Image(pang)
+                copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(ping),Image(pung)
         endSelect
     endif
     //color max(0,127.5+127.5*Sin(bars*.015)-Max(0,bars-10000)-.01*Max(0,bars-10000)), Max(0,127.5+127.5*Sin(ft2*.02)-.01*Max(0,ft2-10000)), Max(0,127.5+127.5*Sin(ft2*.01)-.01*Max(0,ft2-10000))
@@ -324,9 +324,9 @@ feedbackEffu:
 	fb = max(0.15, saturate(1.0/(fphase)))
 	color saturate(fphase)*254,saturate(fphase)*200,saturate(fphase)*210
 	drawToImage ping
-    Circle 105+10*Sin(ft2*.1), 85+10*cos(ft2*.12), 10
+    circle 105+10*sin(ft2*.1), 85+10*cos(ft2*.12), 10
     drawToBuffer
-    DrawImage pang, 0, 0
+    drawImage pang, 0, 0
 
 	// overlay
 	drawImage imgRealtime, 10, -imageHeight(imgRealtime) + track_values_smooth(TRACK_OVERLAY_X) * 180
@@ -335,28 +335,13 @@ return
 
 
 // fisheyee distance
-#define a_dist(_px,_py,_pz) (sqrt((_px)^2+(_py)^2+(_pz)^2))
+#define a_dist(__px,__py,__pz) (sqrt(( __px)^2+( __py)^2+( __pz)^2))
 
 atominEffu:
     //kamera pyörii jonkun jännän jutskan ympärillä. linejä. bucketointi lopuksi jos tarvii
     //y pienenee ylöspäin ja z kasvaa eteenpäin x kasvaa oikealle, kai
-    color 200,0,0
-	/*
-    a_cDist#=-track_values(0)*20//15+sin(bars*360)*10
-    a_cAng#=track_values(1)*700//bars*90
-    a_cRot#=track_values(2)*700
-    a_cAlt#=track_values(3)*10-5
-    a_cPitch#=track_values(4)*700
-    a_cRoll#=track_values(5)*700
-    a_cX#=track_values(6)*50
-    a_cY#=track_values(7)*50
-    a_cZ#=track_values(8)*-50
-    a_cFog#=track_values(9)+0.1
-    a_shipX#=track_values(10)*50
-    a_shipY#=track_values(11)*50
-    a_shipZ#=track_values(12)*50
-    a_gRough#=track_values(13)*0.5
-	*/
+    //color 200,0,0
+
 	
 	SET_CAMERA_VARS(a_)
     
@@ -364,31 +349,9 @@ atominEffu:
     a_r=200
 
     gosub a_ground
-
-    //test rendering an object
-    a_mx=peekInt(shipobj,0)
-    a_my=peekInt(shipobj,4)
-    a_mz=peekInt(shipobj,8)
-    a_size=MEMBlockSize(a_mx)
     
-    a_cX+a_shipX
-    a_cY+a_shipY
-    a_cZ+a_shipZ
-
-    for i=0 to a_size-8 step 8
-		
-        px#=peekFloat(a_mx,i)
-        py#=peekFloat(a_my,i)
-        pz#=peekFloat(a_mz,i)
-        i2=i+4
-        px2#=peekFloat(a_mx,i2)
-        py2#=peekFloat(a_my,i2)
-        pz2#=peekFloat(a_mz,i2)
-        
-        //gosub a_line_with_fog
-        gosub a_smart_line
-    next i
-    
+    RENDER_OBJECT(shipobj,a_,a_smart_line)
+ 
     unlock
 return
 
@@ -437,8 +400,8 @@ return
 
 a_dot:
     gosub a_kamera
-    pd#=a_dist(px,py,pz)
-    if pz<0.2 then dot px/pd*180.0+160,py/pd*180.0+90
+    pd#=a_dist(px#,py#,pz#)
+    if pz#<0.2 then dot px#/pd#*180.0+160,py#/pd#*180.0+90
 return
 
 a_line:
@@ -452,11 +415,11 @@ return
 a_line_with_fog:
     gosub a_kamera
     gosub a_kamera2
-    pd#=a_dist(px,py,pz)
-    pd2#=a_dist(px2,py2,pz2)
-    _d#=(pd+pd2)*2*a_cFog
+    pd#=a_dist(_px#,_py#,_pz#)
+    pd2#=a_dist(px2#,py2#,pz2#)
+    _d#=(pd+pd2)*2.0*a_cFog
     color a_clampc(a_r/_d*2-_d),a_clampc(a_g/_d*2-_d),a_clampc(a_b/_d*2-_d)
-    if pz<0.2 and pz2<0.2 then line px/pd#*180.0+160,py/pd#*180.0+90,px2/pd2#*180.0+160,py2/pd2#*180.0+90
+    if _pz<0.2 and pz2<0.2 then line _px/pd#*180.0+160,_py/pd#*180.0+90,px2/pd2#*180.0+160,py2/pd2#*180.0+90
 return
 
 _s_a_line_with_fog: //takes _-prefixed input-variables instead
@@ -464,7 +427,7 @@ _s_a_line_with_fog: //takes _-prefixed input-variables instead
     gosub _s_a_kamera2
     pd#=a_dist(px,py,pz)
     pd2#=a_dist(px2,py2,pz2)
-    _d#=(pd+pd2)*2*a_cFog
+    _d#=(pd+pd2)*2.0*a_cFog
     color a_clampc(a_r/_d*2-_d),a_clampc(a_g/_d*2-_d),a_clampc(a_b/_d*2-_d)
     if pz<0.2 and pz2<0.2 then line px/pd#*180.0+160,py/pd#*180.0+90,px2/pd2#*180.0+160,py2/pd2#*180.0+90
 return
@@ -473,12 +436,12 @@ a_smart_line:
     _px#=px//do this just to avoid another copy of camera function
     _py#=py
     _pz#=pz
-    _s_d=a_dist(px-px2,py-py2,pz-pz2)*6
-    px=(px+px2)/2
-    py=(py+py2)/2
-    pz=(pz+pz2)/2
+    _s_d#=a_dist(px-px2,py-py2,pz-pz2)*6.0
+    px#=(px#+px2#)/2.0
+    py#=(py#+py2#)/2.0
+    pz#=(pz#+pz2#)/2.0
     gosub a_kamera
-    _s_d=_s_d/(a_dist(px,py,pz)^2*0.2+0.5)+1
+    _s_d=roundup(_s_d/(a_dist(px,py,pz)^2*0.2+0.5)+1)
 
     if _s_d>1 then
         _dx#=(px2-_px)/_s_d
@@ -498,12 +461,14 @@ a_smart_line:
             _pz=_s_pz+_dz*_s_i2
             gosub _s_a_line_with_fog
         next _s_i
+    
     else
         px=_px
         py=_py
         pz=_pz
         gosub a_line_with_fog
     endif
+    
 return
 
 
