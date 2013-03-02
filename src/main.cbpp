@@ -25,6 +25,7 @@ global tempo#
 global gCurrentScene$
 tempo = 100.0
 TRACK_AMOUNT = 19
+frameLimit 60
 
 // SCENE LOADING
 global gSceneAmount
@@ -71,6 +72,10 @@ demoInit:
 	imgRealtime = loadImage("assets/gfx/text_realtime.png")
 	imgSimulation = loadImage("assets/gfx/text_simulation.png")
 	imgDemoLogo = loadImage("assets/gfx/demoname.png")
+	imgWeGreet = loadImage("assets/gfx/text_wegreet.png")
+	imgSplash = loadImage("assets/gfx/splash.png")
+	imgTimblex = loadImage("assets/gfx/text_timblex.png")
+	imgCb2 = loadImage("assets/gfx/text_cb2.png")
 	imgFadeMask = makeImage(320, 240)
 	
 	trhProbTable = malloc(128*128*4)
@@ -189,6 +194,16 @@ taajamaEffu:
 	#undef house_amount
 	#undef house_dist
 	#undef house_margin
+	
+	drawImage imgSplash,0,track_values_smooth(TRACK_OVERLAY_X)*400-imageHeight(imgWeGreet)
+	drawImage imgWeGreet,0,track_values_smooth(TRACK_OVERLAY_X)*400-imageHeight(imgWeGreet) + sin(bars*360)^2*5
+	
+	teximage = imgTimblex
+	#define fontheight 75
+	drawImage imgTimblex, track_values_smooth(TRACK_OVERLAY_Y)*1400-300 , fontheight + sin(bars*360)^2*4
+	drawImage imgCb2, track_values_smooth(TRACK_OVERLAY_Y)*1400-600 , fontheight + sin(bars*360+90)^2*4
+	#undef fontheight
+	
 return
 
 aavikkoEffu:
