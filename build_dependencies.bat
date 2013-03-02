@@ -20,6 +20,7 @@ if (%pythonpath%) == () goto error_no_python
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_DEBUG src\editor.cbpp %sourcedir%\inc\editor_debug.cb -d %current%src\
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_RELEASE src\objloader.cbpp %sourcedir%\inc\objloader.cb -d %current%src\
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_RELEASE src\effects\garbage.cbpp %sourcedir%\inc\garbage.cb -d %current%src\effects\
+ml src\camera.cbml src\camera.cbpp
 @echo off
 REM do not use pause here, use the --wait-on-error flag instead
 exit /b

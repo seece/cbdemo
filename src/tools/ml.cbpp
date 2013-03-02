@@ -1,0 +1,51 @@
+'This is your first CoolBasic intro!  
+
+cl$=commandLine()
+
+global inf, outf
+inf=openToRead(getWord(cl,1))
+outf=openToWrite(getWord(cl,2))
+    
+w(outf,chr(47)+chr(47)+"See "+getWord(cl,1)+" for source"+chr(13)+chr(13))
+repeat 
+    l$=readLine(inf)
+    if inStr(l,"@inline")=1 then parsesub(l):w(outf,chr(13)+chr(13))
+    
+until EOF(inf)
+w(outf,"makeError "+chr(34)+"include "+getWord(cl,2)+" with #include"+chr(34))
+
+function parseSub(p$)
+    pars$=replace(p,"@inline","")
+    l$=readLine(inf)
+    prefs=1
+    repeat 
+        if inStr(pars,replace(lSet("",prefs)," ","@"))<>0 then prefs+1 else exit
+    forever
+    for i=prefs to 1 step -1
+        pars=replace(pars,replace(lSet("",i)," ","@"),"_prefix"+i)
+    next i
+    w(outf,"#define "+left(l,len(l)-1)+"("+pars+") ")
+    l$=readLine(inf)
+    if l="return" then return 0
+    repeat 
+        if inStr(l,"//") then l=left(l,inStr(l,"//")-1)
+        if inStr(l,"'") then l=left(l,inStr(l,"'")-1)
+        for i=prefs to 1 step -1
+            l=replace(l,replace(lSet("",i)," ","@"),"_prefix"+i+" ## ")
+        next i
+        w(outf,trim(l))
+        l$=readLine(inf)
+        if l="return" then return 0 else w(outf," : ")
+    until EOF(inf)
+    
+endFunction
+
+function w(f,c$)
+        for i=1 to len(c)
+            writeByte f,getc(c,i)
+        next i
+endFunction
+
+function getc(c$,n)
+    return asc(mid(c,n,1))
+endFunction
