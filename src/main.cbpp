@@ -50,7 +50,7 @@ include "inc/objloader.cb"
 include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 
 demoInit:
-	setWindow "peisik demo"
+	setWindow "Linear Minds"
 
 	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ|gRoug|14|sclY|ovrX|ovrY|fade"
 	#define TRACK_GROUND_ROUGHNESS 13
@@ -176,17 +176,20 @@ return
 
 heimoEffu:
 	ukko_margin = imageWidth(imgUkot(0))
-	ukko_amount = 320 / ukko_margin
+	ukko_amount = 320 / ukko_margin + 1
 	ukko_ofs# = ((bars * 360.0 * 0.75) mod ukko_margin) // + sin(bars*360.0*4)*5.0
-	
-	for i=0 to ukko_amount+1
+	ukko_out = roundDown(track_values(TRACK_FADE) * float(ukko_amount) + 0.5) * ukko_margin + ukko_ofs
+	setWindow "out:" + roundDown(track_values(TRACK_FADE) * float(ukko_amount) + 0.5)
+	for i=0 to ukko_amount
 		randomize i
 		frame = int(bars*8+rnd(0.1)) mod 2
 		
 		ukko_hyppy# = max(-0.0, sin(bars*360*4.0 - 10.0+rnd(0,40.0))) * 10.0 
-		drawImage imgUkot(frame), ukko_margin * i - ukko_ofs + sin(bars*360*4.0-20.0)*10.0 + rnd(1.0), 1 + ukko_hyppy
-		drawImage imgUkot(frame+2), -ukko_margin+320-ukko_margin * i + ukko_ofs - sin(bars*360*4.0-20.0)*10.0 + rnd(1.0), 120 + ukko_hyppy
+		drawImage imgUkot(frame), 	ukko_margin * i 				- ukko_ofs + sin(bars*360*4.0-20.0)*10.0 + rnd(1.0), 1 		+ ukko_hyppy
+		drawImage imgUkot(frame+2), -ukko_margin+320-ukko_margin * i + ukko_ofs - sin(bars*360*4.0-20.0)*10.0 + rnd(1.0), 120 	+ ukko_hyppy
 	next i
+	box 320-ukko_out,0,ukko_out,imageHeight(imgUkot(0))+30
+	box 0,105,ukko_out,imageHeight(imgUkot(0))+50
 return
 
 taajamaEffu:
