@@ -16,7 +16,7 @@
 #endif
 
 #ifdef RELEASE
-	gWindowMode = 1	
+	gWindowMode = 1
 #endif
 
 global MUSIC_PATH$
@@ -25,6 +25,7 @@ global tempo#
 global gCurrentScene$
 tempo = 100.0
 TRACK_AMOUNT = 19
+frameLimit 60
 
 // SCENE LOADING
 global gSceneAmount
@@ -67,10 +68,23 @@ demoInit:
 	house1obj = loadWavefrontObj("assets/obj/hus1_1.obj")
 	house2obj = loadWavefrontObj("assets/obj/hus2_1.obj")
 	
+	#define flipImageHoriz(_img) resizeImage _img, -imageWidth(_img), imageHeight(_img)
+	
+	dim imgUkot(4)
+	imgUkot(0) = loadImage("assets/gfx/ukko1.png")
+	imgUkot(1) = loadImage("assets/gfx/ukko2.png")
+	imgUkot(2) = cloneImage(imgUkot(0))  : flipImageHoriz(imgUkot(2))
+	imgUkot(3) = cloneImage(imgUkot(1)) : flipImageHoriz(imgUkot(3))
+	
+	
 	imgSmallLogo = loadImage("assets/gfx/logo1.png")
 	imgRealtime = loadImage("assets/gfx/text_realtime.png")
 	imgSimulation = loadImage("assets/gfx/text_simulation.png")
 	imgDemoLogo = loadImage("assets/gfx/demoname.png")
+	imgWeGreet = loadImage("assets/gfx/text_wegreet.png")
+	imgSplash = loadImage("assets/gfx/splash.png")
+	imgTimblex = loadImage("assets/gfx/text_timblex.png")
+	imgCb2 = loadImage("assets/gfx/text_cb2.png")
 	imgFadeMask = makeImage(320, 240)
 	
 	trhProbTable = malloc(128*128*4)
@@ -89,6 +103,7 @@ demoInit:
 	#define FEEDBACK_HEIGHT 180
 	
 	gosub initFeedback
+    gosub initParticleup
 return
 
 initFeedback:
@@ -124,6 +139,30 @@ initFeedback:
 
 return
 
+initParticleup:
+    particleupspawntime# = .0
+    particleupspeed# = 1.0
+    particleupscale# = 1.0
+    const upparticlecount = 199
+    dim upparticle#(upparticlecount,6)
+    
+    for i = 0 to upparticlecount
+        a# = rnd(360)
+        r# = sqrt(rnd(30))
+        upparticle(i,0) = r*cos(a)
+        upparticle(i,1) = rnd(-.1,.1)
+        upparticle(i,2) = r*sin(a)
+        upparticle(i,3) = rnd(-1,1)
+        upparticle(i,4) = rnd(-1,1)
+        upparticle(i,5) = rnd(-1,1)
+        l# = 1.0/sqrt(upparticle(i,3)*upparticle(i,3)+upparticle(i,4)*upparticle(i,4)+upparticle(i,5)*upparticle(i,5))
+        upparticle(i,3) = upparticle(i,3)*l
+        upparticle(i,4) = upparticle(i,4)*l
+        upparticle(i,5) = upparticle(i,5)*l
+        upparticle(i,6) = rnd(.5)
+    next i
+return
+
 scaleBuffer:
     for sb_i=180 to 0 step -1
         copyBox 0, sb_i,320,1,0, sb_i*2,image(gBuffer),image(gBuffer)
@@ -147,16 +186,56 @@ drawDemo:
 		gosub sotkuEffu
 	elseIf gCurrentScene = "xfiles" then
 		gosub taajamaEffu
+	elseIf gCurrentScene = "weather" then
+		gosub heimoEffu
 	elseIf gCurrentScene = "mafia"
 		gosub templeEffu
-	else 
+        gosub drawParticleup
+	else
 		gosub atominEffu
 	endif
+return
+
+drawParticleup:
+    upparticlet# = (bars-particleupspawntime#)*particleupspeed#
+    px# = .0
+    py# = .0
+    pz# = .0
+    a_r#= 200
+    a_g = 20
+    a_b = 20
+    for i = 0 To upparticlecount
+        pt# = upparticlet-upparticle(i,6)
+        If pt>.0 then
+            px = upparticle(i,0)+upparticle(i,3)*pt
+            py = upparticle(i,1)+upparticle(i,4)*pt+2.0*pt*pt
+            pz = upparticle(i,2)+upparticle(i,5)*pt
+            px = (1.0-(particleupscale-1)*.6)*(px + .2*(cos(pz*100.0)-cos(py*100.0)))
+            py = particleupscale*(py + .2*(cos(px*100.0)-cos(pz*100.0)))
+            pz = particleupscale*(pz + .2*(cos(py*100.0)-cos(px*100.0)))
+            gosub a_dot
+        endif
+    next i
 return
 
 // paints the white parts of the given image to the given color
 // result is saved to imgFadeMask
 #define FADEIMAGE(_img, _r, _g, _b) maskImage imgFadeMask, 255, 255, 255 : maskImage _img, 255, 255, 255 : drawToImage imgFadeMask : color 0,0,0  : box 1,1,imageWidth(imgFadeMask)-1, imageHeight(imgFadeMask)-1  : color _r,_g,_b  : box 1,1,imageWidth(_img)-1, imageHeight(_img)-1 : drawImage _img, 1, 1 : drawToBuffer : maskImage _img, 0, 0, 0 : maskImage imgFadeMask, 0, 0, 0
+
+heimoEffu:
+	ukko_margin = imageWidth(imgUkot(0))
+	ukko_amount = 320 / ukko_margin
+	ukko_ofs# = ((bars * 360.0 * 0.75) mod ukko_margin) // + sin(bars*360.0*4)*5.0
+	
+	for i=0 to ukko_amount+1
+		randomize i
+		frame = int(bars*8+rnd(0.1)) mod 2
+		
+		ukko_hyppy# = max(-0.0, sin(bars*360*4.0 - 10.0+rnd(0,40.0))) * 10.0 
+		drawImage imgUkot(frame), ukko_margin * i - ukko_ofs + sin(bars*360*4.0-20.0)*10.0 + rnd(1.0), 1 + ukko_hyppy
+		drawImage imgUkot(frame+2), -ukko_margin+320-ukko_margin * i + ukko_ofs - sin(bars*360*4.0-20.0)*10.0 + rnd(1.0), 120 + ukko_hyppy
+	next i
+return
 
 taajamaEffu:
 	#define house_margin 1.5
@@ -189,6 +268,16 @@ taajamaEffu:
 	#undef house_amount
 	#undef house_dist
 	#undef house_margin
+	
+	drawImage imgSplash,0,track_values_smooth(TRACK_OVERLAY_X)*400-imageHeight(imgWeGreet)
+	drawImage imgWeGreet,0,track_values_smooth(TRACK_OVERLAY_X)*400-imageHeight(imgWeGreet) + sin(bars*360)^2*5
+	
+	teximage = imgTimblex
+	#define fontheight 75
+	drawImage imgTimblex, track_values_smooth(TRACK_OVERLAY_Y)*1400-300 , fontheight + sin(bars*360)^2*4
+	drawImage imgCb2, track_values_smooth(TRACK_OVERLAY_Y)*1400-600 , fontheight + sin(bars*360+90)^2*4
+	#undef fontheight
+	
 return
 
 aavikkoEffu:
@@ -196,7 +285,7 @@ aavikkoEffu:
 	a_cZ = track_values(8)*-50	// don't smooth the z-axis camera movement
     
     lock image(gBuffer)
-    a_r=200
+    a_r#=200
 
 	a_shipX = a_shipX + sin(bars*360.0*0.1)*3.0
 	a_shipZ = a_shipZ * 3.0
@@ -214,17 +303,30 @@ templeEffu:
 	SET_CAMERA_VARS(a_)
     
     lock image(gBuffer)
-    a_r=200
+    a_r#=200
 	
 	RENDER_OBJECT(templeobj,a_,a_smart_line)
     
     unlock
+    a_cZ = a_cZ +1.0
+    particleupscale = 1.5
+    particleupspawntime = 61
+    particleupspeed = .08
+    gosub drawParticleup
+    
 return
 
 kiitoEffu:
 	gosub atominEffu
 
 	c = a_clampc(track_values(TRACK_FADE)*255)
+    
+    SET_CAMERA_VARS(a_)
+    a_cX = -3.0
+    a_cZ = 6.0
+    particleupspawntime = 9.0
+    particleupspeed = .4
+    gosub drawParticleup
 	
 	color cbWhite
 	
@@ -258,7 +360,7 @@ feedbackEffu:
 		color cbred
 		SET_CAMERA_VARS(a_)
     
-		a_r=200
+		a_r#=200
 	
 		RENDER_OBJECT(shipobj,a_,a_smart_line)
 	
@@ -267,57 +369,55 @@ feedbackEffu:
 
 	fy_ofs = -50
 	
-    if t<timer()
-        k = k + 1
-        If k>3 Then k = 0
-        Select k
-            Case 0
-                For i = 0 To 179
-                    copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
-                next i
-                copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),Image(ptmp)
-                drawToImage ptmp
-                drawImage grid, -1, -1
-                drawToImage pang
-                drawImage ptmp,0,0
-                drawToBuffer
-            Case 1
-                For i = 180 To 359
-                    copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
-                next i
-                copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
-                drawToImage ptmp
-                drawImage grid, 0, 0
-                drawToImage pang
-                drawImage ptmp,0,0
-                drawToBuffer
-            Case 2
-                For i = 360 To 539
-                    copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
-                next i
-                copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),Image(ptmp)
-                drawToImage ptmp
-                drawImage grid, 0, -1
-                drawToImage pang
-                drawImage ptmp,0,0
-                drawToBuffer
-            Case 3
-                For i = 540 To 179
-                    copyBox fpos(i,0)+rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
-                next i
-                copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pung),Image(ptmp)
-                drawToImage ptmp
-                drawImage grid, -1, 0
-                drawToImage pang
-                drawImage ptmp,0,0
-                drawToBuffer
-                tmp = ping
-                ping = pong
-                pong = tmp
-                copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(pong),Image(pang)
-                copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,Image(ping),Image(pung)
-        endSelect
-    endif
+    feedbackk = feedbackk + 1
+    if feedbackk>3 then feedbackk = 0
+    select feedbackk
+        case 0
+            for i = 0 To 179
+                copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+            next i
+            copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),Image(ptmp)
+            drawToImage ptmp
+            drawImage grid, -1, -1
+            drawToImage pang
+            drawImage ptmp,0,0
+            drawToBuffer
+        case 1
+            for i = 180 To 359
+                copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),image(ping),image(pong)
+            next i
+            copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),image(ptmp)
+            drawToImage ptmp
+            drawImage grid, 0, 0
+            drawToImage pang
+            drawImage ptmp,0,0
+            drawToBuffer
+        case 2
+            for i = 360 To 539
+                copyBox fpos(i,0)+Rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),Image(ping),Image(pong)
+            next i
+            copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),image(ptmp)
+            drawToImage ptmp
+            drawImage grid, 0, -1
+            drawToImage pang
+            drawImage ptmp,0,0
+            drawToBuffer
+        case 3
+            for i = 540 To 179
+                copyBox fpos(i,0)+rand(-1,1),fpos(i,1)+Rand(-1,1),12,12,fpos(i,2),fpos(i,3),image(ping),image(pong)
+            next i
+            copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pung),image(ptmp)
+            drawToImage ptmp
+            drawImage grid, -1, 0
+            drawToImage pang
+            drawImage ptmp,0,0
+            drawToBuffer
+            tmp = ping
+            ping = pong
+            pong = tmp
+            copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(pong),image(pang)
+            copyBox 0,0,FEEDBACK_WIDTH,FEEDBACK_HEIGHT,0,0,image(ping),image(pung)
+    endSelect
     //color max(0,127.5+127.5*Sin(bars*.015)-Max(0,bars-10000)-.01*Max(0,bars-10000)), Max(0,127.5+127.5*Sin(ft2*.02)-.01*Max(0,ft2-10000)), Max(0,127.5+127.5*Sin(ft2*.01)-.01*Max(0,ft2-10000))
 	fphase# =sin(bars*360*0.5)
 	//smokecolor = saturate(1.0+)*64+70
@@ -346,7 +446,7 @@ atominEffu:
 	SET_CAMERA_VARS(a_)
     
     lock image(gBuffer)
-    a_r=200
+    a_r#=200
 
     gosub a_ground
     
@@ -401,7 +501,9 @@ return
 a_dot:
     gosub a_kamera
     pd#=a_dist(px#,py#,pz#)
-    if pz#<0.2 then dot px#/pd#*180.0+160,py#/pd#*180.0+90
+    _d# = pd*4*a_cFog
+    color a_clampc(a_r/_d*2-_d),a_clampc(a_g/_d*2-_d),a_clampc(a_b/_d*2-_d)
+    if pz<0.2 then dot px#/pd#*180.0+160,py#/pd#*180.0+90
 return
 
 a_line:
