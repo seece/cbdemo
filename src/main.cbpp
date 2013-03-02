@@ -103,6 +103,7 @@ demoInit:
 	#define FEEDBACK_HEIGHT 180
 	
 	gosub initFeedback
+    gosub initParticleup
 return
 
 initFeedback:
@@ -138,6 +139,30 @@ initFeedback:
 
 return
 
+initParticleup:
+    particleupspawntime# = .0
+    particleupspeed# = 1.0
+    particleupscale# = 1.0
+    const upparticlecount = 199
+    dim upparticle#(upparticlecount,6)
+    
+    for i = 0 to upparticlecount
+        a# = rnd(360)
+        r# = sqrt(rnd(30))
+        upparticle(i,0) = r*cos(a)
+        upparticle(i,1) = rnd(-.1,.1)
+        upparticle(i,2) = r*sin(a)
+        upparticle(i,3) = rnd(-1,1)
+        upparticle(i,4) = rnd(-1,1)
+        upparticle(i,5) = rnd(-1,1)
+        l# = 1.0/sqrt(upparticle(i,3)*upparticle(i,3)+upparticle(i,4)*upparticle(i,4)+upparticle(i,5)*upparticle(i,5))
+        upparticle(i,3) = upparticle(i,3)*l
+        upparticle(i,4) = upparticle(i,4)*l
+        upparticle(i,5) = upparticle(i,5)*l
+        upparticle(i,6) = rnd(.5)
+    next i
+return
+
 scaleBuffer:
     for sb_i=180 to 0 step -1
         copyBox 0, sb_i,320,1,0, sb_i*2,image(gBuffer),image(gBuffer)
@@ -165,9 +190,32 @@ drawDemo:
 		gosub heimoEffu
 	elseIf gCurrentScene = "mafia"
 		gosub templeEffu
-	else 
+        gosub drawParticleup
+	else
 		gosub atominEffu
 	endif
+return
+
+drawParticleup:
+    upparticlet# = (bars-particleupspawntime#)*particleupspeed#
+    px# = .0
+    py# = .0
+    pz# = .0
+    a_r = 200
+    a_g = 20
+    a_b = 20
+    for i = 0 To upparticlecount
+        pt# = upparticlet-upparticle(i,6)
+        If pt>.0 then
+            px = upparticle(i,0)+upparticle(i,3)*pt
+            py = upparticle(i,1)+upparticle(i,4)*pt+2.0*pt*pt
+            pz = upparticle(i,2)+upparticle(i,5)*pt
+            px = (1.0-(particleupscale-1)*.6)*(px + .2*(cos(pz*100.0)-cos(py*100.0)))
+            py = particleupscale*(py + .2*(cos(px*100.0)-cos(pz*100.0)))
+            pz = particleupscale*(pz + .2*(cos(py*100.0)-cos(px*100.0)))
+            gosub a_dot
+        endif
+    next i
 return
 
 // paints the white parts of the given image to the given color
@@ -260,12 +308,25 @@ templeEffu:
 	RENDER_OBJECT(templeobj,a_,a_smart_line)
     
     unlock
+    a_cZ = a_cZ +1.0
+    particleupscale = 1.5
+    particleupspawntime = 61
+    particleupspeed = .08
+    gosub drawParticleup
+    
 return
 
 kiitoEffu:
 	gosub atominEffu
 
 	c = a_clampc(track_values(TRACK_FADE)*255)
+    
+    SET_CAMERA_VARS(a_)
+    a_cX = -3.0
+    a_cZ = 6.0
+    particleupspawntime = 9.0
+    particleupspeed = .4
+    gosub drawParticleup
 	
 	color cbWhite
 	
@@ -477,6 +538,8 @@ return
 a_dot:
     gosub a_kamera
     pd#=a_dist(px,py,pz)
+    _d# = pd*4*a_cFog
+    color a_clampc(a_r/_d*2-_d),a_clampc(a_g/_d*2-_d),a_clampc(a_b/_d*2-_d)
     if pz<0.2 then dot px/pd*180.0+160,py/pd*180.0+90
 return
 
