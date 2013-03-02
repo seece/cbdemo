@@ -17,6 +17,8 @@ release/temp/
 src/output/
 cbRun.exe
 cbrun.exe
+ml.exe
+cbml.exe
 
 #temporary source files
 main.cb

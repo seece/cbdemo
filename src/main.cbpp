@@ -172,7 +172,7 @@ taajamaEffu:
 		a_cX = a_cX + (i*house_margin) + sin(i * 31.0)
 		//a_cX + (i*house_margin)  mod (house_margin*8) +house_margin*2
 		
-		RENDER_OBJECT(house1obj,a_,a_smart_line)
+		RENDER_OBJECT_SCALED(house1obj,a_,a_smart_line,1.0, scaley + sin(i*30), 1.0)
 	next i
 	
 	#undef house_levels

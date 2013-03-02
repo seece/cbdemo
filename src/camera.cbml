@@ -38,3 +38,24 @@ RENDER_OBJECT:
         gosub _rendersub
     next @i 
 return
+
+@inline _obj,@,_rendersub,_sx,_sy,_sz
+RENDER_OBJECT_SCALED:
+    @mx=peekInt(_obj,0)
+    @my=peekInt(_obj,4)
+    @mz=peekInt(_obj,8)
+    @size=MEMBlockSize(@mx)
+    @cX+ @shipX 
+    @cY+ @shipY
+    @cZ+ @shipZ
+    for @i=0 to @size-8 step 8
+        px#=peekFloat(@mx,@i)*_sx
+        py#=peekFloat(@my,@i)*_sy
+        pz#=peekFloat(@mz,@i)*_sz
+        @i2=@i+4
+        px2#=peekFloat(@mx,@i2)*_sx
+        py2#=peekFloat(@my,@i2)*_sy
+        pz2#=peekFloat(@mz,@i2)*_sz
+        gosub _rendersub
+    next @i 
+return
