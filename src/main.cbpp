@@ -52,6 +52,7 @@ demoInit:
 	setWindow "peisik demo"
 
 	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ|gRoug|14|sclY|ovrX|ovrY|fade"
+	#define TRACK_GROUND_ROUGHNESS 13
 	#define TRACK_SCALE_Y 15
 	#define TRACK_OVERLAY_X 16
 	#define TRACK_OVERLAY_Y 17	
@@ -64,6 +65,7 @@ demoInit:
 	shipobj = loadWavefrontObj("assets/obj/shup.obj")
 	templeobj = loadWavefrontObj("assets/obj/temple.obj")
 	house1obj = loadWavefrontObj("assets/obj/hus1_1.obj")
+	house2obj = loadWavefrontObj("assets/obj/hus2_1.obj")
 	
 	imgSmallLogo = loadImage("assets/gfx/logo1.png")
 	imgRealtime = loadImage("assets/gfx/text_realtime.png")
@@ -161,6 +163,7 @@ taajamaEffu:
 	#define house_amount 8
 	#define house_dist 4.0
 	#define house_levels 3
+	#define shake sin(90+bars*360)^2.0*track_values_smooth(TRACK_GROUND_ROUGHNESS)
 
 	scaley# = track_values_smooth(TRACK_SCALE_Y)
 	for i=0 to 20
@@ -170,11 +173,18 @@ taajamaEffu:
 		a_r=200
 		a_cZ = a_cZ + (i mod house_levels)*-house_dist + house_dist*house_levels + sin(i * -29.0)*3.0
 		a_cX = a_cX + (i*house_margin) + sin(i * 31.0)
+		a_cX = a_cX + shake
 		//a_cX + (i*house_margin)  mod (house_margin*8) +house_margin*2
+		if i mod 4 = 0 then
+			modelobj = house2obj
+		else
+			modelobj = house1obj
+		endif
 		
-		RENDER_OBJECT_SCALED(house1obj,a_,a_smart_line,1.0, scaley + sin(i*30), 1.0)
+		RENDER_OBJECT_SCALED(modelobj,a_,a_smart_line, 1.0, scaley + sin(i*30), 1.0)
 	next i
 	
+	#undef shake
 	#undef house_levels
 	#undef house_amount
 	#undef house_dist
