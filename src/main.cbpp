@@ -295,6 +295,7 @@ drawDemo:
 	else
 		gosub atominEffu
 	endif
+    if track_values(14)>.5 then gosub hoerpel
 return
 
 drawParticleup:
@@ -316,6 +317,12 @@ drawParticleup:
             pz = particleupscale*(pz + .2*(cos(py*100.0)-cos(px*100.0)))
             gosub a_dot
         endif
+    next i
+return
+
+hoerpel:
+    for i = 0 to 179
+        copyBox 0, i, 319, 1, int(rnd(-1.0,1.0)*track_values(14)), i
     next i
 return
 
@@ -458,7 +465,7 @@ drawTorus:
                     line x1+slp1*ii, ii, x3+slp3*ii, ii
                 next ii
                 _d# = 17.0/s3+1.8
-                color a_clampc(200/_d*2-_d),a_clampc(20/_d*2-_d),a_clampc(20/_d*2-_d)
+                color a_clampc(160/_d*2-_d),a_clampc(160/_d*2-_d),a_clampc(160/_d*2-_d)
                 line px1, py1, px2, py2
                 line px1, py1, px3, py3
                 line px2, py2, px4, py4
