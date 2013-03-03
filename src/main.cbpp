@@ -16,7 +16,7 @@
 #endif
 
 #ifdef RELEASE
-	gWindowMode = 1
+	gWindowMode = 0
 #endif
 
 global MUSIC_PATH$
@@ -107,6 +107,7 @@ demoInit:
 	gosub initFeedback
     gosub initParticleup
 	gosub initTorus
+    gosub initMoire
 return
 
 initTorus:
@@ -151,6 +152,54 @@ initTorus:
         next i
     next jj
     
+return
+
+initMoire:
+    dim imgs(6), pc#(3)
+    
+    For i = 0 to 6
+        imgs(i) = makeImage(640-320*(i>1), 480-240*(i>1))
+        if i<>1 then maskImage imgs(i), 255, 0, 255
+        if i=3 then maskImage(imgs(i)), 255, 255, 255
+        if i=4 or i = 6 then maskImage imgs(i),0,0,0
+        if i<2 then
+            drawToImage imgs(i)
+            lock image(imgs(i))
+            for j = 0 to 639
+                for k = 0 to 479
+                    d# = distance(319.5, 239.5, j, k)/30.0
+                    d = (d-roundDown(d))*(i<1)+(1-d+roundDown(d))*(i>0)
+                    if 0<.5-d then putPixel2 j, k, 255*256*256+255
+                    if i<1 and 0>.5-d then putPixel2 j, k, 255*256*256+255*256+255
+                next k
+            next j
+            unlock image(imgs(i))
+        endif
+    next i
+    drawToScreen
+    
+    drawToImage imgs(4)
+        lock image(imgs(4))
+        for i = 0 To 319
+            for j = 0 to 239
+                dd# = rnd(.9,1.2)*160.0*sqrt((1.0-distance(120, 120, i*479/639.0, j)/distance(120,120,0,0)))
+                putPixel2 i, j, roundDown(dd*.4)*256*256+roundDown(dd*.1)*256+roundDown(dd*.1)
+            next j
+        next i
+        unlock image(imgs(4))
+    drawToScreen
+    
+    drawToImage imgs(5)
+        lock image(imgs(5))
+        for i = 0 to 319
+            for j = 0 to 239
+                dd# = rnd(.9,1.2)*160.0*sqrt((1.0-distance(120, 120, i*479/639.0, j)/distance(120,120,0,0)))
+                putPixel2 i, j, roundDown(dd*.2)*256*256+roundDown(dd*.15)*256+roundDown(dd*.1)
+            next j
+        next i
+        unlock image(imgs(5))
+    drawToScreen
+
 return
 
 initFeedback:
@@ -554,9 +603,30 @@ sotkuEffu:
 	ypos# = -bars*100.0 + track_values(TRACK_FADE)*100.0
 	
 	// teksti näkyy vain hetken aikaa
-	if gCurrentScene = "ufo" then 
+	if gCurrentScene = "ufo" then
+        t# = (bars-2)*3000.0
+        for i = 0 to 1
+            pc(i*2+0) = 140*cos(t*(.02+i*.02))-150
+            pc(i*2+1) = 70*sin(t*(.025+i*.02))-150
+            drawToImage imgs(2)
+                cls
+                drawImage imgs(0), pc(2-2*i), pc(3-2*i)
+                drawImage imgs(1), pc(0+2*i), pc(1+2*i)
+            drawToImage imgs(3)
+                if i<1 then cls
+                drawImage imgs(2), 0, 0
+            drawToBuffer
+        next i
+        drawToImage imgs(6)
+            drawImage imgs(4), 0, 0
+            drawImage imgs(3), 0, 0
+        drawToBuffer
+        drawImage imgs(5), 0, 0
+        drawImage imgs(6), 0, 0
+
 		drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage)
 		drawImage imgGarbage, 0, ypos mod imageHeight(imgGarbage) + imageHeight(imgGarbage)
+        
 	elseIf gCurrentScene = "ufo2" then
 		gosub feedbackEffu
 	endif
@@ -633,7 +703,7 @@ feedbackEffu:
 	fphase# =sin(bars*360*0.5)
 	//smokecolor = saturate(1.0+)*64+70
 	fb = max(0.15, saturate(1.0/(fphase)))
-	color saturate(fphase)*220,saturate(fphase)*50,saturate(fphase)*30
+	color saturate(fphase)*200,saturate(fphase)*20,saturate(fphase)*20
 	drawToImage ping
     circle 105+10*sin(ft2*.1), 85+10*cos(ft2*.12), 10
     drawToBuffer
