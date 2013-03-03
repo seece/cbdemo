@@ -299,6 +299,17 @@ initFeedback:
 	ptmp = makeImage(FEEDBACK_WIDTH,FEEDBACK_HEIGHT)
 	defaultMask 1, 0,0,0
 	grid = makeImage(FEEDBACK_WIDTH+1,FEEDBACK_HEIGHT+1)
+    
+    drawToImage pang
+        color 20, 20, 20
+        box 0, 0, FEEDBACK_WIDTH, FEEDBACK_HEIGHT
+    drawToImage pung
+        box 0, 0, FEEDBACK_WIDTH, FEEDBACK_HEIGHT
+    drawToImage ping
+        box 0, 0, FEEDBACK_WIDTH, FEEDBACK_HEIGHT
+    drawToImage pong
+        box 0, 0, FEEDBACK_WIDTH, FEEDBACK_HEIGHT
+    drawToBuffer
 	
 	color 255, 0, 255
 	drawToImage grid
@@ -850,7 +861,6 @@ feedbackEffu:
     circle 105+10*sin(ft2*.1), 85+10*cos(ft2*.12), 10
     drawToBuffer
     drawImage pang, 0, 0
-
 	// overlay
 	drawImage imgRealtime, 10, -imageHeight(imgRealtime) + track_values_smooth(TRACK_OVERLAY_X) * 180
 	drawImage imgSimulation, 320- track_values_smooth(TRACK_OVERLAY_Y) * 320, 180-imageHeight(imgRealtime)-2
