@@ -4,7 +4,7 @@ call build_dependencies.bat
 
 set /p archiverpath=<7ziplocation
 
-set archivename=cbdemo.zip
+set archivename=linear_minds.zip
 set tempdir=release\temp
 set infodir=release\nfo
 set archivedir=release\archives
@@ -13,7 +13,7 @@ set syncdir=src\sync
 set sourcedir=src
 set binarypath=src\cbRun.exe
 REM the final binary name
-set binaryname=cbdemo.exe
+set binaryname=linear_minds.exe
 set sourcearchive=%tempdir%\source.zip
 
 

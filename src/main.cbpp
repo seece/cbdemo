@@ -19,7 +19,7 @@
 	gWindowMode = 1
     SCREEN 340,170
     clsColor 20,20,20
-    setWindow "Linear Minds by Peisik"
+    setWindow "Linear Minds"
 	//meatballs init
     sw = 128
     sh = 128
@@ -73,7 +73,6 @@
         box 16, 16, 128, 128
 		//balls
 		reDim taulu(sw,sh) ' taulukko nollaksi ei tarvitse käyttää getPixel2()
-        
 		aika# = (timer()-alku)/50.0
 		lock SCREEN()
 			for i = 1 to m
@@ -100,7 +99,6 @@
         
 		drawScreen 
 
-        //drawScreen
     forever
     if full then gWindowMode = 0
 #endif
@@ -136,7 +134,7 @@ include "inc/objloader.cb"
 include "inc/garbage.cb"	// compiled from effects/garbage.cbpp
 
 demoInit:
-	setWindow "peisik demo"
+	setWindow "Linear Minds"
 
 	gTrackNames =  "cDist|cAng|cRot|cAlt|cPitch|cRoll|cX|cY|cZ|fogDist|shipX|shipY|shipZ|gRoug|14|sclY|ovrX|ovrY|fade"
 	#define TRACK_GROUND_ROUGHNESS 13
@@ -176,6 +174,9 @@ demoInit:
 	imgTimblex = loadImage("assets/gfx/text_timblex.png")
 	imgAxu = loadImage("assets/gfx/text_axu.png")
 	imgCb2 = loadImage("assets/gfx/text_cb2.png")
+	imgCredits = loadImage("assets/gfx/text_credits.png")
+	imgKredut = loadImage("assets/gfx/kredut.png")
+	imgKredutBg = loadImage("assets/gfx/kredut_bg.png")
 	imgFadeMask = makeImage(320, 240)
 	
 	trhProbTable = malloc(128*128*4)
@@ -401,6 +402,13 @@ loppu:
     'lock image(gBuffer)
     hobo(bars,50/_d#*envelope#(bars#, 76,86,86,89),_px#/_d#*180.0+160,_py#/_d#*180.0+90,a_cRoll)
     'unlock
+	drawImage imgKredutBg, 2, track_values_smooth(TRACK_OVERLAY_X)*400 - imageHeight(imgKredut)
+	drawImage imgKredut, 2, track_values_smooth(TRACK_OVERLAY_X)*400 - imageHeight(imgKredut)
+	drawImage imgCredits, 320-track_values_smooth(TRACK_OVERLAY_Y)*800, 20
+	
+	#ifdef RELEASE
+		if bars > 90.0 then end
+	#endif
 return
 
 drawParticleup:

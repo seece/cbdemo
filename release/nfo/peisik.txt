@@ -1,2 +1,17 @@
-the peisik coolbasic megademo
-v.0.01.1.1
+   _____________   ____________   __   ____________   __  |  |      ___
+  |   _______   | |  ________  | |  | |  __________| |  | |  |     /  /
+  |  |       |  | |   _________| |  | |_________   | |  | |  |____/  /
+  |  |_______|  | |  |_________  |  |  _________|  | |  | |   _____  \
+  |   __________| |____________| |__| |____________| |__| |__|     \__\
+  |__| Linear Minds
+  
+  A demo for CoolBasic Demokisa 2013, released 3rd of March, 2013.
+  
+  Credits:
+	Atomimalli
+	cce
+	Ilmuri
+	Joxu
+	msqrt
+  
+  Special thanks to Branch for his Markov signature.
