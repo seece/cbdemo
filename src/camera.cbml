@@ -41,6 +41,33 @@ RENDER_OBJECT:
     next @i 
 return
 
+@inline _obj,@,_rendersub,roll
+RENDER_OBJECT_ROLLED:
+    @mx=peekInt(_obj,0)
+    @my=peekInt(_obj,4)
+    @mz=peekInt(_obj,8)
+    @size=MEMBlockSize(@mx)
+    @cX#+ @shipX 
+    @cY#+ @shipY
+    @cZ#+ @shipZ
+    for @i=0 to @size-8 step 8
+        @_a#=-getAngle(0,0,peekFloat(@mx,@i),peekFloat(@my,@i))
+        @_d#=distance(0,0,peekFloat(@mx,@i),peekFloat(@my,@i))
+        px#=cos(@_a+roll)*@_d'_1_px#=peekFloat(@mx,@i)
+        py#=-sin(@_a+roll)*@_d'_1_py#=peekFloat(@my,@i)
+        pz#=peekFloat(@mz,@i)'_1_pz#=peekFloat(@mz,@i)
+        @i2=@i+4
+            
+        @_a#=-getAngle(0,0,peekFloat(@mx,@i2),peekFloat(@my,@i2))
+        @_d#=distance(0,0,peekFloat(@mx,@i2),peekFloat(@my,@i2))
+        px2#=cos(@_a+roll)*@_d'_1_px#=peekFloat(@mx,@i)
+        py2#=-sin(@_a+roll)*@_d'_1_py#=peekFloat(@my,@i)
+        pz2#=peekFloat(@mz,@i2)'_2_pz#=peekFloat(@mz,@i2)
+        'LINE_WITH_FOG(@,_1_,_2_)
+        gosub _rendersub
+    next @i 
+return
+
 @inline _obj,@,_rendersub,_sx,_sy,_sz
 RENDER_OBJECT_SCALED:
     @mx=peekInt(_obj,0)

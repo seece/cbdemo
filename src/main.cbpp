@@ -580,7 +580,7 @@ aavikkoEffu:
     
     gosub a_ground
 
-	RENDER_OBJECT(shipobj,a_,a_smart_line)
+	RENDER_OBJECT_ROLLED(shipobj,a_,a_smart_line,180+cos(bars*360.0*0.1+20)*25.0)
 	
     
     unlock
