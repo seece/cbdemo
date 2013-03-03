@@ -628,7 +628,7 @@ feedbackEffu:
 	fphase# =sin(bars*360*0.5)
 	//smokecolor = saturate(1.0+)*64+70
 	fb = max(0.15, saturate(1.0/(fphase)))
-	color saturate(fphase)*254,saturate(fphase)*200,saturate(fphase)*210
+	color saturate(fphase)*220,saturate(fphase)*50,saturate(fphase)*30
 	drawToImage ping
     circle 105+10*sin(ft2*.1), 85+10*cos(ft2*.12), 10
     drawToBuffer
