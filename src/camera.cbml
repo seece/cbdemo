@@ -24,9 +24,9 @@ RENDER_OBJECT:
     @my=peekInt(_obj,4)
     @mz=peekInt(_obj,8)
     @size=MEMBlockSize(@mx)
-    @cX+ @shipX 
-    @cY+ @shipY
-    @cZ+ @shipZ
+    @cX#+ @shipX 
+    @cY#+ @shipY
+    @cZ#+ @shipZ
     for @i=0 to @size-8 step 8
         px#=peekFloat(@mx,@i)
         py#=peekFloat(@my,@i)
@@ -45,9 +45,9 @@ RENDER_OBJECT_SCALED:
     @my=peekInt(_obj,4)
     @mz=peekInt(_obj,8)
     @size=MEMBlockSize(@mx)
-    @cX+ @shipX 
-    @cY+ @shipY
-    @cZ+ @shipZ
+    @cX#+ @shipX 
+    @cY#+ @shipY
+    @cZ#+ @shipZ
     for @i=0 to @size-8 step 8
         px#=peekFloat(@mx,@i)*_sx
         py#=peekFloat(@my,@i)*_sy
@@ -58,4 +58,31 @@ RENDER_OBJECT_SCALED:
         pz2#=peekFloat(@mz,@i2)*_sz
         gosub _rendersub
     next @i 
+return
+
+@inline @
+KAMERA:
+    //rotate around origin and translate back
+     px#= px+cos(@cAng-90)*@cDist+@cX
+     pz#= pz-sin(@cAng-90)*@cDist+@cZ
+     py#= py+@cAlt+@cY
+    @a#=-getAngle(0,0, px, pz)
+    @d#=-distance(0,0, px, pz)
+     px=cos(@a+@cAng)*@d
+     pz=-sin(@a+@cAng)*@d
+    //rotate camera
+    @a#=getAngle(0,0, px, pz)
+    @d#=distance(0,0, px, pz)
+     px=cos(@a+@cRot)*@d
+     pz=-sin(@a+@cRot)*@d
+    //pitch
+    @a#=getAngle(0,0, pz, py)
+    @d#=distance(0,0, pz, py)
+     pz=cos(@a+@cPitch)*@d
+     py=-sin(@a+@cPitch)*@d
+    //roll
+    @a#=getAngle(0,0, px, py)
+    @d#=distance(0,0, px, py)
+     px=cos(@a+@cRoll)*@d
+     py=-sin(@a+@cRoll)*@d
 return

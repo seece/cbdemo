@@ -14,6 +14,7 @@ repeat
 until EOF(inf)
 w(outf,"makeError "+chr(34)+"include "+getWord(cl,2)+" with #include"+chr(34))
 
+
 function parseSub(p$)
     pars$=replace(p,"@inline","")
     l$=readLine(inf)
@@ -25,17 +26,25 @@ function parseSub(p$)
         pars=replace(pars,replace(lSet("",i)," ","@"),"_prefix"+i)
     next i
     w(outf,"#define "+left(l,len(l)-1)+"("+pars+") ")
-    l$=readLine(inf)
-    if l="return" then return 0
+    l$=""
+    goto begin
     repeat 
+        for i=prefs to 1 step -1
+            l=replace(l,replace(lSet("",i)," ","@")," _prefix"+i+" ## ")
+        next i
+        w(outf,l)
+        begin:
+        ol$=l
+        l$=readLine(inf)
         if inStr(l,"//") then l=left(l,inStr(l,"//")-1)
         if inStr(l,"'") then l=left(l,inStr(l,"'")-1)
-        for i=prefs to 1 step -1
-            l=replace(l,replace(lSet("",i)," ","@"),"_prefix"+i+" ## ")
-        next i
-        w(outf,trim(l))
-        l$=readLine(inf)
-        if l="return" then return 0 else w(outf," : ")
+        l=trim(l)
+        if l="return" then 
+            return 0 
+        elseIf len(replace(replace(replace(l," ",""),chr(13),""),chr(10),""))>0 and len(replace(replace(replace(ol," ",""),chr(13),""),chr(10),""))>0 then 
+            print ol
+            w(outf," : ")
+        endif
     until EOF(inf)
     
 endFunction
