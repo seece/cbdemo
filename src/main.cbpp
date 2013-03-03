@@ -254,8 +254,8 @@ drawParticleup:
     py# = .0
     pz# = .0
     a_r#= 200
-    a_g = 20
-    a_b = 20
+    a_g# = 20
+    a_b# = 20
     for i = 0 To upparticlecount
         pt# = upparticlet-upparticle(i,6)
         If pt>.0 then
@@ -458,6 +458,8 @@ taajamaEffu:
 		a_cX# = track_values(6)*-200
 		cAlt#=track_values_smooth(3)*30-15
 		a_r#=200
+        a_g# = 1
+        a_b# = 1
 		a_cZ# = a_cZ + (i mod house_levels)*-house_dist + house_dist*house_levels + sin(i * -29.0)*3.0
 		a_cX# = a_cX + (i*house_margin) + sin(i * 31.0)
 		a_cX# = a_cX + shake
@@ -656,6 +658,8 @@ atominEffu:
     
     lock image(gBuffer)
     a_r#=200
+    a_g# = 0
+    a_b# = 0
 
     gosub a_ground
     
