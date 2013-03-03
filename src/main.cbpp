@@ -483,14 +483,15 @@ heimoEffu:
 	ukko_margin = imageWidth(imgUkot(0))
 	ukko_amount = 320 / ukko_margin
 	ukko_ofs# = ((bars * 360.0 * 0.75) mod ukko_margin) // + sin(bars*360.0*4)*5.0
+	ukko_remove = track_values(TRACK_OVERLAY_X) * 100
 	
 	for i=0 to ukko_amount+1
 		randomize i
 		frame = int(bars*8+rnd(0.1)) mod 2
 		
-		ukko_hyppy# = max(-0.0, sin(bars*360*4.0 - 10.0+rnd(0,40.0))) * 10.0 
-		drawImage imgUkot(frame), ukko_margin * i - ukko_ofs + sin(bars*360*4.0-20.0)*10.0 + rnd(1.0), 1 + ukko_hyppy
-		drawImage imgUkot(frame+2), -ukko_margin+320-ukko_margin * i + ukko_ofs - sin(bars*360*4.0-20.0)*10.0 + rnd(1.0), 120 + ukko_hyppy
+		ukko_hyppy# = max(-0.0, sin(bars*360*4.0 - 0.0+rnd(0,40.0))) * 10.0 
+		drawImage imgUkot(frame), ukko_margin * i - ukko_ofs + sin(bars*360*4.0-10.0)*10.0 + rnd(1.0), 1 + ukko_hyppy - ukko_remove
+		drawImage imgUkot(frame+2), -ukko_margin+320-ukko_margin * i + ukko_ofs - sin(bars*360*4.0-10.0)*10.0 + rnd(1.0), 120 + ukko_hyppy + ukko_remove
 	next i
 return
 
