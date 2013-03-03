@@ -43,6 +43,7 @@
     setfont loadFont("lucida console",11)
     full = 0
     showfps = 0
+    alku=timer()
     repeat
         if mouseHit(1) then
             if boxOverlap(mouseX(),mouseY(),1,1,175,25,130,26) then full = not full
@@ -72,7 +73,8 @@
         box 16, 16, 128, 128
 		//balls
 		reDim taulu(sw,sh) ' taulukko nollaksi ei tarvitse k‰ytt‰‰ getPixel2()
-		aika = timer()/50
+        
+		aika# = (timer()-alku)/50.0
 		lock SCREEN()
 			for i = 1 to m
 				for x = pallo(i,0) to pallo(i,0)+pw
