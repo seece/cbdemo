@@ -742,6 +742,9 @@ feedbackEffu:
 	// overlay
 	drawImage imgRealtime, 10, -imageHeight(imgRealtime) + track_values_smooth(TRACK_OVERLAY_X) * 180
 	drawImage imgSimulation, 320- track_values_smooth(TRACK_OVERLAY_Y) * 320, 180-imageHeight(imgRealtime)-2
+	
+	color 20,20,20
+	box 0,180-track_values(TRACK_FADE)*181,320,180
 return 
 
 
