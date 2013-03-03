@@ -727,7 +727,7 @@ return
 _s_a_line_with_fog: //takes _-prefixed input-variables instead
     gosub _s_a_kamera
     gosub _s_a_kamera2
-    pd#=a_dist(px,py,pz)
+    pd#=a_dist(px#,py#,pz#)
     pd2#=a_dist(px2,py2,pz2)
     _d#=(pd+pd2)*2.0*a_cFog
     color a_clampc(a_r/_d*2-_d),a_clampc(a_g/_d*2-_d),a_clampc(a_b/_d*2-_d)

@@ -26,23 +26,26 @@ function parseSub(p$)
         pars=replace(pars,replace(lSet("",i)," ","@"),"_prefix"+i)
     next i
     w(outf,"#define "+left(l,len(l)-1)+"("+pars+") ")
-    l$=""
+    l$=chr(0)
+    ol$=l
     goto begin
     repeat 
         for i=prefs to 1 step -1
             l=replace(l,replace(lSet("",i)," ","@")," _prefix"+i+" ## ")
         next i
         w(outf,l)
-        begin:
+        print ol$
         ol$=l
+        begin:
         l$=readLine(inf)
         if inStr(l,"//") then l=left(l,inStr(l,"//")-1)
         if inStr(l,"'") then l=left(l,inStr(l,"'")-1)
         l=trim(l)
+        if EOF(inf) then exit
+        if len(replace(replace(replace(l," ",""),chr(13),""),chr(10),""))=0 then goto begin
         if l="return" then 
             return 0 
-        elseIf len(replace(replace(replace(l," ",""),chr(13),""),chr(10),""))>0 and len(replace(replace(replace(ol," ",""),chr(13),""),chr(10),""))>0 then 
-            print ol
+        elseIf ol<>chr(0) then 
             w(outf," : ")
         endif
     until EOF(inf)
