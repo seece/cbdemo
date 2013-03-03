@@ -63,7 +63,7 @@ demoInit:
 		gResetFoobar = true
 	#endif
 	
-	shipobj = loadWavefrontObj("assets/obj/shup.obj")
+	shipobj = loadWavefrontObj("assets/obj/shup2.obj")
 	templeobj = loadWavefrontObj("assets/obj/temple.obj")
 	house1obj = loadWavefrontObj("assets/obj/hus1_1.obj")
 	house2obj = loadWavefrontObj("assets/obj/hus2_1.obj")
@@ -709,9 +709,11 @@ feedbackEffu:
     endSelect
     //color max(0,127.5+127.5*Sin(bars*.015)-Max(0,bars-10000)-.01*Max(0,bars-10000)), Max(0,127.5+127.5*Sin(ft2*.02)-.01*Max(0,ft2-10000)), Max(0,127.5+127.5*Sin(ft2*.01)-.01*Max(0,ft2-10000))
 	fphase# =sin(bars*360*0.5)
+	fphase2# =sin(bars*360*0.25)
 	//smokecolor = saturate(1.0+)*64+70
-	fb = max(0.15, saturate(1.0/(fphase)))
-	color saturate(fphase)*200,saturate(fphase)*20,saturate(fphase)*20
+	fb# = (1.0+fphase)*.5
+	fb = fb * fb
+	color lerp(30, 200, fb), lerp(30, 40, fb), lerp(40, 40, fb*fb)
 	drawToImage ping
     circle 105+10*sin(ft2*.1), 85+10*cos(ft2*.12), 10
     drawToBuffer
