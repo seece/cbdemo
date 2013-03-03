@@ -1,0 +1,45 @@
+sw = 128
+sh = 128
+
+'SCREEN sw,sh,32,1
+pw = 80
+ph = 80
+m=5
+dim pallo(m,1)
+dim paletti(pw,ph) 
+dim taulu(sw,sh)
+
+for x = 0 To pw
+    for y = 0 To ph
+        dx = (pw/2-x)^2
+        dy = (ph/2-y)^2
+        väri = 100000/(dx+dy+1)
+        paletti(x,y) = max(0,min(255,väri-70))
+    next y 
+next x
+
+repeat
+	reDim taulu(sw,sh) ' taulukko nollaksi ei tarvitse käyttää getPixel2()
+
+    aika = timer()/50
+	lock SCREEN()
+		for i = 1 to m
+			for x = pallo(i,0) to pallo(i,0)+pw
+				for y = pallo(i,1) to pallo(i,1)+ph
+					if x >= 0 and x < sw then
+					if y >= 0 and y < sh then
+					taulu(x,y)=(min(255,paletti(x-pallo(i,0),y-pallo(i,1))+(taulu(x,y))))
+					putPixel2 x,y,taulu(x,y) shl 16 + max(0,taulu(x,y)-100) shl 8 
+					endif
+					endif
+				next y 
+			next x 
+		next i 	
+	unlock
+    for i = 1 to m
+        pallo(i,0) = sw/2 + cos(i*360/m*1.421+aika*1.531)*50-50
+        pallo(i,1) = sh/2 - sin(i*360/m-aika*3.231)*50-50
+    next i 
+    drawScreen 
+
+forever 
