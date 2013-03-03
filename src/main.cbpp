@@ -292,9 +292,27 @@ drawDemo:
 	elseIf gCurrentScene = "mafia"
 		gosub templeEffu
         gosub drawParticleup
+    elseIf gCurrentScene = "outro"
+        gosub atominEffu
+        gosub loppu
 	else
 		gosub atominEffu
+ 
 	endif
+return
+
+loppu:
+    SET_CAMERA_VARS(a_)
+    _px#=0
+    _py#=-60
+    _pz#=70
+    KAMERA(a_,_,_)
+    _d#=A_DIST(_px#,_py#,_pz#)
+    'color a_clampc(a_r#/_d#*40-_d#),a_clampc(a_g#/_d*40-_d#),a_clampc(a_b#/_d#*40-_d#)
+    'box _px#/_d#*180.0+160,_py#/_d#*180.0+90,10,10
+    'lock image(gBuffer)
+    hobo(bars,50/_d#*envelope#(bars#, 76,86,86,89),_px#/_d#*180.0+160,_py#/_d#*180.0+90,a_cRoll)
+    'unlock
 return
 
 drawParticleup:
@@ -965,5 +983,48 @@ _s_a_kamera2: //should be identical to a_kamera, except for variable names
 return
 
 
+function hobo(t#, zoom#,_cx#,_cy#, roll)
+	'drawImage img, 0,0
+	t720# = t*72.0
+	t180# = t*18.0
+	t360# = t*36.0
+	t90# = t*9.0    
+	t45# = t*4.5
+	color 255,255,255
+	for n = 0 To 32
+        cx#=_cx#
+        cy#=_cy#
+		lgrowth# = t90+n*736.4
+		length# = (Cos(lgrowth)*4.0+4.0)*zoom
+		For i = 0 to 32
+			ang# = 2.0*i*Cos(t180+Sin(8.0*i+t360+n*147.6)*90+87.8*n)+564.4*n
+			nx# = cx+Cos(ang+t45-roll)*length
+			ny# = cy+Sin(ang+t45-roll)*length
+			dist# = Min(1.0,Distance(nx,ny*4/3,160.0,160.0)/120.0)
+			c = 255.0-dist*dist*255.0
+			color c*0.3+20,20,20
+			Line cx,cy,nx,ny
+			cx = nx
+			cy = ny
+		next i
+		If -sin(lgrowth)<0 Then
+			circle nx-2, ny-2,5 
+		endif
+	next n
+endFunction 
 
-
+function envelope#(t#, a#,b#,c#,d#)
+	If t<a then
+		Return 0.0
+	EndIf
+	If t<b Then
+		Return (t-a)/(b-a)
+	EndIf
+	If t<c Then
+		Return 1.0
+	EndIf
+	If t<d Then
+		Return (d-t)/(d-c)
+	endif
+	return 0.0
+End function

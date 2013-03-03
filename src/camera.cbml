@@ -66,28 +66,28 @@ return
 @inline @,@@,@@@
 KAMERA:
     //rotate around origin and translate back
-    @@px#= @@@px+cos(@cAng-90)*@cDist+@cX
-    @@pz#= @@@pz-sin(@cAng-90)*@cDist+@cZ
-    @@py#= @@@py+@cAlt+@cY
-    @a#=-getAngle(0,0, @@px, @@pz)
-    @d#=-distance(0,0, @@px, @@pz)
-    @@px=cos(@a+@cAng)*@d
-    @@pz=-sin(@a+@cAng)*@d
+    @@px#= @@@px#+cos(@cAng#-90)*@cDist#+@cX#
+    @@pz#= @@@pz#-sin(@cAng#-90)*@cDist#+@cZ#
+    @@py#= @@@py#+@cAlt#+@cY#
+    @a#=-getAngle(0,0, @@px#, @@pz#)
+    @d#=-distance(0,0, @@px#, @@pz#)
+    @@px#=cos(@a#+@cAng#)*@d#
+    @@pz#=-sin(@a#+@cAng#)*@d#
     //rotate camera
-    @a#=getAngle(0,0, @@px, @@pz)
-    @d#=distance(0,0, @@px, @@pz)
-    @@px=cos(@a+@cRot)*@d
-    @@pz=-sin(@a+@cRot)*@d
+    @a#=getAngle(0,0, @@px#, @@pz#)
+    @d#=distance(0,0, @@px#, @@pz#)
+    @@px#=cos(@a#+@cRot#)*@d#
+    @@pz#=-sin(@a#+@cRot#)*@d#
     //pitch
-    @a#=getAngle(0,0, @@pz, @@py)
-    @d#=distance(0,0, @@pz, @@py)
-    @@pz=cos(@a+@cPitch)*@d
-    @@py=-sin(@a+@cPitch)*@d
+    @a#=getAngle(0,0, @@pz#, @@py#)
+    @d#=distance(0,0, @@pz#, @@py#)
+    @@pz#=cos(@a#+@cPitch#)*@d#
+    @@py#=-sin(@a#+@cPitch#)*@d#
     //roll
-    @a#=getAngle(0,0, @@px, @@py)
-    @d#=distance(0,0, @@px, @@py)
-    @@px=cos(@a+@cRoll)*@d
-    @@py=-sin(@a+@cRoll)*@d
+    @a#=getAngle(0,0, @@px#, @@py#)
+    @d#=distance(0,0, @@px#, @@py#)
+    @@px#=cos(@a#+@cRoll#)*@d#
+    @@py#=-sin(@a#+@cRoll#)*@d#
 return
 
 @inline @,@@
