@@ -1,6 +1,6 @@
 //#pragma dumb_debug
 #pragma anticrap
-#define RELEASE
+
 
 #include "stdlib.cbpp"
 #include "camera.cbpp"
@@ -102,6 +102,8 @@ demoInit:
 	house2obj = loadWavefrontObj("assets/obj/hus2_1.obj")
 	
 	#define flipImageHoriz(_img) resizeImage _img, -imageWidth(_img), imageHeight(_img)
+	// fisheyee distance
+	#define a_dist(__px,__py,__pz) (sqrt(( __px)^2+( __py)^2+( __pz)^2))
 	
 	dim imgUkot(4)
 	imgUkot(0) = loadImage("assets/gfx/ukko1.png")
@@ -119,6 +121,7 @@ demoInit:
 	imgWeGreet = loadImage("assets/gfx/text_wegreet.png")
 	imgSplash = loadImage("assets/gfx/splash.png")
 	imgTimblex = loadImage("assets/gfx/text_timblex.png")
+	imgAxu = loadImage("assets/gfx/text_axu.png")
 	imgCb2 = loadImage("assets/gfx/text_cb2.png")
 	imgFadeMask = makeImage(320, 240)
 	
@@ -353,7 +356,7 @@ drawParticleup:
     py# = .0
     pz# = .0
     a_r#= 200
-    a_g# = 20
+    a_g# = 120
     a_b# = 20
     for i = 0 To upparticlecount
         pt# = upparticlet-upparticle(i,6)
@@ -364,6 +367,7 @@ drawParticleup:
             px = (1.0-(particleupscale-1)*.6)*(px + .2*(cos(pz*100.0)-cos(py*100.0)))
             py = particleupscale*(py + .2*(cos(px*100.0)-cos(pz*100.0)))
             pz = particleupscale*(pz + .2*(cos(py*100.0)-cos(px*100.0)))
+			a_g# = 90.0 - py*9.0 - (i mod 4)*3
             gosub a_dot
         endif
     next i
@@ -539,14 +543,16 @@ heimoEffu:
 	ukko_margin = imageWidth(imgUkot(0))
 	ukko_amount = 320 / ukko_margin
 	ukko_ofs# = ((bars * 360.0 * 0.75) mod ukko_margin) // + sin(bars*360.0*4)*5.0
+	ukko_remove = track_values(TRACK_OVERLAY_X) * 100
 	
 	for i=0 to ukko_amount+1
 		randomize i
 		frame = int(bars*8+rnd(0.1)) mod 2
 		
-		ukko_hyppy# = max(-0.0, sin(bars*360*4.0 - 10.0+rnd(0,40.0))) * 10.0 
-		drawImage imgUkot(frame), ukko_margin * i - ukko_ofs + sin(bars*360*4.0-20.0)*10.0 + rnd(1.0), 1 + ukko_hyppy
-		drawImage imgUkot(frame+2), -ukko_margin+320-ukko_margin * i + ukko_ofs - sin(bars*360*4.0-20.0)*10.0 + rnd(1.0), 120 + ukko_hyppy
+		ukko_hyppy# = max(-0.0, sin(bars*360*4.0 - 0.0+rnd(0,40.0))) * 10.0  	
+		drawImage imgUkot(frame), ukko_margin * i - ukko_ofs + sin(bars*360*4.0-10.0)*10.0 + rnd(1.0), 1 + ukko_hyppy - ukko_remove
+		drawImage imgUkot(frame+2), -ukko_margin+320-ukko_margin * i + ukko_ofs - sin(bars*360*4.0-10.0)*10.0 + rnd(1.0), 120 + ukko_hyppy + ukko_remove
+
 	next i
 return
 
@@ -589,8 +595,9 @@ taajamaEffu:
 	
 	teximage = imgTimblex
 	#define fontheight 75
-	drawImage imgTimblex, track_values_smooth(TRACK_OVERLAY_Y)*1400-300 , fontheight + sin(bars*360)^2*4
-	drawImage imgCb2, track_values_smooth(TRACK_OVERLAY_Y)*1400-600 , fontheight + sin(bars*360+90)^2*4
+	drawImage imgTimblex, 	track_values_smooth(TRACK_OVERLAY_Y)*1400-300 , fontheight + sin(bars*360)^2*4
+	drawImage imgAxu, 		track_values_smooth(TRACK_OVERLAY_Y)*1400-600 , fontheight + sin(bars*360+45)^2*4
+	drawImage imgCb2, 		track_values_smooth(TRACK_OVERLAY_Y)*1400-900 , fontheight + sin(bars*360+90)^2*4
 	#undef fontheight
 	
 return
@@ -625,8 +632,10 @@ templeEffu:
     
     lock image(gBuffer)
     a_r#=200
+	a_g#=10
+	a_b#=10
 	
-	RENDER_OBJECT(templeobj,a_,a_smart_line)
+	RENDER_OBJECT(templeobj,a_,templeline)
     
     unlock
     a_cZ = a_cZ +1.0
@@ -635,6 +644,11 @@ templeEffu:
     particleupspeed = .08
     gosub drawParticleup
     
+return
+
+templeline:
+	A_SMART_LINE_MAKRO(a)
+	//TEMPLE_SMART_LINE_MAKRO(adasasdfsdfa)
 return
 
 kiitoEffu:
@@ -652,7 +666,7 @@ kiitoEffu:
 	color cbWhite
 	
 	if gCurrentScene = "demoname" then
-		drawImage imgDemoLogoBg , 160-imageWidth(imgDemoLogo)/2 + cos(bars*360*2.0) * 1, 50 + sin(bars*360) * 2
+		//drawImage imgDemoLogoBg , 160-imageWidth(imgDemoLogo)/2 + cos(bars*360*2.0) * 1, 50 + sin(bars*360) * 2
 		drawImage imgDemoLogo, 160-imageWidth(imgDemoLogo)/2, 50 
 		
 	else
@@ -783,10 +797,6 @@ feedbackEffu:
 	box 0,180-track_values(TRACK_FADE)*181,320,180
 return 
 
-
-// fisheyee distance
-#define a_dist(__px,__py,__pz) (sqrt(( __px)^2+( __py)^2+( __pz)^2))
-
 atominEffu:
     //kamera pyörii jonkun jännän jutskan ympärillä. linejä. bucketointi lopuksi jos tarvii
     //y pienenee ylöspäin ja z kasvaa eteenpäin x kasvaa oikealle, kai
@@ -889,6 +899,20 @@ _s_a_line_with_fog: //takes _-prefixed input-variables instead
     color a_clampc(a_r/_d*2-_d),a_clampc(a_g/_d*2-_d),a_clampc(a_b/_d*2-_d)
     if pz<0.2 and pz2<0.2 then line px/pd#*180.0+160,py/pd#*180.0+90,px2/pd2#*180.0+160,py2/pd2#*180.0+90
 return
+
+#define fogiline 
+temple_line_with_fog:
+	gosub a_kamera
+    gosub a_kamera2
+	LINE_WITH_FOG_GRADIENT_MAKRO(_)
+return
+
+_s_a_temple_line_with_fog:
+    gosub _s_a_kamera
+    gosub _s_a_kamera2
+	LINE_WITH_FOG_GRADIENT_MAKRO()
+return
+#undef fogiline
 
 a_smart_line:
     _px#=px//do this just to avoid another copy of camera function
@@ -1082,4 +1106,6 @@ function envelope#(t#, a#,b#,c#,d#)
 		Return (d-t)/(d-c)
 	endif
 	return 0.0
-End function
+end function
+
+// fuckings to zerppa
