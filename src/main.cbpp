@@ -16,7 +16,7 @@
 #endif
 
 #ifdef RELEASE
-	gWindowMode = 0
+	gWindowMode = 1
 #endif
 
 global MUSIC_PATH$
@@ -81,6 +81,8 @@ demoInit:
 	imgRealtime = loadImage("assets/gfx/text_realtime.png")
 	imgSimulation = loadImage("assets/gfx/text_simulation.png")
 	imgDemoLogo = loadImage("assets/gfx/demoname.png")
+	imgDemoLogoBg = loadImage("assets/gfx/demoname_bg.png")
+	maskImage imgDemoLogo, 255, 0, 255 : maskImage imgDemoLogoBg, 255, 0, 255
 	imgWeGreet = loadImage("assets/gfx/text_wegreet.png")
 	imgSplash = loadImage("assets/gfx/splash.png")
 	imgTimblex = loadImage("assets/gfx/text_timblex.png")
@@ -104,51 +106,6 @@ demoInit:
 	
 	gosub initFeedback
     gosub initParticleup
-    gosub initTorus
-return
-
-initTorus:
-    
-    const ires# = 17.0
-    const jres# = 9.0
-    
-    dim torus(roundDown(ires*jres*2-1),2,2) as float
-    
-    for jj = 0 to jres-1
-        j = int((jres+roundDown((jj+1)/2)*(-1)^jj) mod jres)
-        for i = 0 to ires-1
-            
-            torus(p,0,0) = cos(i/ires*360.0)*(2-cos(j/jres*360.0))
-            torus(p,0,1) = sin(j/jres*360.0)
-            torus(p,0,2) =-sin(i/ires*360.0)*(2-cos(j/jres*360.0))
-            
-            torus(p,1,0) = cos((i+1)/ires*360.0)*(2-cos(j/jres*360.0))
-            torus(p,1,1) = sin(j/jres*360.0)
-            torus(p,1,2) =-sin((i+1)/ires*360.0)*(2-cos(j/jres*360.0))
-            
-            torus(p,2,0) = cos(i/ires*360.0)*(2-cos((j+1)/jres*360.0))
-            torus(p,2,1) = sin((j+1)/jres*360.0)
-            torus(p,2,2) =-sin(i/ires*360.0)*(2-cos((j+1)/jres*360.0))
-            
-            p = p + 1
-            
-            torus(p,0,0) = cos((i+1)/ires*360.0)*(2-cos(j/jres*360.0))
-            torus(p,0,1) = sin(j/jres*360.0)
-            torus(p,0,2) =-sin((i+1)/ires*360.0)*(2-cos(j/jres*360.0))
-            
-            torus(p,2,0) = cos(i/ires*360.0)*(2-cos((j+1)/jres*360.0))
-            torus(p,2,1) = sin((j+1)/jres*360.0)
-            torus(p,2,2) =-sin(i/ires*360.0)*(2-Cos((j+1)/jres*360.0))
-            
-            torus(p,1,0) = cos((i+1)/ires*360.0)*(2-Cos((j+1)/jres*360.0))
-            torus(p,1,1) = sin((j+1)/jres*360.0)
-            torus(p,1,2) =-sin((i+1)/ires*360.0)*(2-cos((j+1)/jres*360.0))
-            
-            p = p + 1
-            
-        next i
-    next jj
-    
 return
 
 initFeedback:
@@ -233,9 +190,6 @@ drawDemo:
 		gosub taajamaEffu
 	elseIf gCurrentScene = "weather" then
 		gosub heimoEffu
-        gosub drawTorus
-    elseIf gCurrentScene = "beat" then
-        gosub drawTorus
 	elseIf gCurrentScene = "mafia"
 		gosub templeEffu
         gosub drawParticleup
@@ -264,158 +218,6 @@ drawParticleup:
             gosub a_dot
         endif
     next i
-return
-
-drawTorus:
-
-    endt# = max(.0,min(1.0,(bars-66)^2.0))
-    ang1# = 90+1.2^((65-bars)*2.5) * 140.0 * .3
-    ang2# = 90+1.2^((65-bars)*2.5) * 140.0 * .29
-    cang# = bars * 140.0 * .9
-    cosa1# = cos(ang1)
-    sina1# = sin(ang1)
-    cosa2# = cos(ang2)
-    sina2# = sin(ang2)
-    fcang# = cang - roundDown(cang)
-    dist# = 20.0+max(.0,(61-bars)*50.0)
-    //c1 = lerp(80,lerp(220,160,()*.5+.5),sin(cang)*.5+.5)
-    //c2 = lerp(160,lerp(160,220,cos(cang)*.5+.5),sin(cang)*.5+.5)
-    //c3 = lerp(220,lerp(80,80,cos(cang)*.5+.5),sin(cang)*.5+.5)
-    lock
-        for i = 0 to ires*jres*2-1
-            x1# = cosa2*torus(i,0,0)+sina2*(cosa1*torus(i,0,1)+sina1*torus(i,0,2))
-            y1# = cosa2*(cosa1*torus(i,0,1)+sina1*torus(i,0,2))-sina2*torus(i,0,0)
-            z1# = cosa1*torus(i,0,2)-sina1*torus(i,0,1)
-            x2# = cosa2*torus(i,1,0)+sina2*(cosa1*torus(i,1,1)+sina1*torus(i,1,2))
-            y2# = cosa2*(cosa1*torus(i,1,1)+sina1*torus(i,1,2))-sina2*torus(i,1,0)
-            z2# = cosa1*torus(i,1,2)-sina1*torus(i,1,1)
-            x3# = cosa2*torus(i,2,0)+sina2*(cosa1*torus(i,2,1)+sina1*torus(i,2,2))
-            y3# = cosa2*(cosa1*torus(i,2,1)+sina1*torus(i,2,2))-sina2*torus(i,2,0)
-            z3# = cosa1*torus(i,2,2)-sina1*torus(i,2,1)
-            
-            s1# = 400.0/(z1+dist)
-            s2# = 400.0/(z2+dist)
-            s3# = 400.0/(z3+dist)
-            if (s2*x2-s1*x1)*(s3*y3-s1*y1)-(s3*x3-s1*x1)*(s2*y2-s1*y1)>0 then
-                s4# = (400.0+140.0*max(.0,bars-65+.2*sin(bars*1500.0)))/(cosa1*torus(i,1,2)-sina1*torus(i,1,1)+dist)
-                //nz# = (x2-x1)*(y3-y1)-(x3-x1)*(y2-y1)
-                //c# = Max(.05,(1-nz/Sqrt(((y2-y1)*(z3-z1)-(y3-y1)*(z2-z1))^2+((x2-x1)*(z3-z1)-(x3-x1)*(z2-z1))^2+nz*nz))^2)
-                
-                //Color c*c1, c*c2, c*c3
-                color 20,20,20
-                //Color c*160, c*220, c*80
-                tx1#=160+roundDown(s1*x1)
-                ty1#=90+roundDown(s1*y1)
-                tx2#=160+roundDown(s2*x2)
-                ty2#=90+roundDown(s2*y2)
-                tx3#=160+roundDown(s3*x3)
-                ty3#=90+roundDown(s3*y3)
-                
-                px1# = tx1
-                py1# = ty1
-                px2# = tx2
-                py2# = ty2
-                px3# = tx3
-                py3# = ty3
-                
-                if (ty1>ty2) then
-                    tmpy = ty1
-                    tmpx = tx1
-                    ty1 = ty2
-                    tx1 = tx2
-                    ty2 = tmpy
-                    tx2 = tmpx
-                endif
-                if (ty1>ty3) then
-                    tmpy = ty1
-                    tmpx = tx1
-                    ty1 = ty3
-                    tx1 = tx3
-                    ty3 = tmpy
-                    tx3 = tmpx
-                endif
-                if (ty2>ty3) then
-                    tmpy = ty2
-                    tmpx = tx2
-                    ty2 = ty3
-                    tx2 = tx3
-                    ty3 = tmpy
-                    tx3 = tmpx
-                endif
-                if(ty2=ty1) Then ty1-0.0001
-                If(ty3=ty2) Then ty3+0.0001
-                slp1# = (tx3-tx1)/(ty3-ty1)
-                slp2# = (tx2-tx1)/(ty2-ty1)
-                slp3# = (tx3-tx2)/(ty3-ty2)
-                tx1# = tx1 - slp1*ty1
-                tx2# = tx2 - slp2*ty2
-                tx3# = tx3 - slp3*ty3
-                for ii = ty1 To ty2
-                    line tx1+slp1*ii, ii, tx2+slp2*ii, ii
-                next ii
-                for ii = ty2 To ty3
-                    line tx1+slp1*ii, ii, tx3+slp3*ii, ii
-                next ii
-                i=i+1
-                x4# = cosa2*torus(i,1,0)+sina2*(cosa1*torus(i,1,1)+sina1*torus(i,1,2))
-                y4# = cosa2*(cosa1*torus(i,1,1)+sina1*torus(i,1,2))-sina2*torus(i,1,0)
-                x1=160+roundDown(s4*x4)
-                y1=90+roundDown(s4*y4)
-                x2=160+roundDown(s2*x2)
-                y2=90+roundDown(s2*y2)
-                x3=160+roundDown(s3*x3)
-                y3=90+roundDown(s3*y3)
-                px4# = x1
-                py4# = y1
-                if (y1>y2) then
-                    tmpy = y1
-                    tmpx = x1
-                    y1 = y2
-                    x1 = x2
-                    y2 = tmpy
-                    x2 = tmpx
-                endif
-                if (y1>y3) then
-                    tmpy = y1
-                    tmpx = x1
-                    y1 = y3
-                    x1 = x3
-                    y3 = tmpy
-                    x3 = tmpx
-                endif
-                if (y2>y3) then
-                    tmpy = y2
-                    tmpx = x2
-                    y2 = y3
-                    x2 = x3
-                    y3 = tmpy
-                    x3 = tmpx
-                endif
-                if(y2=y1) then y1-0.0001
-                if(y3=y2) then y3+0.0001
-                slp1# = (x3-x1)/(y3-y1)
-                slp2# = (x2-x1)/(y2-y1)
-                slp3# = (x3-x2)/(y3-y2)
-                x1 = x1 - slp1*y1
-                x2 = x2 - slp2*y2
-                x3 = x3 - slp3*y3
-                For ii = y1 to y2
-                    line x1+slp1*ii, ii, x2+slp2*ii, ii
-                next ii
-                for ii = y2 To y3
-                    line x1+slp1*ii, ii, x3+slp3*ii, ii
-                next ii
-                color 200, 20, 20
-                line px1, py1, px2, py2
-                line px1, py1, px3, py3
-                line px2, py2, px4, py4
-                line px4, py4, px3, py3
-                
-            else
-                i = i + 1
-            endif
-        next i
-    unlock
 return
 
 // paints the white parts of the given image to the given color
@@ -531,8 +333,9 @@ kiitoEffu:
 	color cbWhite
 	
 	if gCurrentScene = "demoname" then
-		FADEIMAGE(imgDemoLogo, c, c, c)
-		if c>20 then drawImage imgFadeMask, 160-imageWidth(imgDemoLogo)/2, 50
+		drawImage imgDemoLogoBg , 160-imageWidth(imgDemoLogo)/2 + cos(bars*360*2.0) * 1, 50 + sin(bars*360) * 2
+		drawImage imgDemoLogo, 160-imageWidth(imgDemoLogo)/2, 50 
+		
 	else
 		FADEIMAGE(imgSmallLogo, c, c, c)
 		if c>20 then drawImage imgFadeMask, 15, 122
