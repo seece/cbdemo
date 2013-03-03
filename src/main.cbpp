@@ -768,7 +768,7 @@ feedbackEffu:
     
 		a_r#=200
 	
-		RENDER_OBJECT(shipobj,a_,a_smart_line)
+		RENDER_OBJECT_SCALED(shipobj,a_,a_smart_line,1,1,-1)
 	
 	unlock
 	drawToBuffer
