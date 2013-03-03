@@ -638,8 +638,8 @@ sotkuEffu:
         clsColor 0, 0, 0
         t# = (bars-2)*3000.0
         for i = 0 to 1
-            pc(i*2+0) = 140*cos(t*(.02+i*.01))-160
-            pc(i*2+1) = 70*sin(t*(.025+i*.01))-90
+            pc(i*2+0) = 140*cos(t*(.02+i*.01)- track_values(TRACK_FADE)*90.0)-160
+            pc(i*2+1) = 70*sin(t*(.025+i*.01)- track_values(TRACK_FADE)*90.0)-90
             drawToImage imgs(2)
                 cls
                 drawImage imgs(0), pc(2-2*i), pc(3-2*i)
