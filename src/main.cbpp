@@ -1,6 +1,6 @@
 //#pragma dumb_debug
 #pragma anticrap
-#define RELEASE
+
 
 #include "stdlib.cbpp"
 #include "camera.cbpp"
@@ -114,6 +114,7 @@ demoInit:
 	imgWeGreet = loadImage("assets/gfx/text_wegreet.png")
 	imgSplash = loadImage("assets/gfx/splash.png")
 	imgTimblex = loadImage("assets/gfx/text_timblex.png")
+	imgAxu = loadImage("assets/gfx/text_axu.png")
 	imgCb2 = loadImage("assets/gfx/text_cb2.png")
 	imgFadeMask = makeImage(320, 240)
 	
@@ -587,8 +588,9 @@ taajamaEffu:
 	
 	teximage = imgTimblex
 	#define fontheight 75
-	drawImage imgTimblex, track_values_smooth(TRACK_OVERLAY_Y)*1400-300 , fontheight + sin(bars*360)^2*4
-	drawImage imgCb2, track_values_smooth(TRACK_OVERLAY_Y)*1400-600 , fontheight + sin(bars*360+90)^2*4
+	drawImage imgTimblex, 	track_values_smooth(TRACK_OVERLAY_Y)*1400-300 , fontheight + sin(bars*360)^2*4
+	drawImage imgAxu, 		track_values_smooth(TRACK_OVERLAY_Y)*1400-600 , fontheight + sin(bars*360+45)^2*4
+	drawImage imgCb2, 		track_values_smooth(TRACK_OVERLAY_Y)*1400-900 , fontheight + sin(bars*360+90)^2*4
 	#undef fontheight
 	
 return
@@ -657,7 +659,7 @@ kiitoEffu:
 	color cbWhite
 	
 	if gCurrentScene = "demoname" then
-		drawImage imgDemoLogoBg , 160-imageWidth(imgDemoLogo)/2 + cos(bars*360*2.0) * 1, 50 + sin(bars*360) * 2
+		//drawImage imgDemoLogoBg , 160-imageWidth(imgDemoLogo)/2 + cos(bars*360*2.0) * 1, 50 + sin(bars*360) * 2
 		drawImage imgDemoLogo, 160-imageWidth(imgDemoLogo)/2, 50 
 		
 	else
