@@ -214,7 +214,7 @@ main:
 		
 		gosub scaleBuffer
 		gosub drawBuffer
-		
+		clsColor 0,0,0
 		drawScreen
 	until keyHit(cbKeyEsc)
 	
