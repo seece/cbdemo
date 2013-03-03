@@ -21,9 +21,11 @@
     clsColor 20,20,20
     setWindow "Linear Minds by Peisik"
 	//meatballs init
+    sw = 128
+    sh = 128
 	pw = 80
 	ph = 80
-	m=5
+	m=4
 	dim pallo(m,1)
 	dim paletti(pw,ph) 
 	dim taulu(sw,sh)
@@ -60,39 +62,42 @@
         color 80, 80, 80
         box 280,72,10,10,0
 		color 100, 10, 10
-        box 16, 16, 128, 128, 0
         
         color 200, 20, 20
         box 280,32,10,10,0
         box 180,105,120,30,0
         if full then box 282,34,6,6,1
 
+		color 0, 0, 0
+        box 16, 16, 128, 128
 		//balls
 		reDim taulu(sw,sh) ' taulukko nollaksi ei tarvitse käyttää getPixel2()
 		aika = timer()/50
-		'lock SCREEN()
+		lock SCREEN()
 			for i = 1 to m
 				for x = pallo(i,0) to pallo(i,0)+pw
 					for y = pallo(i,1) to pallo(i,1)+ph
 						if x >= 0 and x < sw then
 						if y >= 0 and y < sh then
 						taulu(x,y)=(min(255,paletti(x-pallo(i,0),y-pallo(i,1))+(taulu(x,y))))
-						putPixel x,y,taulu(x,y) shl 16 + max(0,taulu(x,y)-100) shl 8 
+						putPixel2 x+16,y+16,taulu(x,y) shl 16 + max(0,taulu(x,y)-100) shl 8 
 						endif
 						endif
 					next y 
 				next x 
 			next i 	
-		'unlock
+		unlock
 
-		
+        color 200, 20, 20
+        box 16, 16, 128, 128, 0
 		for i = 1 to m
 			pallo(i,0) = sw/2 + cos(i*360/m*1.421+aika*1.531)*50-50
 			pallo(i,1) = sh/2 - sin(i*360/m-aika*3.231)*50-50
 		next i 
+		drawImage imgTinyLogo, 2, screenHeight()-imageHeight(imgTinyLogo)-2
+        
 		drawScreen 
 
-		drawImage imgTinyLogo, 2, screenHeight()-imageHeight(imgTinyLogo)-2
         //drawScreen
     forever
     if full then gWindowMode = 0
