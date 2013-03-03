@@ -573,12 +573,20 @@ aavikkoEffu:
     
     lock image(gBuffer)
     a_r#=200
+    a_g# = 0
+    a_b# = 0
+    
 
 	a_shipX = a_shipX + sin(bars*360.0*0.1)*3.0
 	a_shipZ = a_shipZ * 3.0
 	a_cZ# = a_cZ*3.0
     
     gosub a_ground
+
+    a_r#=200
+    a_g# = 200
+    a_b# = 200
+    
 
 	RENDER_OBJECT(shipobj,a_,a_smart_line)
 	
@@ -765,6 +773,10 @@ atominEffu:
     a_b# = 0
 
     gosub a_ground
+
+    a_r#=200
+    a_g# = 200
+    a_b# = 200
     
     RENDER_OBJECT(shipobj,a_,a_smart_line)
  
