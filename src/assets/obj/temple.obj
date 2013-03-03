@@ -1,4 +1,4 @@
-# Blender v2.65 (sub 0) OBJ File: 'temple3_exportd.blend'
+# Blender v2.65 (sub 0) OBJ File: 'temple3_exporte.blend'
 # www.blender.org
 o walls_Cube.001
 v 3.503975 -0.058228 6.914793
@@ -108,14 +108,14 @@ f 40 41 38 37
 f 41 42 39 38
 f 46 47 44 43
 f 47 48 45 44
-f 52 51 53 54
 f 54 53 55 56
 f 59 60 63 62
-f 72 74 73 71
 f 74 76 75 73
 f 79 82 83 80
 f 52 50
 f 65 51
+f 51 53
+f 54 52
 f 53 57
 f 65 49
 f 58 56
@@ -132,6 +132,8 @@ f 67 68
 f 49 68
 f 72 70
 f 85 71
+f 71 73
+f 74 72
 f 73 77
 f 85 69
 f 78 76

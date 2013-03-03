@@ -69,6 +69,8 @@ demoInit:
 	house2obj = loadWavefrontObj("assets/obj/hus2_1.obj")
 	
 	#define flipImageHoriz(_img) resizeImage _img, -imageWidth(_img), imageHeight(_img)
+	// fisheyee distance
+	#define a_dist(__px,__py,__pz) (sqrt(( __px)^2+( __py)^2+( __pz)^2))
 	
 	dim imgUkot(4)
 	imgUkot(0) = loadImage("assets/gfx/ukko1.png")
@@ -595,7 +597,7 @@ templeEffu:
     lock image(gBuffer)
     a_r#=200
 	
-	RENDER_OBJECT(templeobj,a_,a_smart_line)
+	RENDER_OBJECT(templeobj,a_,templeline)
     
     unlock
     a_cZ = a_cZ +1.0
@@ -604,6 +606,11 @@ templeEffu:
     particleupspeed = .08
     gosub drawParticleup
     
+return
+
+templeline:
+	A_SMART_LINE_MAKRO(a)
+	//TEMPLE_SMART_LINE_MAKRO(adasasdfsdfa)
 return
 
 kiitoEffu:
@@ -752,10 +759,6 @@ feedbackEffu:
 	box 0,180-track_values(TRACK_FADE)*181,320,180
 return 
 
-
-// fisheyee distance
-#define a_dist(__px,__py,__pz) (sqrt(( __px)^2+( __py)^2+( __pz)^2))
-
 atominEffu:
     //kamera pyörii jonkun jännän jutskan ympärillä. linejä. bucketointi lopuksi jos tarvii
     //y pienenee ylöspäin ja z kasvaa eteenpäin x kasvaa oikealle, kai
@@ -858,6 +861,20 @@ _s_a_line_with_fog: //takes _-prefixed input-variables instead
     color a_clampc(a_r/_d*2-_d),a_clampc(a_g/_d*2-_d),a_clampc(a_b/_d*2-_d)
     if pz<0.2 and pz2<0.2 then line px/pd#*180.0+160,py/pd#*180.0+90,px2/pd2#*180.0+160,py2/pd2#*180.0+90
 return
+
+#define fogiline 
+temple_line_with_fog:
+	gosub a_kamera
+    gosub a_kamera2
+	LINE_WITH_FOG_GRADIENT_MAKRO(_)
+return
+
+_s_a_temple_line_with_fog:
+    gosub _s_a_kamera
+    gosub _s_a_kamera2
+	LINE_WITH_FOG_GRADIENT_MAKRO()
+return
+#undef fogiline
 
 a_smart_line:
     _px#=px//do this just to avoid another copy of camera function
@@ -1051,4 +1068,6 @@ function envelope#(t#, a#,b#,c#,d#)
 		Return (d-t)/(d-c)
 	endif
 	return 0.0
-End function
+end function
+
+// fuckings to zerppa
