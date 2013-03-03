@@ -16,7 +16,7 @@
 #endif
 
 #ifdef RELEASE
-	gWindowMode = 0
+	gWindowMode = 1
 #endif
 
 global MUSIC_PATH$
@@ -81,6 +81,8 @@ demoInit:
 	imgRealtime = loadImage("assets/gfx/text_realtime.png")
 	imgSimulation = loadImage("assets/gfx/text_simulation.png")
 	imgDemoLogo = loadImage("assets/gfx/demoname.png")
+	imgDemoLogoBg = loadImage("assets/gfx/demoname_bg.png")
+	maskImage imgDemoLogo, 255, 0, 255 : maskImage imgDemoLogoBg, 255, 0, 255
 	imgWeGreet = loadImage("assets/gfx/text_wegreet.png")
 	imgSplash = loadImage("assets/gfx/splash.png")
 	imgTimblex = loadImage("assets/gfx/text_timblex.png")
@@ -104,11 +106,11 @@ demoInit:
 	
 	gosub initFeedback
     gosub initParticleup
-    gosub initTorus
+	gosub initTorus
 return
 
 initTorus:
-    
+
     const ires# = 17.0
     const jres# = 9.0
     
@@ -184,6 +186,8 @@ initFeedback:
 
 return
 
+
+
 initParticleup:
     particleupspawntime# = .0
     particleupspeed# = 1.0
@@ -233,8 +237,8 @@ drawDemo:
 		gosub taajamaEffu
 	elseIf gCurrentScene = "weather" then
 		gosub heimoEffu
-        gosub drawTorus
-    elseIf gCurrentScene = "beat" then
+	    gosub drawTorus
+	elseIf gCurrentScene = "beat" then
         gosub drawTorus
 	elseIf gCurrentScene = "mafia"
 		gosub templeEffu
@@ -405,7 +409,8 @@ drawTorus:
                 for ii = y2 To y3
                     line x1+slp1*ii, ii, x3+slp3*ii, ii
                 next ii
-                color 200, 20, 20
+                _d# = 17.0/s3+1.8
+                color a_clampc(200/_d*2-_d),a_clampc(20/_d*2-_d),a_clampc(20/_d*2-_d)
                 line px1, py1, px2, py2
                 line px1, py1, px3, py3
                 line px2, py2, px4, py4
@@ -531,8 +536,9 @@ kiitoEffu:
 	color cbWhite
 	
 	if gCurrentScene = "demoname" then
-		FADEIMAGE(imgDemoLogo, c, c, c)
-		if c>20 then drawImage imgFadeMask, 160-imageWidth(imgDemoLogo)/2, 50
+		drawImage imgDemoLogoBg , 160-imageWidth(imgDemoLogo)/2 + cos(bars*360*2.0) * 1, 50 + sin(bars*360) * 2
+		drawImage imgDemoLogo, 160-imageWidth(imgDemoLogo)/2, 50 
+		
 	else
 		FADEIMAGE(imgSmallLogo, c, c, c)
 		if c>20 then drawImage imgFadeMask, 15, 122
