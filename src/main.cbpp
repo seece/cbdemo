@@ -1,6 +1,6 @@
 //#pragma dumb_debug
 #pragma anticrap
-//#define RELEASE
+#define RELEASE
 
 #include "stdlib.cbpp"
 #include "camera.cbpp"
@@ -24,18 +24,22 @@
     showfps = 0
     repeat
         if mouseHit(1) then
-            if boxOverlap(mouseX(),mouseY(),1,1,45,25,130,20) then full = not full
+            if boxOverlap(mouseX(),mouseY(),1,1,45,25,130,26) then full = not full
             if boxOverlap(mouseX(),mouseY(),1,1,60,105,120,30) then exit
         endif
-        text 50,30,"Fullscreen"
-        box 160,32,10,10,0
-        if full then box 162,34,6,6,1
-        text 50,70,"Antialias"
-        color 100, 100, 100
-        box 160,72,10,10,0
+        
         color 255, 255, 255
+        text 50,30,"Fullscreen"
+        text 50,70,"Antialias"
         centerText 120,120,"LINEARIZE",2
+        
+        color 100, 10, 10
+        box 160,72,10,10,0
+        
+        color 200, 20, 20
+        box 160,32,10,10,0
         box 60,105,120,30,0
+        if full then box 162,34,6,6,1
         drawScreen
     forever
     if full then gWindowMode = 0
