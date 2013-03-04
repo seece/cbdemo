@@ -1,7 +1,6 @@
 //#pragma dumb_debug
 #pragma anticrap
 
-
 #include "stdlib.cbpp"
 #include "camera.cbpp"
 
@@ -9,6 +8,7 @@
 //#define drawToBuffer drawToScreen
 //clamppi väreille niin että musta on 20
 #define a_clampc(_cval) (max(20,min(255, _cval))) 
+
 #define RELEASE
 // _RELEASE is a flag set by the precompiler
 #ifdef _RELEASE
@@ -97,10 +97,22 @@
 		next i 
 		drawImage imgTinyLogo, 2, screenHeight()-imageHeight(imgTinyLogo)-2
         
-		drawScreen 
+		drawScreen
+        
+        if keyHit(28) then
+            capturemode = 1
+            makeDir "capture"
+            exit
+        endif
 
     forever
     if full then gWindowMode = 0
+#endif
+
+#ifdef CAPTURE
+    gWindowMode = 1
+    #define _RELEASE
+    #define RELEASE
 #endif
 
 global MUSIC_PATH$
@@ -784,7 +796,7 @@ sotkuEffu:
 return
 
 feedbackEffu:
-	t = timer()
+	t = bars*3000
 	ft2 = t
 	
 	lock image(pang)

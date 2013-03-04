@@ -189,14 +189,16 @@ main:
 		chDir "../src"
 		
 	#else
-		playSound MUSIC_PATH
+        if capturemode = 0 then
+            playSound MUSIC_PATH
+        endif
 	#endif
 	
 	gosub timeInit
 	
 	repeat
 		//t# = (float(timer())-float(start_time)) / 1000.0
-		gosub updateTime
+        gosub updateTime
 		
 		#ifdef USE_EDITOR
 			setFont editorfont
@@ -215,7 +217,10 @@ main:
 		gosub scaleBuffer
 		gosub drawBuffer
 		clsColor 0,0,0
-		drawScreen
+        if capturemode then
+            saveImage gBuffer, "capture/frame"+replace(rSet(str(frames),6), " ", "0")+".bmp"
+        endif
+        drawScreen
 	until keyHit(cbKeyEsc)
 	
 	#ifdef USE_EDITOR
@@ -373,6 +378,11 @@ updateTime:
 	
 	t# = pause_offset + time_offset + float(timer() - tstart)/1000.0
 	
+    if capturemode
+        t = capturet#
+        capturet# = capturet# + 1.0/60.0
+    endif
+    
 	beats# = (t/60.0)*(tempo)
 	bars# = beats/4.0 
 	gCurrentScene = getCurrentScene(bars, gSceneAmount)
