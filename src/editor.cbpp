@@ -84,14 +84,24 @@ const SCREEN_HEIGHT = 480
 	SAFEEXIT OFF
 	clsColor 16,16,16
 #else
-	SCREEN SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, gWindowMode
+    #ifdef OCULUSRIFT
+        SCREEN SCREEN_WIDTH*2, SCREEN_HEIGHT, SCREEN_BPP, gWindowMode
+    #else
+        SCREEN SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, gWindowMode
+    #endif
 #endif
 
 frameLimit 60
 
 global gBuffer
-gBuffer=makeImage(PICTURE_WIDTH, PICTURE_HEIGHT) // kuvasuhde 16:9
-
+#ifdef OCULUSRIFT
+    dim stereoBuffers(1)
+    stereoBuffers(0)=makeImage(PICTURE_WIDTH, PICTURE_HEIGHT)
+    stereoBuffers(1)=makeImage(PICTURE_WIDTH, PICTURE_HEIGHT)
+    gBuffer=stereoBuffers(0)
+#else
+    gBuffer=makeImage(PICTURE_WIDTH, PICTURE_HEIGHT) // kuvasuhde 16:9
+#endif
 dim tracks(TRACK_AMOUNT)	// an array of track pointers
 dim track_values(TRACK_AMOUNT) as float
 dim track_values_smooth(TRACK_AMOUNT) as float
@@ -207,13 +217,30 @@ main:
 		#endif
 		
 		gosub updateTracks
-		
-		drawToImage gBuffer
-		gosub drawDemo
-		drawToScreen
-		
-		gosub scaleBuffer
-		gosub drawBuffer
+        
+		#ifdef OCULUSRIFT
+            for gbuffer_i=0 to 1
+                if gbuffer_i=1 then
+                    gosub translateStereo
+                endif
+                
+                gBuffer=stereoBuffers(gbuffer_i)
+                drawToImage gBuffer
+                gosub drawDemo
+                drawToScreen
+                
+                gosub scaleBuffer
+                stereoimage=gbuffer_i
+                gosub drawBuffer
+            next gbuffer_i
+        #else
+            drawToImage gBuffer
+            gosub drawDemo
+            drawToScreen
+            
+            gosub scaleBuffer
+            gosub drawBuffer
+        #endif
 		clsColor 0,0,0
 		drawScreen
 	until keyHit(cbKeyEsc)
@@ -481,7 +508,11 @@ drawBuffer:
 	#ifdef USE_EDITOR
 		drawImage gBuffer, 0, 0
 	#else
-		drawImage gBuffer, 0, (screenHeight()-PICTURE_HEIGHT)/2
+        #ifdef OCULUSRIFT
+            drawImage gBuffer, PICTURE_WIDTH*stereoImage, (screenHeight()-PICTURE_HEIGHT)/2
+        #else
+            drawImage gBuffer, 0, (screenHeight()-PICTURE_HEIGHT)/2
+        #endif
 	#endif
 	
 return

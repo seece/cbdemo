@@ -15,6 +15,8 @@
 	#define RELEASE
 #endif
 
+#define OCULUSRIFT
+
 #ifdef RELEASE
 	gWindowMode = 1
     SCREEN 340,170
@@ -125,7 +127,11 @@ global imgGarbage
 
 
 #ifdef RELEASE
-include "inc/editor_release.cb"
+    #ifdef OCULUSRIFT
+        include "inc/editor_oculusrift.cb"
+    #else
+        include "inc/editor_release.cb"
+    #endif
 #else
 include "inc/editor_debug.cb"
 #endif
@@ -374,6 +380,10 @@ return
 drawDemo:
 	color 20, 20, 20
 	box 0,0,640,480,1
+    
+    #ifdef OCULUSRIFT
+        
+    #endif
     
 	If gCurrentScene = "kiito" or gCurrentScene="demoname" then
 		gosub kiitoEffu
@@ -1131,6 +1141,12 @@ _s_a_kamera2: //should be identical to a_kamera, except for variable names
     a_d#=distance(0,0,px2,py2)
     px2=cos(a_a+a_cRoll)*a_d
     py2=-sin(a_a+a_cRoll)*a_d
+return
+
+translateStereo:
+    a_cX=a_cX+cos(a_cAng-90+a_cRot)*10*cos(a_cRoll)
+    a_cY=a_cY-sin(a_cAng-90+a_cRot)*10*cos(a_cRoll)
+    'a_cY=
 return
 
 

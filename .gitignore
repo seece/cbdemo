@@ -25,6 +25,7 @@ main.cb
 src/main.cb 
 src/inc/editor_debug.cb
 src/inc/editor_release.cb
+src/inc/editor_oculusrift.cb
 src/inc/foobar.cb
 src/inc/sync_debug.cb
 src/inc/sync_release.cb
