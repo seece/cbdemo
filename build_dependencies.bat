@@ -19,6 +19,7 @@ ml src\camera.cbml src\camera.cbpp
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB seek\foobar.cbpp %sourcedir%\inc\foobar.cb -d %current%seek\
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_RELEASE src\editor.cbpp %sourcedir%\inc\editor_release.cb -d %current%src\
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_DEBUG src\editor.cbpp %sourcedir%\inc\editor_debug.cb -d %current%src\
+%pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_RELEASE;OCULUSRIFT src\editor.cbpp %sourcedir%\inc\editor_oculusrift.cb -d %current%src\
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_RELEASE src\objloader.cbpp %sourcedir%\inc\objloader.cb -d %current%src\
 %pythonpath% %cbpp_path% %compile_flags% --flags=BUILD_AS_LIB;_RELEASE src\effects\garbage.cbpp %sourcedir%\inc\garbage.cb -d %current%src\effects\
 @echo off

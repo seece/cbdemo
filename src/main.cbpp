@@ -160,7 +160,7 @@ demoInit:
 	
 	#define flipImageHoriz(_img) resizeImage _img, -imageWidth(_img), imageHeight(_img)
 	// fisheyee distance
-	#define a_dist(__px,__py,__pz) (sqrt(( __px)^2+( __py)^2+( __pz)^2))
+	#define a_dist(__px,__py,__pz) (sqrt(( __px+stereoAmount)^2+( __py)^2+( __pz)^2))
 	
 	dim imgUkot(4)
 	imgUkot(0) = loadImage("assets/gfx/ukko1.png")
@@ -382,7 +382,7 @@ drawDemo:
 	box 0,0,640,480,1
     
     #ifdef OCULUSRIFT
-        
+            setWindow ""stereoAmount
     #endif
     
 	If gCurrentScene = "kiito" or gCurrentScene="demoname" then
@@ -1144,9 +1144,10 @@ _s_a_kamera2: //should be identical to a_kamera, except for variable names
 return
 
 translateStereo:
-    a_cX=a_cX+cos(a_cAng-90+a_cRot)*10*cos(a_cRoll)
-    a_cY=a_cY-sin(a_cAng-90+a_cRot)*10*cos(a_cRoll)
-    'a_cY=
+    
+    a_cX=a_cX+cos(a_cAng-90+a_cRot)*100*cos(a_cRoll)
+    a_cZ=a_cZ-sin(a_cAng-90+a_cRot)*100*cos(a_cRoll)
+    a_cY=a_cY+sin(a_cRoll)*100
 return
 
 
@@ -1186,7 +1187,7 @@ function envelope#(t#, a#,b#,c#,d#)
 	EndIf
 	If t<b Then
 		Return (t-a)/(b-a)
-	EndIf
+	endif
 	If t<c Then
 		Return 1.0
 	EndIf
