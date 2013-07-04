@@ -9,7 +9,7 @@
 //#define drawToBuffer drawToScreen
 //clamppi väreille niin että musta on 20
 #define a_clampc(_cval) (max(20,min(255, _cval))) 
-#define RELEASE
+//#define RELEASE
 // _RELEASE is a flag set by the precompiler
 #ifdef _RELEASE
 	#define RELEASE
@@ -125,15 +125,18 @@ loadScenes(scenelistpath)
 
 global imgGarbage	
 
-
 #ifdef RELEASE
     #ifdef OCULUSRIFT
-        include "inc/editor_oculusrift.cb"
+        include "inc/editor_oculusrift_release.cb"
     #else
         include "inc/editor_release.cb"
     #endif
 #else
-include "inc/editor_debug.cb"
+    #ifdef OCULUSRIFT
+        include "inc/editor_oculusrift.cb"
+    #else
+        include "inc/editor_debug.cb"
+    #else
 #endif
 
 include "inc/objloader.cb"

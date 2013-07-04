@@ -1,7 +1,6 @@
 // precompiler options
 #pragma anticrap
 
-//#define NOSCALING
 
 #ifndef BUILD_AS_LIB
 #define USE_EDITOR
@@ -12,6 +11,12 @@
 	#ifdef _DEBUG
 		#define USE_EDITOR
 	#endif
+#endif
+
+#ifdef OCULUSRIFT
+    #ifdef USE_EDITOR
+        #define NOSCALING
+    #endif
 #endif
 
 #define EDITOR_HEIGHT 170
@@ -35,7 +40,7 @@ gWindowMode = 1
 	#define assert(statement) if not (statement) then makeError __LINE__ + ": assertion failed"
 #else
 	#define assert(statement) 
-#endif
+#endif  
 
 // macros
 #define malloc(size) makeMEMBlock(size)
@@ -65,11 +70,11 @@ gWindowMode = 1
 #ifdef BUILD_AS_LIB
 	#ifdef _DEBUG
 	include "inc/sync_debug.cb"
-	#endif
-	
-	#ifdef _RELEASE
-	include "inc/sync_release.cb"
-	#endif
+	#else
+        #ifdef _RELEASE
+        include "inc/sync_release.cb"
+        #endif
+    #endif
 #else
 	include "inc/sync_debug.cb"
 #endif
@@ -77,9 +82,6 @@ gWindowMode = 1
 
 
 #ifdef OCULUSRIFT
-    const SCREEN_WIDTH = 580
-    const SCREEN_HEIGHT = 480
-#else
     const SCREEN_WIDTH = 640
     const SCREEN_HEIGHT = 480
 #endif
@@ -94,7 +96,11 @@ gWindowMode = 1
 	clsColor 16,16,16
 #else
     #ifdef OCULUSRIFT
-        SCREEN SCREEN_WIDTH*2, SCREEN_HEIGHT*2, SCREEN_BPP, gWindowMode
+        #ifdef NOSCALING
+            SCREEN SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, gWindowMode
+        #else
+            SCREEN SCREEN_WIDTH*2, SCREEN_HEIGHT*2, SCREEN_BPP, gWindowMode
+        #endif
     #else
         SCREEN SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, gWindowMode
     #endif
@@ -238,8 +244,8 @@ main:
                     gosub scaleBuffer
                 #endif
                 stereoImage=gbuffer_i
-                stereoAmount=stereoImage*mouseX()
-                stereoOffset=gbuffer_i*mouseY()
+                stereoAmount=0.002*stereoImage*mouseX()
+                stereoOffset=0.06*gbuffer_i*mouseY()
                 gosub drawBuffer
             next gbuffer_i
         #else
@@ -516,6 +522,13 @@ endFunction
 drawBuffer:
 	#ifdef USE_EDITOR
 		drawImage gBuffer, 0, 0
+        #ifdef OCULUSRIFT
+            #ifdef NOSCALING
+                drawImageBox gBuffer, PICTURE_WIDTH*stereoImage*0.5-stereoOffset,0,0,0,PICTURE_WIDTH*0.5,PICTURE_HEIGHT*0.5,0
+            #else
+                drawImage gBuffer, PICTURE_WIDTH*stereoImage-stereoOffset, 0
+            #endif
+        #endif
 	#else
         #ifdef OCULUSRIFT
             #ifdef NOSCALING
